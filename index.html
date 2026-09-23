@@ -1,0 +1,1674 @@
+<!DOCTYPE html>
+<html lang="es" class="h-full">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>HabitFlow 360 - Registro y Control de Hábitos</title>
+  
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Chart.js CDN for Analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Lucide Icons CDN -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            },
+            cat: {
+              health: '#10b981',
+              mind: '#3b82f6',
+              work: '#8b5cf6',
+              finance: '#f59e0b',
+              wellness: '#ec4899'
+            }
+          },
+          boxShadow: {
+            'soft': '0 8px 30px rgba(0, 0, 0, 0.06)',
+            'glow': '0 0 25px rgba(99, 102, 241, 0.35)',
+          }
+        }
+      }
+    };
+  </script>
+
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&display=swap');
+    
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    /* Custom smooth scrollbar */
+    ::-webkit-scrollbar {
+      width: 6px;
+      height: 6px;
+    }
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+    ::-webkit-scrollbar-thumb {
+      background: #cbd5e1;
+      border-radius: 9999px;
+    }
+    .dark ::-webkit-scrollbar-thumb {
+      background: #334155;
+    }
+
+    /* Micro-animations */
+    .bounce-active:active {
+      transform: scale(0.96);
+    }
+    .pop-anim {
+      animation: popEffect 0.35s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+    }
+    @keyframes popEffect {
+      0% { transform: scale(0.85); opacity: 0.5; }
+      50% { transform: scale(1.08); }
+      100% { transform: scale(1); opacity: 1; }
+    }
+    
+    /* Heatmap square transitions */
+    .heatmap-box {
+      transition: all 0.2s ease-in-out;
+    }
+    .heatmap-box:hover {
+      transform: scale(1.25);
+      z-index: 10;
+    }
+  </style>
+</head>
+
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+
+  <!-- Top Floating Header -->
+  <header class="sticky top-0 z-40 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/70 shadow-sm transition-colors">
+    <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
+      
+      <!-- Brand Logo & Name -->
+      <div class="flex items-center space-x-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20">
+          <i data-lucide="sparkles" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-brand-600 to-indigo-500 dark:from-white dark:via-indigo-300 dark:to-indigo-400 bg-clip-text text-transparent leading-tight">
+            HabitFlow 360
+          </h1>
+          <p class="text-[11px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
+            <span class="inline-block w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+            Hábitos en 1 Clic
+          </p>
+        </div>
+      </div>
+
+      <div class="flex items-center space-x-2 sm:space-x-3">
+        <!-- Global Streak Indicator Badge -->
+        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/50 shadow-sm">
+          <span class="text-lg leading-none select-none">🔥</span>
+          <span id="global-streak-count" class="text-sm font-bold text-amber-700 dark:text-amber-400">0</span>
+          <span class="text-[11px] font-semibold text-amber-600/80 dark:text-amber-500/80 hidden sm:inline">días</span>
+        </div>
+
+        <!-- Cloud Sync Fast Status -->
+        <button id="btn-quick-sync" title="Sincronizar con Google Sheets" class="p-2 text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition bounce-active relative">
+          <i data-lucide="cloud" class="w-5 h-5"></i>
+          <span id="sync-indicator" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500"></span>
+        </button>
+
+        <!-- Dark/Light Mode Switch -->
+        <button id="theme-toggle-btn" title="Cambiar tema" class="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition bounce-active">
+          <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+    </div>
+  </header>
+
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 pb-24 sm:pb-12">
+    
+    <!-- Navigation Pill Tabs -->
+    <nav class="flex p-1.5 bg-slate-200/70 dark:bg-slate-900/80 rounded-2xl mb-6 shadow-inner border border-slate-200/40 dark:border-slate-800">
+      <button onclick="switchTab('today')" id="tab-btn-today" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400">
+        <i data-lucide="check-circle-2" class="w-4 h-4"></i>
+        <span>Mi Día</span>
+      </button>
+      <button onclick="switchTab('stats')" id="tab-btn-stats" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
+        <span>Estadísticas</span>
+      </button>
+      <button onclick="switchTab('manager')" id="tab-btn-manager" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        <i data-lucide="layers" class="w-4 h-4"></i>
+        <span>Gestor</span>
+      </button>
+      <button onclick="switchTab('cloud')" id="tab-btn-cloud" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        <i data-lucide="cloud-cog" class="w-4 h-4"></i>
+        <span>Nube & Respaldo</span>
+      </button>
+    </nav>
+
+    <section id="tab-content-today" class="space-y-6">
+      
+      <!-- Greeting & Daily Progress Card -->
+      <div class="relative overflow-hidden rounded-3xl bg-gradient-to-br from-indigo-600 via-brand-600 to-indigo-800 text-white p-6 sm:p-7 shadow-xl shadow-indigo-500/15">
+        <div class="relative z-10 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div>
+            <span id="current-date-badge" class="inline-block px-3 py-1 rounded-full bg-white/15 text-xs font-semibold tracking-wide backdrop-blur-sm mb-2 text-indigo-100">
+              Cargando fecha...
+            </span>
+            <h2 id="dynamic-greeting" class="text-2xl sm:text-3xl font-extrabold tracking-tight">
+              ¡Hola! Vamos con todo hoy.
+            </h2>
+            <p id="motivational-quote" class="text-xs sm:text-sm text-indigo-100/90 mt-1 max-w-md">
+              "La consistencia es la clave del progreso extraordinario."
+            </p>
+          </div>
+
+          <!-- Progress Ring / Percentage Stat -->
+          <div class="flex items-center space-x-3 bg-white/10 dark:bg-black/20 p-3.5 rounded-2xl backdrop-blur-md border border-white/15 self-start sm:self-auto">
+            <div class="text-right">
+              <div id="progress-percent-label" class="text-2xl sm:text-3xl font-black tracking-tight leading-none">0%</div>
+              <div id="progress-count-label" class="text-[11px] font-semibold text-indigo-200 mt-1">0 de 0 completados</div>
+            </div>
+            <div class="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center text-white">
+              <i data-lucide="target" class="w-5 h-5"></i>
+            </div>
+          </div>
+        </div>
+
+        <!-- Real-time Progress Bar -->
+        <div class="relative z-10 mt-6">
+          <div class="w-full h-3.5 bg-black/25 rounded-full overflow-hidden p-0.5 backdrop-blur-sm">
+            <div id="daily-progress-bar" class="h-full bg-gradient-to-r from-emerald-400 via-teal-300 to-emerald-200 rounded-full transition-all duration-500 ease-out shadow-sm" style="width: 0%"></div>
+          </div>
+        </div>
+
+        <!-- Decorative background shape -->
+        <div class="absolute -right-8 -bottom-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
+      </div>
+
+      <!-- Quick Action: Filter Categories -->
+      <div class="flex items-center justify-between gap-2 overflow-x-auto pb-1 no-scrollbar text-xs">
+        <span class="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline">Filtrar:</span>
+        <div class="flex items-center gap-1.5 w-full sm:w-auto">
+          <button onclick="filterCategory('all')" class="cat-pill active px-3 py-1.5 rounded-xl font-bold bg-brand-600 text-white shadow-sm transition">Todos</button>
+          <button onclick="filterCategory('health')" class="cat-pill px-3 py-1.5 rounded-xl font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-emerald-500 transition">Salud</button>
+          <button onclick="filterCategory('mind')" class="cat-pill px-3 py-1.5 rounded-xl font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-blue-500 transition">Mente</button>
+          <button onclick="filterCategory('work')" class="cat-pill px-3 py-1.5 rounded-xl font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-purple-500 transition">Trabajo</button>
+          <button onclick="filterCategory('finance')" class="cat-pill px-3 py-1.5 rounded-xl font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-amber-500 transition">Finanzas</button>
+          <button onclick="filterCategory('wellness')" class="cat-pill px-3 py-1.5 rounded-xl font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-pink-500 transition">Bienestar</button>
+        </div>
+      </div>
+
+      <div id="habit-cards-container" class="space-y-3.5">
+        <!-- Injected via JavaScript -->
+      </div>
+
+      <!-- Empty State for Habits -->
+      <div id="habits-empty-state" class="hidden text-center py-12 px-4 rounded-3xl border-2 border-dashed border-slate-200 dark:border-slate-800">
+        <div class="w-16 h-16 mx-auto rounded-full bg-indigo-50 dark:bg-slate-800 flex items-center justify-center text-brand-600 dark:text-brand-400 mb-3">
+          <i data-lucide="clipboard-list" class="w-8 h-8"></i>
+        </div>
+        <h3 class="text-base font-bold text-slate-700 dark:text-slate-200">No hay hábitos para mostrar</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 max-w-sm mx-auto">
+          Crea tu primer hábito con el botón inferior para empezar a forjar tu mejor versión.
+        </p>
+        <button onclick="openHabitModal()" class="mt-4 inline-flex items-center gap-2 px-4 py-2 bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-brand-700 transition">
+          <i data-lucide="plus-circle" class="w-4 h-4"></i>
+          Crear Hábito
+        </button>
+      </div>
+
+    </section>
+
+    <section id="tab-content-stats" class="hidden space-y-6">
+      
+      <!-- Consistency Heatmap (GitHub Style) -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800/80 gap-2">
+          <div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <i data-lucide="calendar" class="w-4 h-4 text-brand-600 dark:text-brand-400"></i>
+              Matriz de Constancia (Últimos 30 días)
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400">Cada casilla representa tu nivel de éxito diario.</p>
+          </div>
+          <div class="flex items-center gap-1.5 text-[11px] text-slate-500 font-medium">
+            <span>Menos</span>
+            <span class="w-3 h-3 rounded bg-slate-100 dark:bg-slate-800"></span>
+            <span class="w-3 h-3 rounded bg-emerald-200 dark:bg-emerald-950"></span>
+            <span class="w-3 h-3 rounded bg-emerald-400 dark:bg-emerald-700"></span>
+            <span class="w-3 h-3 rounded bg-emerald-600 dark:bg-emerald-500"></span>
+            <span>Más</span>
+          </div>
+        </div>
+
+        <!-- Heatmap Grid -->
+        <div class="mt-4 overflow-x-auto pb-2">
+          <div id="consistency-heatmap" class="grid grid-flow-col grid-rows-5 gap-2 min-w-[320px]">
+            <!-- Generated dynamically in JS -->
+          </div>
+        </div>
+
+        <div id="heatmap-tooltip-info" class="mt-3 text-center text-xs font-semibold text-slate-500 dark:text-slate-400">
+          Haz clic o pasa el cursor sobre una casilla para ver el detalle.
+        </div>
+      </div>
+
+      <!-- Charts Section: Two column layout -->
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Category Distribution Doughnut -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
+            <i data-lucide="pie-chart" class="w-4 h-4 text-purple-500"></i>
+            Distribución por Categoría
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">¿En qué áreas inviertes más tu energía?</p>
+          <div class="h-60 relative flex items-center justify-center">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+
+        <!-- Weekly Trend Bar Chart -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+          <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2 mb-2">
+            <i data-lucide="trending-up" class="w-4 h-4 text-emerald-500"></i>
+            Tendencia Semanal (% Cumplimiento)
+          </h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">Desempeño diario en los últimos 7 días.</p>
+          <div class="h-60 relative flex items-center justify-center">
+            <canvas id="weeklyChart"></canvas>
+          </div>
+        </div>
+
+      </div>
+
+    </section>
+
+    <section id="tab-content-manager" class="hidden space-y-5">
+      
+      <div class="flex items-center justify-between">
+        <div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Gestor de Hábitos</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Crea, edita y ajusta tus metas personales.</p>
+        </div>
+        <button onclick="openHabitModal()" class="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-brand-500/20 transition bounce-active">
+          <i data-lucide="plus" class="w-4 h-4"></i>
+          <span>Nuevo Hábito</span>
+        </button>
+      </div>
+
+      <!-- Manager Habit List -->
+      <div id="manager-habits-list" class="space-y-3">
+        <!-- Rendered in JS -->
+      </div>
+
+    </section>
+
+    <section id="tab-content-cloud" class="hidden space-y-6">
+      
+      <!-- Google Sheets Web App Integration Card -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <i data-lucide="sheet" class="w-6 h-6"></i>
+          </div>
+          <div class="flex-1">
+            <div class="flex items-center justify-between flex-wrap gap-2">
+              <h3 class="text-base font-bold text-slate-900 dark:text-white">Sincronización con Google Sheets</h3>
+              <span id="cloud-status-badge" class="text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400">
+                No configurado
+              </span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Conecta tu hoja de cálculo privada de Google Sheets para tener respaldo automático, ilimitado y accesible desde cualquier lugar.
+            </p>
+          </div>
+        </div>
+
+        <!-- Google Apps Script URL Input -->
+        <div class="mt-5 space-y-2">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300">
+            URL de la Aplicación Web (Google Apps Script)
+          </label>
+          <div class="flex gap-2">
+            <input type="url" id="gas-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="flex-1 bg-slate-50 dark:bg-slate-800/80 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
+            <button onclick="saveCloudSettings()" class="px-4 py-2.5 bg-slate-900 hover:bg-black dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition bounce-active">
+              Guardar
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400">
+            Pega aquí la URL proporcionada al implementar tu Google Apps Script como Web App (acceso: "Cualquiera").
+          </p>
+        </div>
+
+        <!-- Sync Actions -->
+        <div class="mt-5 pt-4 border-t border-slate-100 dark:border-slate-800 flex flex-wrap items-center justify-between gap-3">
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="auto-sync-checkbox" onchange="toggleAutoSync(this.checked)" class="w-4 h-4 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+            <label for="auto-sync-checkbox" class="text-xs font-semibold text-slate-700 dark:text-slate-300 cursor-pointer">
+              Auto-sincronizar al registrar hábitos
+            </label>
+          </div>
+          <div class="flex gap-2">
+            <button onclick="syncToCloud()" id="btn-sync-now" class="flex items-center gap-2 px-4 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-bold shadow-md shadow-emerald-600/20 transition bounce-active">
+              <i data-lucide="cloud-upload" class="w-4 h-4"></i>
+              <span>Enviar a Sheets</span>
+            </button>
+            <button onclick="fetchFromCloud()" id="btn-pull-cloud" class="flex items-center gap-2 px-3 py-2 rounded-xl bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold transition bounce-active">
+              <i data-lucide="cloud-download" class="w-4 h-4"></i>
+              <span>Descargar de Sheets</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Apps Script Quick Guide Accordion -->
+        <details class="mt-4 text-xs text-slate-600 dark:text-slate-400 bg-slate-50 dark:bg-slate-950/50 p-3.5 rounded-2xl border border-slate-200/60 dark:border-slate-800">
+          <summary class="font-bold text-slate-700 dark:text-slate-300 cursor-pointer select-none">
+            📘 ¿Cómo crear el Google Apps Script en 2 minutos? (Clic aquí)
+          </summary>
+          <div class="mt-2.5 space-y-2 text-[11px] leading-relaxed">
+            <p>1. Crea una nueva hoja en <a href="https://sheets.new" target="_blank" class="text-brand-600 underline">sheets.new</a>.</p>
+            <p>2. Ve a <strong>Extensiones > Apps Script</strong>, borra todo y pega este código:</p>
+            <pre class="p-2.5 rounded-lg bg-slate-900 text-emerald-400 font-mono text-[10px] overflow-x-auto select-all">function doPost(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var body = JSON.parse(e.postData.contents);
+  if (body.action === "sync") {
+    sheet.clear();
+    sheet.appendRow(["HabitFlow Backup", new Date()]);
+    sheet.appendRow([JSON.stringify(body.payload)]);
+    return ContentService.createTextOutput(JSON.stringify({status: "success"}))
+      .setMimeType(ContentService.MimeType.JSON);
+  }
+}
+function doGet(e) {
+  var sheet = SpreadsheetApp.getActiveSpreadsheet().getActiveSheet();
+  var raw = sheet.getRange(2, 1).getValue();
+  return ContentService.createTextOutput(raw)
+    .setMimeType(ContentService.MimeType.JSON);
+}</pre>
+            <p>3. Haz clic en <strong>Implementar > Nueva implementación</strong> > tipo "Aplicación web".</p>
+            <p>4. En "Quién tiene acceso", selecciona <strong>Cualquier usuario</strong> y copia la URL terminada en <code>/exec</code>.</p>
+          </div>
+        </details>
+      </div>
+
+      <!-- JSON File Backup & Restore Card -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+        <div class="flex items-start gap-4">
+          <div class="w-12 h-12 rounded-2xl bg-indigo-500/10 text-brand-600 dark:text-brand-400 flex items-center justify-center shrink-0">
+            <i data-lucide="database" class="w-6 h-6"></i>
+          </div>
+          <div>
+            <h3 class="text-base font-bold text-slate-900 dark:text-white">Copia de Seguridad Manual (Archivo JSON)</h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-1">
+              Descarga tu archivo de datos completo para guardarlo en tu computadora o cargarlo en otro dispositivo.
+            </p>
+          </div>
+        </div>
+
+        <div class="mt-5 flex flex-wrap gap-3">
+          <button onclick="exportJSONBackup()" class="flex items-center gap-2 px-4 py-2.5 bg-slate-900 hover:bg-black dark:bg-slate-800 dark:hover:bg-slate-700 text-white rounded-xl text-xs font-bold transition bounce-active">
+            <i data-lucide="download" class="w-4 h-4"></i>
+            <span>Exportar Copia (.json)</span>
+          </button>
+          
+          <label class="flex items-center gap-2 px-4 py-2.5 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/60 transition bounce-active">
+            <i data-lucide="upload" class="w-4 h-4"></i>
+            <span>Importar Copia (.json)</span>
+            <input type="file" id="import-file-input" accept=".json" onchange="importJSONBackup(event)" class="hidden">
+          </label>
+        </div>
+      </div>
+
+    </section>
+
+  </main>
+
+  <div class="fixed bottom-6 right-6 z-30">
+    <button onclick="openHabitModal()" title="Agregar nuevo hábito" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center shadow-glow hover:scale-105 active:scale-95 transition-all">
+      <i data-lucide="plus" class="w-7 h-7"></i>
+    </button>
+  </div>
+
+  <div id="habit-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-200" id="habit-modal-content">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white">Nuevo Hábito</h3>
+        <button onclick="closeHabitModal()" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="habit-form" onsubmit="handleHabitSubmit(event)" class="mt-4 space-y-4">
+        <input type="hidden" id="habit-id">
+
+        <!-- Name Input -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nombre del Hábito *</label>
+          <input type="text" id="habit-name" required placeholder="Ej. Meditar 10 minutos, Tomar Agua" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <!-- Category Select -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Categoría</label>
+          <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
+            <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+              <input type="radio" name="habit-category" value="health" checked class="text-brand-600 focus:ring-brand-500">
+              <span class="text-xs font-semibold text-emerald-600">🏋️ Salud</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+              <input type="radio" name="habit-category" value="mind" class="text-brand-600 focus:ring-brand-500">
+              <span class="text-xs font-semibold text-blue-600">🧠 Mente</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+              <input type="radio" name="habit-category" value="work" class="text-brand-600 focus:ring-brand-500">
+              <span class="text-xs font-semibold text-purple-600">💼 Trabajo</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+              <input type="radio" name="habit-category" value="finance" class="text-brand-600 focus:ring-brand-500">
+              <span class="text-xs font-semibold text-amber-600">💰 Finanzas</span>
+            </label>
+            <label class="flex items-center gap-2 p-2 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 col-span-2 sm:col-span-2">
+              <input type="radio" name="habit-category" value="wellness" class="text-brand-600 focus:ring-brand-500">
+              <span class="text-xs font-semibold text-pink-600">🧘 Bienestar & Estilo de Vida</span>
+            </label>
+          </div>
+        </div>
+
+        <!-- Habit Type Radio -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Tipo de Registro</label>
+          <div class="grid grid-cols-2 gap-3">
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+              <input type="radio" name="habit-type" value="simple" checked onchange="toggleHabitTypeFields('simple')" class="text-brand-600 focus:ring-brand-500">
+              <div>
+                <div class="text-xs font-bold">Checkbox Simple</div>
+                <div class="text-[10px] text-slate-400">Sí / No en 1 clic</div>
+              </div>
+            </label>
+            <label class="flex items-center gap-2 p-3 rounded-xl border border-slate-200 dark:border-slate-700 cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800">
+              <input type="radio" name="habit-type" value="quantitative" onchange="toggleHabitTypeFields('quantitative')" class="text-brand-600 focus:ring-brand-500">
+              <div>
+                <div class="text-xs font-bold">Cuantitativo</div>
+                <div class="text-[10px] text-slate-400">Contador (+ / -) con meta</div>
+              </div>
+            </label>
+          </div>
+        </div>
+
+        <!-- Quantitative Settings (Conditional) -->
+        <div id="quantitative-fields" class="hidden grid grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Meta</label>
+            <input type="number" id="habit-target" step="0.1" value="2.5" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-100">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Unidad</label>
+            <input type="text" id="habit-unit" value="Litros" placeholder="L, vasos, págs" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-100">
+          </div>
+          <div>
+            <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Paso (+/-)</label>
+            <input type="number" id="habit-step" step="0.1" value="0.5" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-lg px-2.5 py-1.5 text-xs text-slate-800 dark:text-slate-100">
+          </div>
+        </div>
+
+        <!-- Icon Picker (Quick Emojis) -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Ícono Representativo</label>
+          <div class="flex items-center gap-2 overflow-x-auto pb-1" id="icon-picker">
+            <!-- Will be filled or selected -->
+            <button type="button" onclick="selectIcon('💧')" class="icon-opt p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-110 transition text-base">💧</button>
+            <button type="button" onclick="selectIcon('📖')" class="icon-opt p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-110 transition text-base">📖</button>
+            <button type="button" onclick="selectIcon('💪')" class="icon-opt p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-110 transition text-base">💪</button>
+            <button type="button" onclick="selectIcon('🧘')" class="icon-opt p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-110 transition text-base">🧘</button>
+            <button type="button" onclick="selectIcon('💻')" class="icon-opt p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-110 transition text-base">💻</button>
+            <button type="button" onclick="selectIcon('🥗')" class="icon-opt p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-110 transition text-base">🥗</button>
+            <button type="button" onclick="selectIcon('💰')" class="icon-opt p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-110 transition text-base">💰</button>
+            <button type="button" onclick="selectIcon('🎯')" class="icon-opt p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-110 transition text-base">🎯</button>
+            <button type="button" onclick="selectIcon('⚡')" class="icon-opt p-2 rounded-xl bg-slate-100 dark:bg-slate-800 hover:scale-110 transition text-base">⚡</button>
+          </div>
+          <input type="hidden" id="habit-icon" value="🎯">
+        </div>
+
+        <!-- Form Submit & Cancel -->
+        <div class="pt-3 flex gap-2 justify-end">
+          <button type="button" onclick="closeHabitModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+            Cancelar
+          </button>
+          <button type="submit" class="px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20 transition bounce-active">
+            Guardar Hábito
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <div id="custom-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center transform scale-95 transition-transform duration-200" id="custom-modal-box">
+      <div id="modal-icon-container" class="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center text-brand-600 dark:text-brand-400 mb-4">
+        <i id="custom-modal-icon" data-lucide="info" class="w-7 h-7"></i>
+      </div>
+      <h4 id="custom-modal-title" class="text-base font-bold text-slate-900 dark:text-white">Aviso</h4>
+      <p id="custom-modal-message" class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">Mensaje del sistema.</p>
+      <div id="custom-modal-buttons" class="mt-5 flex gap-2 justify-center">
+        <!-- Buttons injected dynamically -->
+      </div>
+    </div>
+  </div>
+
+  <div id="toast" class="fixed top-20 right-4 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xl text-xs font-semibold transform translate-y-[-20px] opacity-0 pointer-events-none transition-all duration-300">
+    <span id="toast-icon">✨</span>
+    <span id="toast-message">Mensaje de notificación</span>
+  </div>
+
+  <script>
+    const STORAGE_KEY = 'habitflow_360_data';
+    const SETTINGS_KEY = 'habitflow_360_settings';
+    
+    // Category visual config
+    const CATEGORIES = {
+      health: { label: 'Salud & Deporte', color: '#10b981', bg: 'bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20' },
+      mind: { label: 'Mente & Aprendizaje', color: '#3b82f6', bg: 'bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20' },
+      work: { label: 'Trabajo & Código', color: '#8b5cf6', bg: 'bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20' },
+      finance: { label: 'Finanzas', color: '#f59e0b', bg: 'bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20' },
+      wellness: { label: 'Bienestar & Estilo', color: '#ec4899', bg: 'bg-pink-500/10 text-pink-600 dark:text-pink-400 border-pink-500/20' }
+    };
+
+    // Default seed habits
+    const DEFAULT_HABITS = [
+      {
+        id: 'h-seed-1',
+        name: 'Tomar 2.5 Litros de Agua',
+        category: 'health',
+        type: 'quantitative',
+        target: 2.5,
+        unit: 'L',
+        step: 0.5,
+        icon: '💧',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'h-seed-2',
+        name: 'Lectura o Aprendizaje Diario',
+        category: 'mind',
+        type: 'simple',
+        target: 1,
+        unit: '',
+        step: 1,
+        icon: '📖',
+        createdAt: new Date().toISOString()
+      },
+      {
+        id: 'h-seed-3',
+        name: 'Sesión de Enfoque Profundo (Deep Work)',
+        category: 'work',
+        type: 'simple',
+        target: 1,
+        unit: '',
+        step: 1,
+        icon: '💻',
+        createdAt: new Date().toISOString()
+      }
+    ];
+
+    // Master Application State
+    let appState = {
+      habits: [],
+      // logs: { "YYYY-MM-DD": { [habitId]: progressNumber } }
+      logs: {}
+    };
+
+    let appSettings = {
+      darkMode: false,
+      gasUrl: '',
+      autoSync: false,
+      lastSync: null
+    };
+
+    let activeCategoryFilter = 'all';
+    let chartInstanceCategory = null;
+    let chartInstanceWeekly = null;
+    let audioCtx = null;
+
+    function playCelebrationSound() {
+      try {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) audioCtx = new AudioContextClass();
+        }
+        if (!audioCtx) return;
+        if (audioCtx.state === 'suspended') {
+          audioCtx.resume();
+        }
+
+        // Play pleasant harmonic ascending chime (C5 - E5 - G5 - C6)
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        const now = audioCtx.currentTime;
+
+        notes.forEach((freq, index) => {
+          const osc = audioCtx.createOscillator();
+          const gain = audioCtx.createGain();
+
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + index * 0.08);
+
+          gain.gain.setValueAtTime(0.001, now + index * 0.08);
+          gain.gain.exponentialRampToValueAtTime(0.18, now + index * 0.08 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.08 + 0.28);
+
+          osc.connect(gain);
+          gain.connect(audioCtx.destination);
+
+          osc.start(now + index * 0.08);
+          osc.stop(now + index * 0.08 + 0.3);
+        });
+      } catch (e) {
+        // Fallback silently if audio context is blocked
+      }
+    }
+
+    function getTodayKey() {
+      const d = new Date();
+      return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+    }
+
+    function formatDateFriendly(dateStr) {
+      const [y, m, d] = dateStr.split('-');
+      const date = new Date(y, m - 1, d);
+      return date.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
+    }
+
+    function loadLocalData() {
+      try {
+        const rawData = localStorage.getItem(STORAGE_KEY);
+        if (rawData) {
+          appState = JSON.parse(rawData);
+          if (!appState.habits || !Array.isArray(appState.habits)) {
+            appState.habits = DEFAULT_HABITS;
+          }
+          if (!appState.logs) {
+            appState.logs = {};
+          }
+        } else {
+          appState.habits = [...DEFAULT_HABITS];
+          // Pre-populate some historical mock logs for realistic consistency matrix demo
+          seedHistoricalData();
+          saveLocalData();
+        }
+
+        const rawSettings = localStorage.getItem(SETTINGS_KEY);
+        if (rawSettings) {
+          appSettings = { ...appSettings, ...JSON.parse(rawSettings) };
+        }
+      } catch (err) {
+        console.error("Error cargando almacenamiento local:", err);
+        appState.habits = [...DEFAULT_HABITS];
+      }
+    }
+
+    function saveLocalData() {
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
+        localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings));
+      } catch (e) {
+        console.warn("No se pudo guardar en almacenamiento local:", e);
+      }
+    }
+
+    function seedHistoricalData() {
+      const today = new Date();
+      // Fill random progress for the past 25 days so stats look vibrant immediately
+      for (let i = 25; i >= 1; i--) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        
+        appState.logs[k] = {};
+        if (Math.random() > 0.25) appState.logs[k]['h-seed-1'] = 2.5;
+        if (Math.random() > 0.3) appState.logs[k]['h-seed-2'] = 1;
+        if (Math.random() > 0.4) appState.logs[k]['h-seed-3'] = 1;
+      }
+    }
+
+    function applyTheme() {
+      const isDark = appSettings.darkMode;
+      const htmlEl = document.documentElement;
+      const icon = document.getElementById('theme-icon');
+      
+      if (isDark) {
+        htmlEl.classList.add('dark');
+        if (icon) icon.setAttribute('data-lucide', 'sun');
+      } else {
+        htmlEl.classList.remove('dark');
+        if (icon) icon.setAttribute('data-lucide', 'moon');
+      }
+      lucide.createIcons();
+    }
+
+    function updateGreetingAndDate() {
+      const now = new Date();
+      const hour = now.getHours();
+      let greeting = '¡Buenas noches!';
+      if (hour >= 5 && hour < 12) greeting = '¡Buenos días!';
+      else if (hour >= 12 && hour < 19) greeting = '¡Buenas tardes!';
+
+      const greetingEl = document.getElementById('dynamic-greeting');
+      if (greetingEl) greetingEl.textContent = `${greeting} Vamos con todo.`;
+
+      const dateOptions = { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' };
+      const dateStr = now.toLocaleDateString('es-ES', dateOptions);
+      const capDate = dateStr.charAt(0).toUpperCase() + dateStr.slice(1);
+      
+      const badge = document.getElementById('current-date-badge');
+      if (badge) badge.textContent = capDate;
+    }
+
+    function calculateHabitStreak(habitId) {
+      let streak = 0;
+      let checkDate = new Date();
+      const todayKey = getTodayKey();
+      
+      // Check if today is completed
+      const habit = appState.habits.find(h => h.id === habitId);
+      if (!habit) return 0;
+
+      const isCompletedToday = (appState.logs[todayKey]?.[habitId] || 0) >= habit.target;
+      if (isCompletedToday) streak++;
+
+      // Check backwards
+      while (true) {
+        checkDate.setDate(checkDate.getDate() - 1);
+        const k = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+        const logVal = appState.logs[k]?.[habitId] || 0;
+        
+        if (logVal >= habit.target) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      return streak;
+    }
+
+    function calculateGlobalActiveStreak() {
+      let streak = 0;
+      let checkDate = new Date();
+      const todayKey = getTodayKey();
+
+      // At least 1 habit completed today
+      const todayLogs = appState.logs[todayKey] || {};
+      const completedToday = appState.habits.some(h => (todayLogs[h.id] || 0) >= h.target);
+      if (completedToday) streak++;
+
+      // Previous days
+      while (true) {
+        checkDate.setDate(checkDate.getDate() - 1);
+        const k = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+        const pastLogs = appState.logs[k] || {};
+        const completedPast = appState.habits.some(h => (pastLogs[h.id] || 0) >= h.target);
+        if (completedPast) {
+          streak++;
+        } else {
+          break;
+        }
+      }
+      return streak;
+    }
+
+    function renderTodayHabits() {
+      const container = document.getElementById('habit-cards-container');
+      const emptyState = document.getElementById('habits-empty-state');
+      if (!container) return;
+
+      const todayKey = getTodayKey();
+      if (!appState.logs[todayKey]) {
+        appState.logs[todayKey] = {};
+      }
+      const todayLogs = appState.logs[todayKey];
+
+      const visibleHabits = appState.habits.filter(h => {
+        if (activeCategoryFilter === 'all') return true;
+        return h.category === activeCategoryFilter;
+      });
+
+      if (visibleHabits.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+      } else {
+        emptyState.classList.add('hidden');
+        
+        container.innerHTML = visibleHabits.map(habit => {
+          const currentVal = Number(todayLogs[habit.id] || 0);
+          const isDone = currentVal >= habit.target;
+          const streak = calculateHabitStreak(habit.id);
+          const catInfo = CATEGORIES[habit.category] || CATEGORIES.wellness;
+
+          if (habit.type === 'quantitative') {
+            const percent = Math.min(100, Math.round((currentVal / habit.target) * 100));
+            return `
+              <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border ${isDone ? 'border-emerald-400 dark:border-emerald-600/80 shadow-md shadow-emerald-500/5' : 'border-slate-200/90 dark:border-slate-800'} shadow-soft transition-all duration-200">
+                <div class="flex items-center justify-between gap-3">
+                  <div class="flex items-center gap-3">
+                    <span class="text-2xl sm:text-3xl select-none">${habit.icon || '🎯'}</span>
+                    <div>
+                      <div class="flex items-center gap-2 flex-wrap">
+                        <h4 class="text-sm font-bold text-slate-900 dark:text-white">${habit.name}</h4>
+                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${catInfo.bg}">${catInfo.label}</span>
+                      </div>
+                      <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                        <span class="font-semibold text-slate-700 dark:text-slate-300">
+                          Progreso: <span class="${isDone ? 'text-emerald-600 dark:text-emerald-400 font-bold' : ''}">${currentVal}</span> / ${habit.target} ${habit.unit}
+                        </span>
+                        <span class="flex items-center gap-0.5 font-bold text-amber-600 dark:text-amber-400">
+                          🔥 ${streak} d
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <!-- Plus / Minus Controls -->
+                  <div class="flex items-center gap-1.5 shrink-0">
+                    <button onclick="decrementHabit('${habit.id}')" title="Disminuir" class="w-9 h-9 rounded-xl bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-200 flex items-center justify-center font-bold text-base hover:bg-slate-200 dark:hover:bg-slate-700 transition bounce-active">
+                      -
+                    </button>
+                    <button onclick="incrementHabit('${habit.id}')" title="Incrementar" class="px-3.5 h-9 rounded-xl ${isDone ? 'bg-emerald-600 text-white shadow-emerald-600/30' : 'bg-brand-600 text-white shadow-brand-500/20'} flex items-center justify-center font-bold text-xs shadow-md transition bounce-active">
+                      +${habit.step}
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Mini Progress bar for quantitative -->
+                <div class="mt-3.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full h-2 overflow-hidden">
+                  <div class="h-full bg-gradient-to-r ${isDone ? 'from-emerald-500 to-teal-400' : 'from-brand-500 to-indigo-400'} rounded-full transition-all duration-300" style="width: ${percent}%"></div>
+                </div>
+              </div>
+            `;
+          } else {
+            // Simple 1-click Checkbox habit
+            return `
+              <div class="bg-white dark:bg-slate-900 rounded-3xl p-4 sm:p-5 border ${isDone ? 'border-emerald-400 dark:border-emerald-600/80 shadow-md shadow-emerald-500/5' : 'border-slate-200/90 dark:border-slate-800'} shadow-soft transition-all duration-200 flex items-center justify-between gap-3">
+                <div class="flex items-center gap-3">
+                  <span class="text-2xl sm:text-3xl select-none">${habit.icon || '🎯'}</span>
+                  <div>
+                    <div class="flex items-center gap-2 flex-wrap">
+                      <h4 class="text-sm font-bold ${isDone ? 'line-through text-slate-400 dark:text-slate-500' : 'text-slate-900 dark:text-white'} transition-all">${habit.name}</h4>
+                      <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${catInfo.bg}">${catInfo.label}</span>
+                    </div>
+                    <div class="flex items-center gap-3 text-xs text-slate-500 dark:text-slate-400 mt-1">
+                      <span class="flex items-center gap-0.5 font-bold text-amber-600 dark:text-amber-400">
+                        🔥 ${streak} días seguidos
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Instant Check Button -->
+                <button onclick="toggleSimpleHabit('${habit.id}')" class="w-11 h-11 rounded-2xl flex items-center justify-center transition-all bounce-active ${isDone ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 pop-anim' : 'bg-slate-100 hover:bg-slate-200 dark:bg-slate-800 dark:hover:bg-slate-700 text-slate-400 dark:text-slate-500'}">
+                  <i data-lucide="${isDone ? 'check' : 'circle'}" class="w-6 h-6 stroke-[2.5]"></i>
+                </button>
+              </div>
+            `;
+          }
+        }).join('');
+      }
+
+      lucide.createIcons();
+      updateDashboardProgress();
+    }
+
+    function updateDashboardProgress() {
+      const todayKey = getTodayKey();
+      const logs = appState.logs[todayKey] || {};
+      const total = appState.habits.length;
+      
+      let completedCount = 0;
+      appState.habits.forEach(h => {
+        const val = logs[h.id] || 0;
+        if (val >= h.target) completedCount++;
+      });
+
+      const percentage = total === 0 ? 0 : Math.round((completedCount / total) * 100);
+
+      // DOM Elements
+      const progressBar = document.getElementById('daily-progress-bar');
+      const percentLabel = document.getElementById('progress-percent-label');
+      const countLabel = document.getElementById('progress-count-label');
+      const streakBadge = document.getElementById('global-streak-count');
+
+      if (progressBar) progressBar.style.width = `${percentage}%`;
+      if (percentLabel) percentLabel.textContent = `${percentage}%`;
+      if (countLabel) countLabel.textContent = `${completedCount} de ${total} completados`;
+      if (streakBadge) streakBadge.textContent = calculateGlobalActiveStreak();
+    }
+
+    function toggleSimpleHabit(habitId) {
+      const todayKey = getTodayKey();
+      if (!appState.logs[todayKey]) appState.logs[todayKey] = {};
+
+      const current = appState.logs[todayKey][habitId] || 0;
+      const isBecomingDone = current === 0;
+
+      appState.logs[todayKey][habitId] = isBecomingDone ? 1 : 0;
+      saveLocalData();
+      renderTodayHabits();
+
+      if (isBecomingDone) {
+        playCelebrationSound();
+        showToast("¡Hábito cumplido! Excelente trabajo 🎉", "⭐");
+        checkAutoSyncTrigger();
+      }
+    }
+
+    function incrementHabit(habitId) {
+      const todayKey = getTodayKey();
+      if (!appState.logs[todayKey]) appState.logs[todayKey] = {};
+
+      const habit = appState.habits.find(h => h.id === habitId);
+      if (!habit) return;
+
+      const prev = Number(appState.logs[todayKey][habitId] || 0);
+      const step = Number(habit.step || 1);
+      const nextVal = Math.round((prev + step) * 100) / 100;
+
+      appState.logs[todayKey][habitId] = nextVal;
+      saveLocalData();
+      renderTodayHabits();
+
+      if (prev < habit.target && nextVal >= habit.target) {
+        playCelebrationSound();
+        showToast(`¡Meta alcanzada para ${habit.name}! 🔥`, "💧");
+        checkAutoSyncTrigger();
+      }
+    }
+
+    function decrementHabit(habitId) {
+      const todayKey = getTodayKey();
+      if (!appState.logs[todayKey]) return;
+
+      const habit = appState.habits.find(h => h.id === habitId);
+      if (!habit) return;
+
+      const prev = Number(appState.logs[todayKey][habitId] || 0);
+      const step = Number(habit.step || 1);
+      const nextVal = Math.max(0, Math.round((prev - step) * 100) / 100);
+
+      appState.logs[todayKey][habitId] = nextVal;
+      saveLocalData();
+      renderTodayHabits();
+    }
+
+    function filterCategory(cat) {
+      activeCategoryFilter = cat;
+      document.querySelectorAll('.cat-pill').forEach(btn => {
+        btn.classList.remove('bg-brand-600', 'text-white', 'font-bold');
+        btn.classList.add('bg-white', 'dark:bg-slate-900', 'text-slate-600', 'dark:text-slate-300', 'font-medium');
+      });
+      event.currentTarget.classList.add('bg-brand-600', 'text-white', 'font-bold');
+      event.currentTarget.classList.remove('bg-white', 'dark:bg-slate-900', 'text-slate-600', 'dark:text-slate-300');
+      renderTodayHabits();
+    }
+
+    function renderConsistencyHeatmap() {
+      const heatmapContainer = document.getElementById('consistency-heatmap');
+      const tooltipInfo = document.getElementById('heatmap-tooltip-info');
+      if (!heatmapContainer) return;
+
+      heatmapContainer.innerHTML = '';
+      const daysCount = 30;
+      const today = new Date();
+
+      for (let i = daysCount - 1; i >= 0; i--) {
+        const d = new Date();
+        d.setDate(today.getDate() - i);
+        const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        
+        const logs = appState.logs[key] || {};
+        let done = 0;
+        const total = appState.habits.length;
+        
+        appState.habits.forEach(h => {
+          if ((logs[h.id] || 0) >= h.target) done++;
+        });
+
+        const ratio = total === 0 ? 0 : done / total;
+        let colorClass = 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700/50';
+
+        if (ratio > 0 && ratio <= 0.33) {
+          colorClass = 'bg-emerald-200 dark:bg-emerald-950 border-emerald-300 dark:border-emerald-800';
+        } else if (ratio > 0.33 && ratio <= 0.75) {
+          colorClass = 'bg-emerald-400 dark:bg-emerald-700 border-emerald-500 dark:border-emerald-600';
+        } else if (ratio > 0.75) {
+          colorClass = 'bg-emerald-600 dark:bg-emerald-500 border-emerald-700 dark:border-emerald-400';
+        }
+
+        const box = document.createElement('div');
+        box.className = `w-7 h-7 sm:w-8 sm:h-8 rounded-lg border ${colorClass} heatmap-box cursor-pointer flex items-center justify-center text-[10px] font-semibold text-slate-700 dark:text-slate-200 select-none`;
+        box.title = `${formatDateFriendly(key)}: ${done}/${total} hábitos (${Math.round(ratio * 100)}%)`;
+        
+        box.addEventListener('mouseenter', () => {
+          if (tooltipInfo) {
+            tooltipInfo.textContent = `📅 ${formatDateFriendly(key)}: ${done} de ${total} hábitos completados (${Math.round(ratio * 100)}%)`;
+          }
+        });
+
+        box.addEventListener('click', () => {
+          showToast(`${formatDateFriendly(key)}: ${done}/${total} completados`, '📊');
+        });
+
+        heatmapContainer.appendChild(box);
+      }
+    }
+
+    function renderAnalyticsCharts() {
+      // 1. Category Chart (Doughnut)
+      const catCtx = document.getElementById('categoryChart');
+      if (catCtx) {
+        const catCounts = { health: 0, mind: 0, work: 0, finance: 0, wellness: 0 };
+        appState.habits.forEach(h => {
+          if (catCounts[h.category] !== undefined) catCounts[h.category]++;
+          else catCounts.wellness++;
+        });
+
+        if (chartInstanceCategory) chartInstanceCategory.destroy();
+        
+        chartInstanceCategory = new Chart(catCtx, {
+          type: 'doughnut',
+          data: {
+            labels: ['Salud', 'Mente', 'Trabajo', 'Finanzas', 'Bienestar'],
+            datasets: [{
+              data: [
+                catCounts.health,
+                catCounts.mind,
+                catCounts.work,
+                catCounts.finance,
+                catCounts.wellness
+              ],
+              backgroundColor: ['#10b981', '#3b82f6', '#8b5cf6', '#f59e0b', '#ec4899'],
+              borderWidth: 0,
+              hoverOffset: 6
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+              legend: {
+                position: 'bottom',
+                labels: {
+                  boxWidth: 12,
+                  font: { family: 'Plus Jakarta Sans', size: 11 },
+                  color: appSettings.darkMode ? '#cbd5e1' : '#475569'
+                }
+              }
+            },
+            cutout: '70%'
+          }
+        });
+      }
+
+      // 2. Weekly Trend Chart (Bar)
+      const weeklyCtx = document.getElementById('weeklyChart');
+      if (weeklyCtx) {
+        const labels = [];
+        const dataSuccessRate = [];
+        const today = new Date();
+
+        for (let i = 6; i >= 0; i--) {
+          const d = new Date();
+          d.setDate(today.getDate() - i);
+          const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+          
+          labels.push(d.toLocaleDateString('es-ES', { weekday: 'short' }));
+
+          const logs = appState.logs[k] || {};
+          let completed = 0;
+          const total = appState.habits.length;
+          appState.habits.forEach(h => {
+            if ((logs[h.id] || 0) >= h.target) completed++;
+          });
+          dataSuccessRate.push(total === 0 ? 0 : Math.round((completed / total) * 100));
+        }
+
+        if (chartInstanceWeekly) chartInstanceWeekly.destroy();
+
+        chartInstanceWeekly = new Chart(weeklyCtx, {
+          type: 'bar',
+          data: {
+            labels: labels,
+            datasets: [{
+              label: '% Cumplimiento',
+              data: dataSuccessRate,
+              backgroundColor: '#6366f1',
+              borderRadius: 8,
+              maxBarThickness: 32
+            }]
+          },
+          options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+              y: {
+                beginAtZero: true,
+                max: 100,
+                ticks: {
+                  callback: val => val + '%',
+                  color: appSettings.darkMode ? '#94a3b8' : '#64748b',
+                  font: { family: 'Plus Jakarta Sans', size: 10 }
+                },
+                grid: {
+                  color: appSettings.darkMode ? '#1e293b' : '#f1f5f9'
+                }
+              },
+              x: {
+                ticks: {
+                  color: appSettings.darkMode ? '#94a3b8' : '#64748b',
+                  font: { family: 'Plus Jakarta Sans', size: 11, weight: '600' }
+                },
+                grid: { display: false }
+              }
+            },
+            plugins: {
+              legend: { display: false }
+            }
+          }
+        });
+      }
+    }
+
+    function renderManagerList() {
+      const container = document.getElementById('manager-habits-list');
+      if (!container) return;
+
+      if (appState.habits.length === 0) {
+        container.innerHTML = `
+          <div class="text-center py-8 text-slate-400 text-xs">
+            No tienes hábitos registrados en tu lista maestra.
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = appState.habits.map(h => {
+        const cat = CATEGORIES[h.category] || CATEGORIES.wellness;
+        return `
+          <div class="bg-white dark:bg-slate-900 rounded-2xl p-4 border border-slate-200/80 dark:border-slate-800 flex items-center justify-between gap-3 shadow-sm">
+            <div class="flex items-center gap-3">
+              <span class="text-2xl">${h.icon || '🎯'}</span>
+              <div>
+                <h4 class="text-sm font-bold text-slate-900 dark:text-white">${h.name}</h4>
+                <div class="flex items-center gap-2 mt-1">
+                  <span class="text-[10px] font-bold px-2 py-0.5 rounded-full border ${cat.bg}">${cat.label}</span>
+                  <span class="text-xs text-slate-400">
+                    ${h.type === 'quantitative' ? `Meta: ${h.target} ${h.unit} (paso: ${h.step})` : 'Simple (Checkbox)'}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div class="flex items-center gap-1.5">
+              <button onclick="editHabit('${h.id}')" title="Editar" class="p-2 text-slate-500 hover:text-brand-600 dark:hover:text-brand-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition">
+                <i data-lucide="edit-3" class="w-4 h-4"></i>
+              </button>
+              <button onclick="confirmDeleteHabit('${h.id}')" title="Eliminar" class="p-2 text-slate-400 hover:text-rose-600 rounded-xl hover:bg-rose-50 dark:hover:bg-rose-950/30 transition">
+                <i data-lucide="trash-2" class="w-4 h-4"></i>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      lucide.createIcons();
+    }
+
+    function openHabitModal(editId = null) {
+      const modal = document.getElementById('habit-modal');
+      const content = document.getElementById('habit-modal-content');
+      const title = document.getElementById('modal-title');
+      const form = document.getElementById('habit-form');
+
+      form.reset();
+      document.getElementById('habit-id').value = '';
+
+      if (editId) {
+        const habit = appState.habits.find(h => h.id === editId);
+        if (habit) {
+          title.textContent = 'Editar Hábito';
+          document.getElementById('habit-id').value = habit.id;
+          document.getElementById('habit-name').value = habit.name;
+          document.getElementById('habit-icon').value = habit.icon || '🎯';
+          
+          const catRadio = form.querySelector(`input[name="habit-category"][value="${habit.category}"]`);
+          if (catRadio) catRadio.checked = true;
+
+          const typeRadio = form.querySelector(`input[name="habit-type"][value="${habit.type}"]`);
+          if (typeRadio) typeRadio.checked = true;
+
+          if (habit.type === 'quantitative') {
+            document.getElementById('habit-target').value = habit.target;
+            document.getElementById('habit-unit').value = habit.unit;
+            document.getElementById('habit-step').value = habit.step;
+            toggleHabitTypeFields('quantitative');
+          } else {
+            toggleHabitTypeFields('simple');
+          }
+        }
+      } else {
+        title.textContent = 'Nuevo Hábito';
+        toggleHabitTypeFields('simple');
+      }
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      content.classList.remove('scale-95');
+    }
+
+    function closeHabitModal() {
+      const modal = document.getElementById('habit-modal');
+      const content = document.getElementById('habit-modal-content');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      content.classList.add('scale-95');
+    }
+
+    function toggleHabitTypeFields(type) {
+      const quantFields = document.getElementById('quantitative-fields');
+      if (type === 'quantitative') {
+        quantFields.classList.remove('hidden');
+      } else {
+        quantFields.classList.add('hidden');
+      }
+    }
+
+    function selectIcon(iconChar) {
+      document.getElementById('habit-icon').value = iconChar;
+      document.querySelectorAll('.icon-opt').forEach(btn => {
+        btn.classList.remove('ring-2', 'ring-brand-500', 'bg-indigo-100', 'dark:bg-slate-700');
+        if (btn.textContent.trim() === iconChar) {
+          btn.classList.add('ring-2', 'ring-brand-500', 'bg-indigo-100', 'dark:bg-slate-700');
+        }
+      });
+    }
+
+    function handleHabitSubmit(e) {
+      e.preventDefault();
+      const id = document.getElementById('habit-id').value;
+      const name = document.getElementById('habit-name').value.trim();
+      const category = document.querySelector('input[name="habit-category"]:checked').value;
+      const type = document.querySelector('input[name="habit-type"]:checked').value;
+      const icon = document.getElementById('habit-icon').value || '🎯';
+
+      if (!name) return;
+
+      let habitObj = {
+        name,
+        category,
+        type,
+        icon,
+        createdAt: new Date().toISOString()
+      };
+
+      if (type === 'quantitative') {
+        habitObj.target = parseFloat(document.getElementById('habit-target').value) || 1;
+        habitObj.unit = document.getElementById('habit-unit').value.trim() || '';
+        habitObj.step = parseFloat(document.getElementById('habit-step').value) || 1;
+      } else {
+        habitObj.target = 1;
+        habitObj.unit = '';
+        habitObj.step = 1;
+      }
+
+      if (id) {
+        // Edit existing
+        const index = appState.habits.findIndex(h => h.id === id);
+        if (index !== -1) {
+          appState.habits[index] = { ...appState.habits[index], ...habitObj };
+        }
+        showToast("Hábito actualizado correctamente", "✏️");
+      } else {
+        // Add new
+        habitObj.id = 'h-' + Date.now();
+        appState.habits.push(habitObj);
+        showToast("¡Nuevo hábito agregado con éxito!", "✨");
+      }
+
+      saveLocalData();
+      closeHabitModal();
+      renderTodayHabits();
+      renderManagerList();
+      checkAutoSyncTrigger();
+    }
+
+    function editHabit(habitId) {
+      openHabitModal(habitId);
+    }
+
+    function confirmDeleteHabit(habitId) {
+      const habit = appState.habits.find(h => h.id === habitId);
+      if (!habit) return;
+
+      showCustomDialog({
+        title: "¿Eliminar Hábito?",
+        message: `¿Estás seguro de que deseas eliminar "${habit.name}"? Los datos de progreso histórico se conservarán pero el hábito ya no aparecerá en tu día.`,
+        icon: "trash-2",
+        confirmText: "Sí, Eliminar",
+        onConfirm: () => {
+          appState.habits = appState.habits.filter(h => h.id !== habitId);
+          saveLocalData();
+          renderTodayHabits();
+          renderManagerList();
+          showToast("Hábito eliminado", "🗑️");
+          checkAutoSyncTrigger();
+        }
+      });
+    }
+
+    function switchTab(tabId) {
+      const tabs = ['today', 'stats', 'manager', 'cloud'];
+      tabs.forEach(t => {
+        const btn = document.getElementById(`tab-btn-${t}`);
+        const content = document.getElementById(`tab-content-${t}`);
+        
+        if (t === tabId) {
+          content.classList.remove('hidden');
+          btn.classList.add('bg-white', 'dark:bg-slate-800', 'text-brand-600', 'dark:text-brand-400', 'font-bold', 'shadow-sm');
+          btn.classList.remove('text-slate-600', 'dark:text-slate-400', 'font-semibold');
+        } else {
+          content.classList.add('hidden');
+          btn.classList.remove('bg-white', 'dark:bg-slate-800', 'text-brand-600', 'dark:text-brand-400', 'font-bold', 'shadow-sm');
+          btn.classList.add('text-slate-600', 'dark:text-slate-400', 'font-semibold');
+        }
+      });
+
+      if (tabId === 'today') renderTodayHabits();
+      if (tabId === 'stats') {
+        renderConsistencyHeatmap();
+        renderAnalyticsCharts();
+      }
+      if (tabId === 'manager') renderManagerList();
+      if (tabId === 'cloud') updateCloudView();
+
+      lucide.createIcons();
+    }
+
+    function updateCloudView() {
+      const gasInput = document.getElementById('gas-url-input');
+      const autoSyncCheck = document.getElementById('auto-sync-checkbox');
+      const badge = document.getElementById('cloud-status-badge');
+      const indicator = document.getElementById('sync-indicator');
+
+      if (gasInput) gasInput.value = appSettings.gasUrl || '';
+      if (autoSyncCheck) autoSyncCheck.checked = Boolean(appSettings.autoSync);
+
+      if (appSettings.gasUrl) {
+        if (badge) {
+          badge.textContent = appSettings.lastSync ? `Sincronizado: ${appSettings.lastSync}` : 'Conectado listo';
+          badge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-400';
+        }
+        if (indicator) indicator.className = 'absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500';
+      } else {
+        if (badge) {
+          badge.textContent = 'No configurado';
+          badge.className = 'text-[11px] font-bold px-2.5 py-1 rounded-full bg-slate-100 text-slate-600 dark:bg-slate-800 dark:text-slate-400';
+        }
+        if (indicator) indicator.className = 'absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-amber-500';
+      }
+    }
+
+    function saveCloudSettings() {
+      const url = document.getElementById('gas-url-input').value.trim();
+      appSettings.gasUrl = url;
+      saveLocalData();
+      updateCloudView();
+      showToast("Configuración de nube guardada", "☁️");
+    }
+
+    function toggleAutoSync(enabled) {
+      appSettings.autoSync = enabled;
+      saveLocalData();
+      showToast(`Auto-sincronización ${enabled ? 'activada' : 'desactivada'}`, "⚡");
+    }
+
+    function checkAutoSyncTrigger() {
+      if (appSettings.autoSync && appSettings.gasUrl) {
+        syncToCloud(true);
+      }
+    }
+
+    async function syncToCloud(isSilent = false) {
+      if (!appSettings.gasUrl) {
+        if (!isSilent) {
+          showCustomDialog({
+            title: "Configuración Requerida",
+            message: "Por favor, ingresa primero la URL de tu Web App de Google Apps Script en la pestaña Nube & Respaldo.",
+            icon: "cloud-alert",
+            confirmText: "Entendido"
+          });
+        }
+        return;
+      }
+
+      if (!isSilent) showToast("Enviando datos a Google Sheets...", "⏳");
+
+      try {
+        const payload = {
+          action: "sync",
+          payload: {
+            state: appState,
+            updatedAt: new Date().toISOString()
+          }
+        };
+
+        // Standard Apps Script webhook post
+        const res = await fetch(appSettings.gasUrl, {
+          method: "POST",
+          headers: {
+            "Content-Type": "text/plain;charset=utf-8" // avoids CORS preflight blocking in Apps Script
+          },
+          body: JSON.stringify(payload)
+        });
+
+        appSettings.lastSync = new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+        saveLocalData();
+        updateCloudView();
+
+        if (!isSilent) showToast("¡Sincronizado exitosamente con Google Sheets!", "✅");
+      } catch (err) {
+        console.error("Error en sincronización con Sheets:", err);
+        if (!isSilent) {
+          showToast("Error de conexión con Google Sheets. Revisa la URL.", "❌");
+        }
+      }
+    }
+
+    async function fetchFromCloud() {
+      if (!appSettings.gasUrl) {
+        showCustomDialog({
+          title: "Configuración Requerida",
+          message: "Ingresa la URL de tu Google Apps Script para descargar la copia de seguridad.",
+          icon: "cloud-alert",
+          confirmText: "Entendido"
+        });
+        return;
+      }
+
+      showToast("Descargando datos de Google Sheets...", "⏳");
+
+      try {
+        const res = await fetch(appSettings.gasUrl);
+        const data = await res.json();
+
+        if (data && data.state && Array.isArray(data.state.habits)) {
+          appState = data.state;
+          saveLocalData();
+          renderTodayHabits();
+          renderManagerList();
+          showToast("¡Datos restaurados desde Google Sheets!", "🎉");
+        } else {
+          showToast("No se encontraron datos válidos en la hoja.", "⚠️");
+        }
+      } catch (err) {
+        console.error("Error al descargar:", err);
+        showToast("No se pudo descargar la hoja. Verifica permisos públicos.", "❌");
+      }
+    }
+
+    function exportJSONBackup() {
+      const backupData = {
+        version: "1.0",
+        exportedAt: new Date().toISOString(),
+        state: appState,
+        settings: appSettings
+      };
+
+      const blob = new Blob([JSON.stringify(backupData, null, 2)], { type: "application/json" });
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `HabitFlow360_Respaldo_${getTodayKey()}.json`;
+      link.click();
+      URL.revokeObjectURL(url);
+      showToast("Respaldo descargado con éxito", "📁");
+    }
+
+    function importJSONBackup(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const parsed = JSON.parse(e.target.result);
+          if (parsed && parsed.state && Array.isArray(parsed.state.habits)) {
+            appState = parsed.state;
+            if (parsed.settings) {
+              appSettings = { ...appSettings, ...parsed.settings };
+            }
+            saveLocalData();
+            applyTheme();
+            renderTodayHabits();
+            renderManagerList();
+            showToast("¡Respaldo importado satisfactoriamente!", "🚀");
+          } else {
+            showToast("Formato de archivo inválido", "❌");
+          }
+        } catch (err) {
+          showToast("Error al leer el archivo JSON", "❌");
+        }
+      };
+      reader.readAsText(file);
+      event.target.value = '';
+    }
+
+    function showCustomDialog({ title, message, icon = 'info', confirmText = 'Aceptar', onConfirm = null }) {
+      const modal = document.getElementById('custom-modal');
+      const box = document.getElementById('custom-modal-box');
+      const titleEl = document.getElementById('custom-modal-title');
+      const msgEl = document.getElementById('custom-modal-message');
+      const iconEl = document.getElementById('custom-modal-icon');
+      const btnContainer = document.getElementById('custom-modal-buttons');
+
+      titleEl.textContent = title;
+      msgEl.textContent = message;
+      iconEl.setAttribute('data-lucide', icon);
+
+      btnContainer.innerHTML = '';
+
+      if (onConfirm) {
+        const cancelBtn = document.createElement('button');
+        cancelBtn.className = 'px-4 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-bold text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition';
+        cancelBtn.textContent = 'Cancelar';
+        cancelBtn.onclick = () => closeCustomDialog();
+        btnContainer.appendChild(cancelBtn);
+
+        const okBtn = document.createElement('button');
+        okBtn.className = 'px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20 transition';
+        okBtn.textContent = confirmText;
+        okBtn.onclick = () => {
+          closeCustomDialog();
+          onConfirm();
+        };
+        btnContainer.appendChild(okBtn);
+      } else {
+        const okBtn = document.createElement('button');
+        okBtn.className = 'px-6 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20 transition';
+        okBtn.textContent = confirmText;
+        okBtn.onclick = () => closeCustomDialog();
+        btnContainer.appendChild(okBtn);
+      }
+
+      lucide.createIcons();
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      box.classList.remove('scale-95');
+    }
+
+    function closeCustomDialog() {
+      const modal = document.getElementById('custom-modal');
+      const box = document.getElementById('custom-modal-box');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      box.classList.add('scale-95');
+    }
+
+    function showToast(text, emoji = "✨") {
+      const toast = document.getElementById('toast');
+      const tText = document.getElementById('toast-message');
+      const tIcon = document.getElementById('toast-icon');
+
+      if (!toast) return;
+      tText.textContent = text;
+      tIcon.textContent = emoji;
+
+      toast.classList.remove('translate-y-[-20px]', 'opacity-0', 'pointer-events-none');
+      toast.classList.add('translate-y-0', 'opacity-100');
+
+      clearTimeout(window._toastTimer);
+      window._toastTimer = setTimeout(() => {
+        toast.classList.remove('translate-y-0', 'opacity-100');
+        toast.classList.add('translate-y-[-20px]', 'opacity-0', 'pointer-events-none');
+      }, 2800);
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      loadLocalData();
+      applyTheme();
+      updateGreetingAndDate();
+      renderTodayHabits();
+      updateCloudView();
+
+      // Theme toggle click
+      const themeBtn = document.getElementById('theme-toggle-btn');
+      if (themeBtn) {
+        themeBtn.addEventListener('click', () => {
+          appSettings.darkMode = !appSettings.darkMode;
+          saveLocalData();
+          applyTheme();
+          if (!document.getElementById('tab-content-stats').classList.contains('hidden')) {
+            renderAnalyticsCharts();
+          }
+        });
+      }
+
+      // Quick sync header button
+      const quickSyncBtn = document.getElementById('btn-quick-sync');
+      if (quickSyncBtn) {
+        quickSyncBtn.addEventListener('click', () => {
+          syncToCloud(false);
+        });
+      }
+
+      lucide.createIcons();
+    });
+  </script>
+</body>
+</html>
