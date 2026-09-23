@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>HabitFlow 360 - Registro y Control de Hábitos</title>
+  <title>HabitFlow 360 - Hábitos, Tareas & Pomodoro</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -11,6 +11,8 @@
   <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
   <!-- Lucide Icons CDN -->
   <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- Canvas Confetti CDN for Micro-rewards -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
   
   <script>
     tailwind.config = {
@@ -34,8 +36,8 @@
             }
           },
           boxShadow: {
-            'soft': '0 8px 30px rgba(0, 0, 0, 0.06)',
-            'glow': '0 0 25px rgba(99, 102, 241, 0.35)',
+            'soft': '0 8px 30px rgba(0, 0, 0, 0.05)',
+            'glow': '0 0 25px rgba(99, 102, 241, 0.3)',
           }
         }
       }
@@ -50,7 +52,6 @@
       -webkit-tap-highlight-color: transparent;
     }
 
-    /* Custom smooth scrollbar */
     ::-webkit-scrollbar {
       width: 6px;
       height: 6px;
@@ -66,7 +67,6 @@
       background: #334155;
     }
 
-    /* Micro-animations */
     .bounce-active:active {
       transform: scale(0.96);
     }
@@ -79,7 +79,6 @@
       100% { transform: scale(1); opacity: 1; }
     }
     
-    /* Heatmap transitions */
     .heatmap-box {
       transition: all 0.2s ease-in-out;
     }
@@ -88,8 +87,7 @@
       z-index: 10;
     }
 
-    /* Drag and Drop visual feedback */
-    .habit-draggable.dragging {
+    .habit-draggable.dragging, .task-draggable.dragging {
       opacity: 0.45;
       transform: scale(0.98);
     }
@@ -106,19 +104,27 @@
   </style>
 </head>
 
-<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
+<body class="bg-slate-50 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300 relative">
 
-  <!-- Top Floating Header -->
+  <!-- Celebration Confetti Background Canvas -->
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50 w-full h-full"></canvas>
+
+  <!-- Top Inspiration Banner -->
+  <div class="bg-gradient-to-r from-brand-600 to-indigo-600 text-white text-xs font-medium py-1.5 px-4 text-center flex items-center justify-center gap-2 shadow-sm select-none">
+    <span>✨</span>
+    <span id="header-inspirational-quote" class="truncate max-w-xl">"El éxito es la suma de pequeños esfuerzos repetidos día tras día."</span>
+  </div>
+
   <header class="sticky top-0 z-40 bg-white/85 dark:bg-slate-900/85 backdrop-blur-md border-b border-slate-200/70 dark:border-slate-800/70 shadow-sm transition-colors">
     <div class="max-w-4xl mx-auto px-4 sm:px-6 h-16 flex items-center justify-between">
       
-      <!-- Brand Logo & Name -->
+      <!-- Brand & Greeting -->
       <div class="flex items-center space-x-2.5">
         <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-400 flex items-center justify-center text-white shadow-md shadow-brand-500/20 text-lg select-none">
           <span>⚡</span>
         </div>
         <div>
-          <h1 class="text-lg font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-brand-600 to-indigo-500 dark:from-white dark:via-indigo-300 dark:to-indigo-400 bg-clip-text text-transparent leading-tight">
+          <h1 class="text-base sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-slate-900 via-brand-600 to-indigo-500 dark:from-white dark:via-indigo-300 dark:to-indigo-400 bg-clip-text text-transparent leading-tight">
             HabitFlow 360
           </h1>
           <p id="sub-greeting-text" class="text-[11px] font-medium text-slate-500 dark:text-slate-400 flex items-center gap-1">
@@ -127,26 +133,27 @@
         </div>
       </div>
 
-      <div class="flex items-center space-x-2 sm:space-x-2.5">
-        <!-- Global Streak Indicator Badge -->
-        <div class="flex items-center gap-1.5 px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/50 shadow-sm" title="Racha global de días consecutivos cumpliendo hábitos">
-          <span class="text-base leading-none select-none">🔥</span>
-          <span id="global-streak-count" class="text-sm font-bold text-amber-700 dark:text-amber-400">0</span>
-          <span class="text-[11px] font-semibold text-amber-600/80 dark:text-amber-500/80">Días</span>
+      <!-- Action Buttons -->
+      <div class="flex items-center space-x-1.5 sm:space-x-2">
+        <!-- Streak Badge -->
+        <div class="flex items-center gap-1 px-2.5 sm:px-3 py-1.5 rounded-full bg-amber-50 dark:bg-amber-950/40 border border-amber-200/60 dark:border-amber-800/50 shadow-sm" title="Racha activa de hábitos">
+          <span class="text-sm sm:text-base leading-none select-none">🔥</span>
+          <span id="global-streak-count" class="text-xs sm:text-sm font-bold text-amber-700 dark:text-amber-400">0</span>
+          <span class="text-[10px] sm:text-[11px] font-semibold text-amber-600/80 dark:text-amber-500/80">Días</span>
         </div>
 
-        <!-- Cloud Sync Fast Status -->
+        <!-- Cloud Sync Fast Button -->
         <button id="btn-quick-sync" title="Sincronizar con Google Sheets" class="p-2 text-slate-500 hover:text-brand-600 dark:text-slate-400 dark:hover:text-brand-400 rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition bounce-active relative">
           <i data-lucide="cloud" class="w-5 h-5"></i>
           <span id="sync-indicator" class="absolute top-1.5 right-1.5 w-2 h-2 rounded-full bg-emerald-500"></span>
         </button>
 
-        <!-- Settings Modal Open Button -->
+        <!-- Settings Modal Button -->
         <button onclick="openSettingsModal()" title="Ajustes & Configuración" class="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition bounce-active">
           <i data-lucide="settings" class="w-5 h-5"></i>
         </button>
 
-        <!-- Dark/Light Mode Switch -->
+        <!-- Theme Toggle Button -->
         <button id="theme-toggle-btn" title="Cambiar tema" class="p-2 text-slate-500 hover:text-slate-900 dark:text-slate-400 dark:hover:text-white rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition bounce-active">
           <i id="theme-icon" data-lucide="moon" class="w-5 h-5"></i>
         </button>
@@ -155,21 +162,29 @@
     </div>
   </header>
 
-  <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-6 pb-24 sm:pb-12">
+  <main class="flex-1 max-w-4xl w-full mx-auto px-4 sm:px-6 py-5 pb-24 sm:pb-12">
     
-    <!-- Navigation Pill Tabs -->
-    <nav class="flex p-1.5 bg-slate-200/70 dark:bg-slate-900/80 rounded-2xl mb-6 shadow-inner border border-slate-200/40 dark:border-slate-800">
-      <button onclick="switchTab('today')" id="tab-btn-today" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-bold transition-all shadow-sm bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400">
+    <!-- Navigation Tabs Pill Bar -->
+    <nav class="flex p-1.5 bg-slate-200/70 dark:bg-slate-900/80 rounded-2xl mb-6 shadow-inner border border-slate-200/40 dark:border-slate-800 overflow-x-auto no-scrollbar gap-1">
+      <button onclick="switchTab('today')" id="tab-btn-today" class="flex-1 min-w-[85px] flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-bold transition-all shadow-sm bg-white dark:bg-slate-800 text-brand-600 dark:text-brand-400">
         <i data-lucide="check-circle-2" class="w-4 h-4"></i>
         <span>Mi Día</span>
       </button>
-      <button onclick="switchTab('stats')" id="tab-btn-stats" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+      <button onclick="switchTab('tasks')" id="tab-btn-tasks" class="flex-1 min-w-[100px] flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        <i data-lucide="folder-kanban" class="w-4 h-4"></i>
+        <span>Carpetas & Tareas</span>
+      </button>
+      <button onclick="switchTab('pomodoro')" id="tab-btn-pomodoro" class="flex-1 min-w-[90px] flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        <i data-lucide="timer" class="w-4 h-4"></i>
+        <span>Pomodoro</span>
+      </button>
+      <button onclick="switchTab('journal')" id="tab-btn-journal" class="flex-1 min-w-[105px] flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
+        <i data-lucide="book-open" class="w-4 h-4"></i>
+        <span>Diario & Metas</span>
+      </button>
+      <button onclick="switchTab('stats')" id="tab-btn-stats" class="flex-1 min-w-[95px] flex items-center justify-center gap-1.5 py-2.5 px-3 rounded-xl text-xs font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
         <i data-lucide="bar-chart-3" class="w-4 h-4"></i>
         <span>Estadísticas</span>
-      </button>
-      <button onclick="switchTab('manager')" id="tab-btn-manager" class="flex-1 flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white">
-        <i data-lucide="layers" class="w-4 h-4"></i>
-        <span>Gestor & Orden</span>
       </button>
     </nav>
 
@@ -190,7 +205,7 @@
             </p>
           </div>
 
-          <!-- Progress Percentage Stat -->
+          <!-- Progress Percentage Badge -->
           <div class="flex items-center space-x-3 bg-white/10 dark:bg-black/20 p-3.5 rounded-2xl backdrop-blur-md border border-white/15 self-start sm:self-auto">
             <div class="text-right">
               <span class="text-[10px] uppercase font-bold tracking-wider text-indigo-200 block">Progreso Diario</span>
@@ -213,11 +228,9 @@
         <div class="absolute -right-8 -bottom-8 w-44 h-44 rounded-full bg-white/10 blur-2xl pointer-events-none"></div>
       </div>
 
-      <!-- Action Bar: Categories Filter & Direct "+ Nuevo Hábito" button -->
+      <!-- Filter Categories & Add Habit Bar -->
       <div class="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
-        <!-- Filter Categories -->
         <div class="flex items-center gap-1.5 overflow-x-auto pb-1 no-scrollbar text-xs flex-1">
-          <span class="text-xs font-bold text-slate-400 uppercase tracking-wider hidden sm:inline mr-1">Filtrar:</span>
           <button onclick="filterCategory('all')" id="cat-btn-all" class="cat-pill active px-3 py-1.5 rounded-xl font-bold bg-brand-600 text-white shadow-sm transition">Todos</button>
           <button onclick="filterCategory('health')" id="cat-btn-health" class="cat-pill px-3 py-1.5 rounded-xl font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-emerald-500 transition">Salud</button>
           <button onclick="filterCategory('mind')" id="cat-btn-mind" class="cat-pill px-3 py-1.5 rounded-xl font-medium bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 text-slate-600 dark:text-slate-300 hover:border-blue-500 transition">Mente</button>
@@ -227,13 +240,7 @@
         </div>
 
         <div class="flex items-center gap-2">
-          <!-- Reorder Hint Badge -->
-          <div class="hidden sm:flex items-center gap-1 text-[11px] text-slate-400 font-medium px-2 py-1 bg-slate-100 dark:bg-slate-800/80 rounded-lg" title="Puedes usar las flechitas ▲ ▼ o arrastrar con el ícono ⋮⋮ para ordenar">
-            <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-brand-500"></i>
-            <span>Ordenable</span>
-          </div>
-
-          <!-- Direct Quick Add Button -->
+          <!-- Add Habit Button -->
           <button onclick="openHabitModal()" class="flex items-center justify-center gap-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition bounce-active shrink-0">
             <i data-lucide="plus" class="w-4 h-4"></i>
             <span>+ Nuevo Hábito</span>
@@ -241,9 +248,9 @@
         </div>
       </div>
 
-      <!-- Habit Cards Container (Drag & Drop + Up/Down Order) -->
+      <!-- Habit Cards Container (With Order Controls & Pomodoro triggers) -->
       <div id="habit-cards-container" class="space-y-3">
-        <!-- Injected via JavaScript -->
+        <!-- Rendered dynamically -->
       </div>
 
       <!-- Empty State for Habits -->
@@ -257,6 +264,186 @@
           <i data-lucide="plus-circle" class="w-4 h-4"></i>
           + Nuevo Hábito
         </button>
+      </div>
+
+    </section>
+
+    <section id="tab-content-tasks" class="hidden space-y-6">
+      
+      <!-- Top Section Header & Actions -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft">
+        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div>
+            <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
+              <span>📂</span>
+              <span>Gestor de Tareas por Carpetas Madre</span>
+            </h3>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+              Organiza tus pendientes por proyectos (ej. Universidad, Casa, Trabajo, Emprendimiento).
+            </p>
+          </div>
+          <div class="flex items-center gap-2">
+            <button onclick="openFolderModal()" class="flex items-center gap-1.5 px-3 py-2 rounded-xl border border-slate-200 dark:border-slate-700 hover:bg-slate-50 dark:hover:bg-slate-800 text-slate-700 dark:text-slate-200 text-xs font-bold transition bounce-active">
+              <i data-lucide="folder-plus" class="w-4 h-4 text-brand-500"></i>
+              <span>+ Carpeta Madre</span>
+            </button>
+            <button onclick="openTaskModal()" class="flex items-center gap-1.5 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20 transition bounce-active">
+              <i data-lucide="plus" class="w-4 h-4"></i>
+              <span>+ Nueva Tarea</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Folder Pills Filter Selector -->
+        <div class="mt-5 flex items-center gap-2 overflow-x-auto pb-1 no-scrollbar" id="folder-pills-container">
+          <!-- Injected dynamically -->
+        </div>
+      </div>
+
+      <!-- Tasks List for Active Folder -->
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft space-y-4">
+        <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+          <div class="flex items-center gap-2">
+            <span id="active-folder-badge-icon" class="text-lg">📁</span>
+            <h4 id="active-folder-title" class="text-sm font-bold text-slate-900 dark:text-white">Todas las Carpetas</h4>
+            <span id="active-folder-count" class="text-xs font-semibold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-500">0 tareas</span>
+          </div>
+          <div class="text-xs text-slate-400">
+            Filtro: <span id="active-folder-name-tag" class="font-bold text-brand-600">Todas</span>
+          </div>
+        </div>
+
+        <div id="tasks-list-container" class="space-y-2.5">
+          <!-- Injected via JavaScript -->
+        </div>
+
+        <!-- Empty State Tasks -->
+        <div id="tasks-empty-state" class="hidden text-center py-8">
+          <span class="text-3xl block mb-2">📋</span>
+          <p class="text-xs font-bold text-slate-700 dark:text-slate-300">No hay tareas pendientes en esta carpeta</p>
+          <p class="text-[11px] text-slate-400 mt-1">Crea una nueva tarea o agrega una Carpeta Madre para tus proyectos.</p>
+        </div>
+      </div>
+
+    </section>
+
+    <section id="tab-content-pomodoro" class="hidden space-y-6">
+      
+      <div class="bg-white dark:bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-200/80 dark:border-slate-800 shadow-soft text-center max-w-lg mx-auto">
+        
+        <!-- Linked Habit / Task Selector -->
+        <div class="inline-flex items-center gap-2 px-3 py-1.5 rounded-full bg-indigo-50 dark:bg-indigo-950/40 border border-indigo-200 dark:border-indigo-800 text-indigo-700 dark:text-indigo-300 text-xs font-semibold mb-6">
+          <span id="pomodoro-linked-icon">🎯</span>
+          <span id="pomodoro-linked-title">Estudiar Inglés</span>
+          <button onclick="promptLinkPomodoroTarget()" title="Cambiar hábito o tarea" class="ml-1 underline text-[10px] text-brand-600 dark:text-brand-400 hover:text-brand-800">
+            Cambiar
+          </button>
+        </div>
+
+        <!-- Mode Switches: Focus, Short Break, Long Break -->
+        <div class="flex items-center justify-center gap-2 p-1.5 bg-slate-100 dark:bg-slate-800/80 rounded-2xl max-w-sm mx-auto mb-6">
+          <button onclick="setPomodoroMode('focus')" id="pomo-mode-focus" class="flex-1 py-1.5 px-3 rounded-xl text-xs font-bold bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm transition">
+            🧠 Enfoque (25m)
+          </button>
+          <button onclick="setPomodoroMode('short')" id="pomo-mode-short" class="flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 transition">
+            ☕ Corto (5m)
+          </button>
+          <button onclick="setPomodoroMode('long')" id="pomo-mode-long" class="flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 transition">
+            🌿 Largo (15m)
+          </button>
+        </div>
+
+        <!-- Cycle Indicator -->
+        <div class="text-xs font-bold text-slate-400 mb-2 uppercase tracking-wider">
+          <span id="pomodoro-cycle-label">Ciclo 1 de 4</span>
+        </div>
+
+        <!-- Big Digital Timer Display -->
+        <div id="pomodoro-timer-display" class="text-6xl sm:text-7xl font-black tracking-tight text-slate-900 dark:text-white tabular-nums my-4">
+          25:00
+        </div>
+
+        <!-- Primary Action Buttons -->
+        <div class="flex items-center justify-center gap-3 mt-6">
+          <button onclick="togglePomodoroTimer()" id="pomo-btn-toggle" class="w-36 py-3 px-6 rounded-2xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-sm shadow-lg shadow-brand-500/25 transition bounce-active flex items-center justify-center gap-2">
+            <i id="pomo-toggle-icon" data-lucide="play" class="w-5 h-5"></i>
+            <span id="pomo-toggle-text">Iniciar</span>
+          </button>
+          <button onclick="resetPomodoroTimer()" title="Reiniciar tiempo" class="w-12 h-12 rounded-2xl border border-slate-200 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-600 dark:text-slate-300 flex items-center justify-center transition bounce-active">
+            <i data-lucide="rotate-ccw" class="w-5 h-5"></i>
+          </button>
+          <button onclick="skipPomodoroCycle()" title="Completar sesión" class="w-12 h-12 rounded-2xl border border-slate-200 dark:border-slate-700 hover:bg-emerald-50 dark:hover:bg-emerald-950/40 text-emerald-600 dark:text-emerald-400 flex items-center justify-center transition bounce-active">
+            <i data-lucide="check-check" class="w-5 h-5"></i>
+          </button>
+        </div>
+
+        <!-- Sound Notice -->
+        <p class="text-[11px] text-slate-400 dark:text-slate-500 mt-6">
+          🔔 Incluye campana acústica sintetizada al concluir cada ciclo de concentración.
+        </p>
+
+      </div>
+
+    </section>
+
+    <section id="tab-content-journal" class="hidden space-y-6">
+      
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        <!-- Daily Micro-Journal -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>✍️</span>
+                <span>Micro-Diario de Reflexión</span>
+              </h3>
+              <span id="journal-date-tag" class="text-[11px] font-bold px-2 py-0.5 rounded-full bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300">Hoy</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-4">
+              Escribe un pensamiento rápido, aprendizaje o logro del día para despejar tu mente.
+            </p>
+
+            <textarea id="daily-journal-input" rows="7" placeholder="¿Qué aprendiste hoy? ¿Qué agradeces haber logrado?..." class="w-full bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-slate-700 rounded-2xl p-3 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500 transition resize-none"></textarea>
+          </div>
+
+          <div class="mt-4 flex items-center justify-between pt-3 border-t border-slate-100 dark:border-slate-800">
+            <span id="journal-status" class="text-[11px] text-slate-400">Autoguardado</span>
+            <button onclick="saveJournalEntry(true)" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold transition bounce-active flex items-center gap-1.5">
+              <i data-lucide="save" class="w-3.5 h-3.5"></i>
+              <span>Guardar Nota</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- Monthly Goals Checklist -->
+        <div class="bg-white dark:bg-slate-900 rounded-3xl p-5 sm:p-6 border border-slate-200/80 dark:border-slate-800 shadow-soft flex flex-col justify-between">
+          <div>
+            <div class="flex items-center justify-between mb-2">
+              <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+                <span>🎯</span>
+                <span>Metas del Mes</span>
+              </h3>
+              <span id="monthly-goals-progress-badge" class="text-xs font-bold text-emerald-600 bg-emerald-50 dark:bg-emerald-950/40 px-2 py-0.5 rounded-full">0%</span>
+            </div>
+            <p class="text-xs text-slate-500 dark:text-slate-400 mb-3">
+              Objetivos macro que alimentan tus hábitos cotidianos.
+            </p>
+
+            <!-- Goals List -->
+            <div id="monthly-goals-container" class="space-y-2 max-h-52 overflow-y-auto pr-1">
+              <!-- Rendered dynamically -->
+            </div>
+          </div>
+
+          <div class="mt-4 pt-3 border-t border-slate-100 dark:border-slate-800 flex gap-2">
+            <input type="text" id="new-monthly-goal-input" placeholder="Nueva meta (ej. Ahorrar $200)..." class="flex-1 bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
+            <button onclick="addMonthlyGoal()" class="px-3.5 py-2 bg-slate-900 dark:bg-brand-600 text-white rounded-xl text-xs font-bold hover:bg-black dark:hover:bg-brand-700 transition bounce-active">
+              + Agregar
+            </button>
+          </div>
+        </div>
+
       </div>
 
     </section>
@@ -324,147 +511,45 @@
 
     </section>
 
-    <section id="tab-content-manager" class="hidden space-y-5">
-      <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-indigo-50/50 dark:bg-slate-900/50 p-4 rounded-2xl border border-indigo-100 dark:border-slate-800">
-        <div>
-          <h3 class="text-base sm:text-lg font-bold text-slate-900 dark:text-white flex items-center gap-2">
-            <i data-lucide="arrow-up-down" class="w-5 h-5 text-brand-600 dark:text-brand-400"></i>
-            <span>Gestor y Orden de Hábitos</span>
-          </h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
-            Usa los botones <span class="font-bold text-slate-700 dark:text-slate-300">▲ Subir</span> y <span class="font-bold text-slate-700 dark:text-slate-300">▼ Bajar</span> o arrastra cada tarjeta para definir el orden exacto.
-          </p>
-        </div>
-        <button onclick="openHabitModal()" class="flex items-center justify-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs sm:text-sm shadow-md shadow-brand-500/20 transition bounce-active shrink-0">
-          <i data-lucide="plus" class="w-4 h-4"></i>
-          <span>Nuevo Hábito</span>
-        </button>
-      </div>
-
-      <!-- Manager Habit List with Reorder Controls -->
-      <div id="manager-habits-list" class="space-y-3">
-        <!-- Rendered in JS -->
-      </div>
-    </section>
-
   </main>
 
-  <!-- Floating Action Button for Adding Habit -->
-  <div class="fixed bottom-6 right-6 z-30">
+  <div class="fixed bottom-6 right-6 z-30 flex flex-col items-end gap-2">
     <button onclick="openHabitModal()" title="Agregar nuevo hábito" class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-brand-600 to-indigo-500 text-white flex items-center justify-center shadow-glow hover:scale-105 active:scale-95 transition-all">
       <i data-lucide="plus" class="w-7 h-7"></i>
     </button>
   </div>
 
-  <!-- Settings & Configuration Modal -->
-  <div id="settings-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
-    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-200" id="settings-modal-content">
-      
-      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-        <div class="flex items-center gap-2">
-          <div class="w-8 h-8 rounded-xl bg-brand-50 dark:bg-slate-800 text-brand-600 dark:text-brand-400 flex items-center justify-center">
-            <i data-lucide="settings" class="w-4 h-4"></i>
-          </div>
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Ajustes & Configuración</h3>
-        </div>
-        <button onclick="closeSettingsModal()" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg">
-          <i data-lucide="x" class="w-5 h-5"></i>
-        </button>
+  <div id="habit-decision-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center transform scale-95 transition-transform duration-200" id="habit-decision-content">
+      <div class="w-12 h-12 rounded-2xl bg-indigo-50 dark:bg-indigo-950/50 text-brand-600 dark:text-brand-400 flex items-center justify-center mx-auto mb-3 text-xl">
+        <span id="decision-habit-icon">⏱️</span>
       </div>
-
-      <div class="mt-4 space-y-5">
-        
-        <!-- 1. Personalization: User Name -->
-        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800">
-          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Tu Nombre o Apodo</label>
-          <div class="flex gap-2">
-            <input type="text" id="setting-user-name" placeholder="Ej. Jhordy" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
-            <button onclick="saveUserNameSetting()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition bounce-active">
-              Guardar
-            </button>
-          </div>
-          <p class="text-[11px] text-slate-400 mt-1.5">Este nombre se mostrará en el saludo principal.</p>
-        </div>
-
-        <!-- 2. Cloud Backup (Google Sheets Web App) -->
-        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 space-y-3">
-          <div class="flex items-center justify-between">
-            <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
-              <i data-lucide="sheet" class="w-4 h-4 text-emerald-500"></i>
-              <span>Copia en Google Sheets</span>
-            </h4>
-            <span id="cloud-status-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
-              No configurado
-            </span>
-          </div>
-          
-          <input type="url" id="gas-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
-          
-          <div class="flex items-center gap-2">
-            <input type="checkbox" id="auto-sync-checkbox" onchange="toggleAutoSync(this.checked)" class="w-3.5 h-3.5 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
-            <label for="auto-sync-checkbox" class="text-[11px] font-medium text-slate-600 dark:text-slate-400 cursor-pointer">
-              Auto-guardar en Sheets al marcar o reordenar hábitos
-            </label>
-          </div>
-
-          <div class="flex flex-wrap gap-2 pt-1">
-            <button onclick="saveCloudSettings()" class="flex-1 px-3 py-2 bg-slate-900 hover:bg-black dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition bounce-active">
-              Guardar URL
-            </button>
-            <button onclick="syncToCloud()" class="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition bounce-active">
-              <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i>
-              <span>Subir a Sheets</span>
-            </button>
-            <button onclick="fetchFromCloud()" class="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-slate-100 rounded-xl text-xs font-bold transition bounce-active">
-              <i data-lucide="cloud-download" class="w-3.5 h-3.5"></i>
-              <span>Descargar</span>
-            </button>
-          </div>
-        </div>
-
-        <!-- 3. JSON Backup & Restore -->
-        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800">
-          <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mb-2">
-            <i data-lucide="database" class="w-4 h-4 text-brand-500"></i>
-            <span>Copia de Seguridad (.json)</span>
-          </h4>
-          <div class="flex flex-wrap gap-2">
-            <button onclick="exportJSONBackup()" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition bounce-active">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              <span>Exportar Copia</span>
-            </button>
-            <label class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/60 transition bounce-active">
-              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
-              <span>Importar Copia</span>
-              <input type="file" id="import-file-input" accept=".json" onchange="importJSONBackup(event)" class="hidden">
-            </label>
-          </div>
-        </div>
-
-        <!-- 4. Factory Reset / Reset to 0 -->
-        <div class="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/50">
-          <h4 class="text-xs font-bold text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
-            <span>🔴 Reinicio Completo de Datos</span>
-          </h4>
-          <p class="text-[11px] text-rose-600/90 dark:text-rose-400/80 mt-1 leading-relaxed">
-            Si deseas reiniciar la aplicación a 0 (borrar todos los hábitos y poner la racha en 0 días), haz clic aquí.
-          </p>
-          <button onclick="confirmFactoryReset()" class="mt-3 w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-600/20 transition bounce-active flex items-center justify-center gap-2">
-            <i data-lucide="trash-2" class="w-4 h-4"></i>
-            <span>Restablecer todo a 0</span>
-          </button>
-        </div>
-
+      <h3 id="decision-habit-name" class="text-base font-bold text-slate-900 dark:text-white">Estudiar Inglés</h3>
+      <p id="decision-habit-time-hint" class="text-xs text-slate-500 dark:text-slate-400 mt-1">Tiempo sugerido: 25 Minutos</p>
+      
+      <p class="text-xs text-slate-600 dark:text-slate-300 mt-4">¿Cómo deseas registrar este hábito el día de hoy?</p>
+      
+      <div class="mt-5 space-y-2">
+        <button onclick="executeHabitDecisionDirect()" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs shadow-md shadow-emerald-600/20 transition bounce-active flex items-center justify-center gap-2">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Marcar como Cumplido Ahora</span>
+        </button>
+        <button onclick="executeHabitDecisionPomodoro()" class="w-full py-2.5 px-4 rounded-xl bg-brand-600 hover:bg-brand-700 text-white font-bold text-xs shadow-md shadow-brand-500/20 transition bounce-active flex items-center justify-center gap-2">
+          <i data-lucide="timer" class="w-4 h-4"></i>
+          <span>Iniciar en Pomodoro (Enfoque)</span>
+        </button>
+        <button onclick="closeHabitDecisionModal()" class="w-full py-2 px-4 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-500 text-xs font-semibold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
+          Cancelar
+        </button>
       </div>
     </div>
   </div>
 
-  <!-- Habit Creation/Edit Modal -->
   <div id="habit-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
     <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-200" id="habit-modal-content">
       
       <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
-        <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white">Nuevo Hábito</h3>
+        <h3 id="modal-title" class="text-lg font-bold text-slate-900 dark:text-white">Crear Nuevo Hábito</h3>
         <button onclick="closeHabitModal()" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
@@ -473,13 +558,11 @@
       <form id="habit-form" onsubmit="handleHabitSubmit(event)" class="mt-4 space-y-4">
         <input type="hidden" id="habit-id">
 
-        <!-- Name Input -->
         <div>
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nombre del Hábito *</label>
           <input type="text" id="habit-name" required placeholder="Ej. Meditar 10 min, Leer 20 páginas" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3.5 py-2.5 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
         </div>
 
-        <!-- Category Select -->
         <div>
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Categoría</label>
           <div class="grid grid-cols-2 sm:grid-cols-3 gap-2">
@@ -506,7 +589,6 @@
           </div>
         </div>
 
-        <!-- Habit Type Radio -->
         <div>
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Tipo de Registro</label>
           <div class="grid grid-cols-2 gap-3">
@@ -527,7 +609,6 @@
           </div>
         </div>
 
-        <!-- Quantitative Settings (Conditional) -->
         <div id="quantitative-fields" class="hidden grid grid-cols-3 gap-2 bg-slate-50 dark:bg-slate-800/50 p-3 rounded-xl border border-slate-200 dark:border-slate-700">
           <div>
             <label class="block text-[11px] font-bold text-slate-600 dark:text-slate-400 mb-1">Meta</label>
@@ -543,7 +624,13 @@
           </div>
         </div>
 
-        <!-- Icon Picker (Quick Emojis) -->
+        <!-- Optional Pomodoro Suggested Minutes -->
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Tiempo de Enfoque Sugerido (Minutos)</label>
+          <input type="number" id="habit-minutes" min="0" step="5" value="25" placeholder="Ej. 25 o 60 para Pomodoro" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          <span class="text-[10px] text-slate-400">Si dejas un tiempo mayor a 0, podrás activar el Pomodoro directo con este hábito.</span>
+        </div>
+
         <div>
           <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Ícono Representativo</label>
           <div class="flex items-center gap-2 overflow-x-auto pb-1" id="icon-picker">
@@ -560,7 +647,6 @@
           <input type="hidden" id="habit-icon" value="🎯">
         </div>
 
-        <!-- Form Submit & Cancel -->
         <div class="pt-3 flex gap-2 justify-end">
           <button type="button" onclick="closeHabitModal()" class="px-4 py-2.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 text-xs font-bold hover:bg-slate-50 dark:hover:bg-slate-800 transition">
             Cancelar
@@ -574,7 +660,184 @@
     </div>
   </div>
 
-  <!-- Custom Modal Alert/Confirm -->
+  <div id="folder-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 transform scale-95 transition-transform duration-200" id="folder-modal-content">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white">Nueva Carpeta Madre</h3>
+        <button onclick="closeFolderModal()" class="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleFolderSubmit(event)" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Nombre de la Carpeta *</label>
+          <input type="text" id="folder-name-input" required placeholder="Ej. Universidad, Trabajo, Casa..." class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Emoji Identificador</label>
+          <input type="text" id="folder-icon-input" value="📁" maxlength="4" class="w-16 text-center bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-2 py-1.5 text-base">
+        </div>
+
+        <div class="pt-2 flex gap-2 justify-end">
+          <button type="button" onclick="closeFolderModal()" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">Cancelar</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20">Crear Carpeta</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="task-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 transform scale-95 transition-transform duration-200" id="task-modal-content">
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100 dark:border-slate-800">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white">Nueva Tarea</h3>
+        <button onclick="closeTaskModal()" class="p-1 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-4 h-4"></i>
+        </button>
+      </div>
+
+      <form onsubmit="handleTaskSubmit(event)" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Título de la Tarea *</label>
+          <input type="text" id="task-name-input" required placeholder="Ej. Entregar informe de ventas" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Carpeta Madre</label>
+          <select id="task-folder-select" class="w-full bg-slate-50 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none">
+            <!-- Injected options -->
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Prioridad</label>
+          <div class="grid grid-cols-3 gap-2">
+            <label class="flex items-center gap-1.5 p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold cursor-pointer">
+              <input type="radio" name="task-priority" value="low" checked>
+              <span>🟢 Baja</span>
+            </label>
+            <label class="flex items-center gap-1.5 p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold cursor-pointer">
+              <input type="radio" name="task-priority" value="medium">
+              <span>🟡 Media</span>
+            </label>
+            <label class="flex items-center gap-1.5 p-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold cursor-pointer">
+              <input type="radio" name="task-priority" value="high">
+              <span>🔴 Alta</span>
+            </label>
+          </div>
+        </div>
+
+        <div class="pt-2 flex gap-2 justify-end">
+          <button type="button" onclick="closeTaskModal()" class="px-3.5 py-2 rounded-xl border border-slate-200 dark:border-slate-700 text-xs font-semibold">Cancelar</button>
+          <button type="submit" class="px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-700 text-white text-xs font-bold shadow-md shadow-brand-500/20">Crear Tarea</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="settings-modal" class="fixed inset-0 z-50 bg-black/50 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
+    <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 max-h-[90vh] overflow-y-auto transform scale-95 transition-transform duration-200" id="settings-modal-content">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100 dark:border-slate-800">
+        <div class="flex items-center gap-2">
+          <div class="w-8 h-8 rounded-xl bg-brand-50 dark:bg-slate-800 text-brand-600 dark:text-brand-400 flex items-center justify-center">
+            <i data-lucide="settings" class="w-4 h-4"></i>
+          </div>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Ajustes & Configuración</h3>
+        </div>
+        <button onclick="closeSettingsModal()" class="p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <div class="mt-4 space-y-5">
+        
+        <!-- User Personalization -->
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800">
+          <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Tu Nombre o Apodo</label>
+          <div class="flex gap-2">
+            <input type="text" id="setting-user-name" placeholder="Ej. Jhordy" class="flex-1 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
+            <button onclick="saveUserNameSetting()" class="px-3.5 py-2 bg-brand-600 hover:bg-brand-700 text-white rounded-xl text-xs font-bold transition bounce-active">
+              Guardar
+            </button>
+          </div>
+          <p class="text-[11px] text-slate-400 mt-1.5">Este nombre se mostrará en el saludo principal.</p>
+        </div>
+
+        <!-- Google Sheets Cloud Backup -->
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800 space-y-3">
+          <div class="flex items-center justify-between">
+            <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5">
+              <i data-lucide="sheet" class="w-4 h-4 text-emerald-500"></i>
+              <span>Copia en Google Sheets</span>
+            </h4>
+            <span id="cloud-status-badge" class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-slate-200 text-slate-600 dark:bg-slate-700 dark:text-slate-300">
+              No configurado
+            </span>
+          </div>
+          
+          <input type="url" id="gas-url-input" placeholder="https://script.google.com/macros/s/.../exec" class="w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-3 py-2 text-xs text-slate-800 dark:text-slate-100 focus:outline-none focus:ring-2 focus:ring-brand-500">
+          
+          <div class="flex items-center gap-2">
+            <input type="checkbox" id="auto-sync-checkbox" onchange="toggleAutoSync(this.checked)" class="w-3.5 h-3.5 text-brand-600 rounded border-slate-300 focus:ring-brand-500">
+            <label for="auto-sync-checkbox" class="text-[11px] font-medium text-slate-600 dark:text-slate-400 cursor-pointer">
+              Auto-guardar en Sheets al registrar cambios
+            </label>
+          </div>
+
+          <div class="flex flex-wrap gap-2 pt-1">
+            <button onclick="saveCloudSettings()" class="flex-1 px-3 py-2 bg-slate-900 hover:bg-black dark:bg-slate-700 dark:hover:bg-slate-600 text-white rounded-xl text-xs font-bold transition bounce-active">
+              Guardar URL
+            </button>
+            <button onclick="syncToCloud()" class="flex items-center justify-center gap-1.5 px-3 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-xl text-xs font-bold transition bounce-active">
+              <i data-lucide="cloud-upload" class="w-3.5 h-3.5"></i>
+              <span>Subir a Sheets</span>
+            </button>
+            <button onclick="fetchFromCloud()" class="flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 text-slate-800 dark:text-slate-100 rounded-xl text-xs font-bold transition bounce-active">
+              <i data-lucide="cloud-download" class="w-3.5 h-3.5"></i>
+              <span>Descargar</span>
+            </button>
+          </div>
+        </div>
+
+        <!-- JSON File Backup & Restore -->
+        <div class="p-4 rounded-2xl bg-slate-50 dark:bg-slate-800/50 border border-slate-200/80 dark:border-slate-800">
+          <h4 class="text-xs font-bold text-slate-900 dark:text-white flex items-center gap-1.5 mb-2">
+            <i data-lucide="database" class="w-4 h-4 text-brand-500"></i>
+            <span>Copia de Seguridad (.json)</span>
+          </h4>
+          <div class="flex flex-wrap gap-2">
+            <button onclick="exportJSONBackup()" class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-slate-800 hover:bg-slate-900 text-white rounded-xl text-xs font-bold transition bounce-active">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Exportar Copia</span>
+            </button>
+            <label class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 bg-white dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-700 dark:text-slate-200 rounded-xl text-xs font-bold cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-700/60 transition bounce-active">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>Importar Copia</span>
+              <input type="file" id="import-file-input" accept=".json" onchange="importJSONBackup(event)" class="hidden">
+            </label>
+          </div>
+        </div>
+
+        <!-- Factory Reset Warning Box -->
+        <div class="p-4 rounded-2xl bg-rose-50/60 dark:bg-rose-950/20 border border-rose-200/80 dark:border-rose-900/50">
+          <h4 class="text-xs font-bold text-rose-700 dark:text-rose-400 flex items-center gap-1.5">
+            <span>🔴 Reinicio Completo de Datos</span>
+          </h4>
+          <p class="text-[11px] text-rose-600/90 dark:text-rose-400/80 mt-1 leading-relaxed">
+            Si deseas reiniciar la aplicación a 0 (borrar hábitos, tareas, notas y racha), haz clic aquí.
+          </p>
+          <button onclick="confirmFactoryReset()" class="mt-3 w-full py-2.5 px-4 rounded-xl bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold shadow-md shadow-rose-600/20 transition bounce-active flex items-center justify-center gap-2">
+            <i data-lucide="trash-2" class="w-4 h-4"></i>
+            <span>Restablecer todo a 0</span>
+          </button>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
   <div id="custom-modal" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-sm flex items-center justify-center p-4 opacity-0 pointer-events-none transition-opacity duration-200">
     <div class="bg-white dark:bg-slate-900 rounded-3xl max-w-sm w-full p-6 shadow-2xl border border-slate-200 dark:border-slate-800 text-center transform scale-95 transition-transform duration-200" id="custom-modal-box">
       <div id="modal-icon-container" class="w-14 h-14 mx-auto rounded-2xl bg-indigo-50 dark:bg-slate-800 flex items-center justify-center text-brand-600 dark:text-brand-400 mb-4">
@@ -583,71 +846,59 @@
       <h4 id="custom-modal-title" class="text-base font-bold text-slate-900 dark:text-white">Aviso</h4>
       <p id="custom-modal-message" class="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">Mensaje del sistema.</p>
       <div id="custom-modal-buttons" class="mt-5 flex gap-2 justify-center">
-        <!-- Buttons injected dynamically -->
       </div>
     </div>
   </div>
 
-  <!-- Toast Notification -->
   <div id="toast" class="fixed top-20 right-4 z-50 flex items-center gap-2.5 px-4 py-3 rounded-2xl bg-slate-900 text-white dark:bg-white dark:text-slate-900 shadow-xl text-xs font-semibold transform translate-y-[-20px] opacity-0 pointer-events-none transition-all duration-300">
     <span id="toast-icon">✨</span>
     <span id="toast-message">Mensaje de notificación</span>
   </div>
 
   <script>
-    const STORAGE_KEY = 'habitflow_360_data';
-    const SETTINGS_KEY = 'habitflow_360_settings';
+    const STORAGE_KEY = 'habitflow_360_data_v3';
+    const SETTINGS_KEY = 'habitflow_360_settings_v3';
     
-    // Category visual config
     const CATEGORIES = {
-      health: { label: 'Salud & Deporte', color: '#10b981', border: 'border-emerald-500/20', bg: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400' },
-      mind: { label: 'Mente & Lectura', color: '#3b82f6', border: 'border-blue-500/20', bg: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400' },
-      work: { label: 'Trabajo & Enfoque', color: '#8b5cf6', border: 'border-purple-500/20', bg: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400' },
-      finance: { label: 'Finanzas', color: '#f59e0b', border: 'border-amber-500/20', bg: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400' },
-      wellness: { label: 'Bienestar & Estilo', color: '#ec4899', border: 'border-pink-500/20', bg: 'bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400' }
+      health: { label: 'Salud & Deporte', color: '#10b981', bg: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600 dark:text-emerald-400' },
+      mind: { label: 'Mente & Aprendizaje', color: '#3b82f6', bg: 'bg-blue-50 dark:bg-blue-950/30 text-blue-600 dark:text-blue-400' },
+      work: { label: 'Trabajo & Código', color: '#8b5cf6', bg: 'bg-purple-50 dark:bg-purple-950/30 text-purple-600 dark:text-purple-400' },
+      finance: { label: 'Finanzas', color: '#f59e0b', bg: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600 dark:text-amber-400' },
+      wellness: { label: 'Bienestar & Estilo', color: '#ec4899', bg: 'bg-pink-50 dark:bg-pink-950/30 text-pink-600 dark:text-pink-400' }
     };
 
-    // Default habits
     const DEFAULT_HABITS = [
-      {
-        id: 'h-seed-1',
-        name: 'Tomar 2.5 Litros de Agua',
-        category: 'health',
-        type: 'quantitative',
-        target: 2.5,
-        unit: 'L',
-        step: 0.5,
-        icon: '💧',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'h-seed-2',
-        name: 'Lectura o Aprendizaje Diario',
-        category: 'mind',
-        type: 'simple',
-        target: 1,
-        unit: '',
-        step: 1,
-        icon: '📖',
-        createdAt: new Date().toISOString()
-      },
-      {
-        id: 'h-seed-3',
-        name: 'Sesión de Enfoque Profundo (Deep Work)',
-        category: 'work',
-        type: 'simple',
-        target: 1,
-        unit: '',
-        step: 1,
-        icon: '💻',
-        createdAt: new Date().toISOString()
-      }
+      { id: 'h-1', name: 'Tomar 2.5 Litros de Agua', category: 'health', type: 'quantitative', target: 2.5, unit: 'L', step: 0.5, minutes: 0, icon: '💧' },
+      { id: 'h-2', name: 'Estudiar Inglés', category: 'mind', type: 'simple', target: 1, unit: '', step: 1, minutes: 25, icon: '📖' },
+      { id: 'h-3', name: 'Sesión de Enfoque Profundo', category: 'work', type: 'simple', target: 1, unit: '', step: 1, minutes: 50, icon: '💻' }
     ];
 
-    // Master Application State
+    const DEFAULT_FOLDERS = [
+      { id: 'f-all', name: 'Todas las Carpetas', icon: '📂' },
+      { id: 'f-uni', name: 'Universidad & Estudio', icon: '🎓' },
+      { id: 'f-work', name: 'Trabajo & Proyectos', icon: '💼' },
+      { id: 'f-home', name: 'Casa & Personal', icon: '🏠' }
+    ];
+
+    const DEFAULT_TASKS = [
+      { id: 't-1', name: 'Revisar apuntes de gramática inglesa', folderId: 'f-uni', priority: 'high', completed: false },
+      { id: 't-2', name: 'Configurar sincronización en Google Sheets', folderId: 'f-work', priority: 'medium', completed: true },
+      { id: 't-3', name: 'Organizar escritorio y libros', folderId: 'f-home', priority: 'low', completed: false }
+    ];
+
+    const DEFAULT_GOALS = [
+      { id: 'g-1', text: 'Leer 1 libro completo de desarrollo personal', completed: false },
+      { id: 'g-2', text: 'Cumplir al menos 20 días de hábitos seguidos', completed: true }
+    ];
+
+    // Master App State
     let appState = {
       habits: [],
-      logs: {} // "YYYY-MM-DD": { [habitId]: progressNumber }
+      folders: [],
+      tasks: [],
+      monthlyGoals: [],
+      journal: {}, // "YYYY-MM-DD": string
+      logs: {}     // "YYYY-MM-DD": { [habitId]: number }
     };
 
     let appSettings = {
@@ -658,47 +909,85 @@
       lastSync: null
     };
 
+    // Pomodoro State
+    let pomodoroState = {
+      mode: 'focus', // 'focus' | 'short' | 'long'
+      durations: { focus: 25 * 60, short: 5 * 60, long: 15 * 60 },
+      timeLeft: 25 * 60,
+      isRunning: false,
+      timerId: null,
+      cycleCount: 1,
+      linkedTargetName: 'Estudiar Inglés',
+      linkedTargetIcon: '🎯'
+    };
+
     let activeCategoryFilter = 'all';
+    let activeFolderFilter = 'f-all';
+    let pendingDecisionHabitId = null;
     let chartInstanceCategory = null;
     let chartInstanceWeekly = null;
     let audioCtx = null;
     let draggedHabitId = null;
 
-    function playCelebrationSound() {
+    function playSynthesizedChime(type = 'success') {
       try {
         if (!audioCtx) {
           const AudioContextClass = window.AudioContext || window.webkitAudioContext;
           if (AudioContextClass) audioCtx = new AudioContextClass();
         }
         if (!audioCtx) return;
-        if (audioCtx.state === 'suspended') {
-          audioCtx.resume();
-        }
+        if (audioCtx.state === 'suspended') audioCtx.resume();
 
-        // Ascending harmonic chime: C5 - E5 - G5 - C6
-        const notes = [523.25, 659.25, 783.99, 1046.50];
         const now = audioCtx.currentTime;
 
-        notes.forEach((freq, index) => {
-          const osc = audioCtx.createOscillator();
-          const gain = audioCtx.createGain();
-
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, now + index * 0.07);
-
-          gain.gain.setValueAtTime(0.001, now + index * 0.07);
-          gain.gain.exponentialRampToValueAtTime(0.16, now + index * 0.07 + 0.02);
-          gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.07 + 0.25);
-
-          osc.connect(gain);
-          gain.connect(audioCtx.destination);
-
-          osc.start(now + index * 0.07);
-          osc.stop(now + index * 0.07 + 0.28);
-        });
+        if (type === 'bell') {
+          // Double gong/bell for Pomodoro completion
+          [659.25, 880.00].forEach((freq, idx) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + idx * 0.18);
+            gain.gain.setValueAtTime(0.001, now + idx * 0.18);
+            gain.gain.exponentialRampToValueAtTime(0.25, now + idx * 0.18 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + idx * 0.18 + 0.8);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + idx * 0.18);
+            osc.stop(now + idx * 0.18 + 0.85);
+          });
+        } else {
+          // Ascending harmonic celebration chime
+          const notes = [523.25, 659.25, 783.99, 1046.50];
+          notes.forEach((freq, index) => {
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.type = 'sine';
+            osc.frequency.setValueAtTime(freq, now + index * 0.07);
+            gain.gain.setValueAtTime(0.001, now + index * 0.07);
+            gain.gain.exponentialRampToValueAtTime(0.18, now + index * 0.07 + 0.02);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + index * 0.07 + 0.28);
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+            osc.start(now + index * 0.07);
+            osc.stop(now + index * 0.07 + 0.3);
+          });
+        }
       } catch (e) {
-        // Silently pass if audio blocked by autoplay policies
+        // Audio policy protection
       }
+    }
+
+    function triggerCelebrationConfetti() {
+      try {
+        if (typeof confetti === 'function') {
+          confetti({
+            particleCount: 50,
+            spread: 60,
+            origin: { y: 0.8 },
+            colors: ['#6366f1', '#10b981', '#f59e0b', '#ec4899', '#3b82f6']
+          });
+        }
+      } catch (e) {}
     }
 
     function getTodayKey() {
@@ -711,14 +1000,21 @@
         const rawData = localStorage.getItem(STORAGE_KEY);
         if (rawData) {
           appState = JSON.parse(rawData);
-          if (!appState.habits || !Array.isArray(appState.habits)) {
-            appState.habits = [...DEFAULT_HABITS];
-          }
-          if (!appState.logs) {
-            appState.logs = {};
-          }
+          if (!appState.habits) appState.habits = [...DEFAULT_HABITS];
+          if (!appState.folders) appState.folders = [...DEFAULT_FOLDERS];
+          if (!appState.tasks) appState.tasks = [...DEFAULT_TASKS];
+          if (!appState.monthlyGoals) appState.monthlyGoals = [...DEFAULT_GOALS];
+          if (!appState.journal) appState.journal = {};
+          if (!appState.logs) appState.logs = {};
         } else {
           appState.habits = [...DEFAULT_HABITS];
+          appState.folders = [...DEFAULT_FOLDERS];
+          appState.tasks = [...DEFAULT_TASKS];
+          appState.monthlyGoals = [...DEFAULT_GOALS];
+          appState.journal = {
+            [getTodayKey()]: "Hoy prioricé el enfoque en mis metas y completé mi rutina a tiempo."
+          };
+          appState.logs = {};
           seedHistoricalData();
           saveLocalData();
         }
@@ -727,9 +1023,11 @@
         if (rawSettings) {
           appSettings = { ...appSettings, ...JSON.parse(rawSettings) };
         }
-      } catch (err) {
-        console.error("Error cargando almacenamiento local:", err);
+      } catch (e) {
         appState.habits = [...DEFAULT_HABITS];
+        appState.folders = [...DEFAULT_FOLDERS];
+        appState.tasks = [...DEFAULT_TASKS];
+        appState.monthlyGoals = [...DEFAULT_GOALS];
       }
     }
 
@@ -737,26 +1035,241 @@
       try {
         localStorage.setItem(STORAGE_KEY, JSON.stringify(appState));
         localStorage.setItem(SETTINGS_KEY, JSON.stringify(appSettings));
-      } catch (e) {
-        console.warn("No se pudo guardar en almacenamiento local:", e);
-      }
+      } catch (e) {}
     }
 
     function seedHistoricalData() {
       const today = new Date();
-      for (let i = 25; i >= 1; i--) {
+      for (let i = 28; i >= 1; i--) {
         const d = new Date();
         d.setDate(today.getDate() - i);
         const k = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
-        
         appState.logs[k] = {};
-        if (Math.random() > 0.25) appState.logs[k]['h-seed-1'] = 2.5;
-        if (Math.random() > 0.3) appState.logs[k]['h-seed-2'] = 1;
-        if (Math.random() > 0.4) appState.logs[k]['h-seed-3'] = 1;
+        if (Math.random() > 0.3) appState.logs[k]['h-1'] = 2.5;
+        if (Math.random() > 0.35) appState.logs[k]['h-2'] = 1;
+        if (Math.random() > 0.4) appState.logs[k]['h-3'] = 1;
       }
     }
 
-    // Reorder Habit: Move Up
+    function renderTodayHabits() {
+      const container = document.getElementById('habit-cards-container');
+      const emptyState = document.getElementById('habits-empty-state');
+      const today = getTodayKey();
+
+      if (!appState.logs[today]) appState.logs[today] = {};
+      const todayLogs = appState.logs[today];
+
+      let filteredHabits = appState.habits;
+      if (activeCategoryFilter !== 'all') {
+        filteredHabits = filteredHabits.filter(h => h.category === activeCategoryFilter);
+      }
+
+      if (!appState.habits || appState.habits.length === 0) {
+        container.innerHTML = '';
+        emptyState.classList.remove('hidden');
+        updateDailyProgress();
+        updateGlobalStreak();
+        return;
+      }
+
+      emptyState.classList.add('hidden');
+      container.innerHTML = '';
+
+      filteredHabits.forEach((habit) => {
+        const globalIndex = appState.habits.findIndex(h => h.id === habit.id);
+        const isFirst = globalIndex === 0;
+        const isLast = globalIndex === appState.habits.length - 1;
+
+        const cat = CATEGORIES[habit.category] || CATEGORIES.wellness;
+        const currentVal = todayLogs[habit.id] || 0;
+        const isCompleted = habit.type === 'simple' ? currentVal >= 1 : currentVal >= habit.target;
+        const habitStreak = calculateHabitStreak(habit.id);
+
+        const card = document.createElement('div');
+        card.className = `habit-draggable relative overflow-hidden bg-white dark:bg-slate-900 rounded-2xl p-3.5 sm:p-4 border transition-all duration-200 shadow-soft flex items-center justify-between gap-3 ${
+          isCompleted 
+            ? 'border-emerald-500/40 bg-emerald-50/20 dark:bg-emerald-950/10' 
+            : 'border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+        }`;
+        
+        card.setAttribute('draggable', 'true');
+        setupHabitDragEvents(card, habit.id);
+
+        // Left controls (Order arrows + Habit Details)
+        const leftDiv = document.createElement('div');
+        leftDiv.className = 'flex items-center gap-2 sm:gap-3 flex-1 min-w-0';
+
+        // Up/Down arrows
+        leftDiv.innerHTML = `
+          <div class="flex flex-col gap-0.5 shrink-0 select-none">
+            <button onclick="moveHabitUp('${habit.id}')" title="Subir orden" ${isFirst ? 'disabled' : ''} class="w-6 h-5 flex items-center justify-center rounded text-[10px] font-bold ${isFirst ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-500 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition'}">▲</button>
+            <button onclick="moveHabitDown('${habit.id}')" title="Bajar orden" ${isLast ? 'disabled' : ''} class="w-6 h-5 flex items-center justify-center rounded text-[10px] font-bold ${isLast ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-500 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition'}">▼</button>
+          </div>
+          
+          <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-sm ${isCompleted ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800'}">
+            <span>${habit.icon || '🎯'}</span>
+          </div>
+
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-1.5 flex-wrap">
+              <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate ${isCompleted ? 'line-through text-slate-400 dark:text-slate-500' : ''}">
+                ${escapeHtml(habit.name)}
+              </h4>
+              <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${cat.bg}">
+                ${cat.label.split(' ')[0]}
+              </span>
+            </div>
+            <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400">
+              <span class="flex items-center gap-0.5 text-amber-600 dark:text-amber-400 font-semibold">
+                🔥 ${habitStreak} días
+              </span>
+              <span>•</span>
+              <span>${habit.type === 'quantitative' ? `Meta: ${habit.target} ${habit.unit}` : (habit.minutes ? `${habit.minutes} min` : 'Diario')}</span>
+              ${habit.minutes ? `<button onclick="startPomodoroFromHabit('${habit.id}')" title="Iniciar Pomodoro con este hábito" class="text-brand-600 dark:text-brand-400 hover:underline flex items-center gap-0.5">⏱️ Pomodoro</button>` : ''}
+            </div>
+          </div>
+        `;
+        card.appendChild(leftDiv);
+
+        // Right side: Checkbox or Counter + Edit Action
+        const rightDiv = document.createElement('div');
+        rightDiv.className = 'flex items-center gap-2 shrink-0';
+
+        if (habit.type === 'quantitative') {
+          rightDiv.innerHTML = `
+            <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
+              <button onclick="updateHabitValue('${habit.id}', -${habit.step || 1})" title="Restar" class="w-7 h-7 rounded-lg bg-white dark:bg-slate-700 text-slate-700 dark:text-slate-200 flex items-center justify-center font-bold text-sm transition bounce-active">-</button>
+              <span class="text-xs font-bold px-1.5 text-slate-800 dark:text-slate-100 min-w-[55px] text-center">
+                ${currentVal} / ${habit.target} <span class="text-[9px] text-slate-400 font-normal">${habit.unit}</span>
+              </span>
+              <button onclick="updateHabitValue('${habit.id}', ${habit.step || 1})" title="Sumar" class="w-7 h-7 rounded-lg ${isCompleted ? 'bg-emerald-600 text-white' : 'bg-brand-600 text-white hover:bg-brand-700'} flex items-center justify-center font-bold text-sm transition bounce-active">+</button>
+            </div>
+            <button onclick="openHabitModal('${habit.id}')" title="Editar hábito" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+            </button>
+          `;
+        } else {
+          rightDiv.innerHTML = `
+            <button onclick="handleHabitCardClick('${habit.id}')" title="${isCompleted ? 'Desmarcar' : 'Completar hábito'}" class="w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 bounce-active ${
+              isCompleted 
+                ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 pop-anim' 
+                : 'bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 text-transparent hover:border-brand-500'
+            }">
+              <i data-lucide="check" class="w-5 h-5 stroke-[3] ${isCompleted ? 'text-white' : 'opacity-0'}"></i>
+            </button>
+            <button onclick="openHabitModal('${habit.id}')" title="Editar hábito" class="p-1.5 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200">
+              <i data-lucide="more-horizontal" class="w-4 h-4"></i>
+            </button>
+          `;
+        }
+
+        card.appendChild(rightDiv);
+        container.appendChild(card);
+      });
+
+      lucide.createIcons();
+      updateDailyProgress();
+      updateGlobalStreak();
+    }
+
+    function handleHabitCardClick(habitId) {
+      const habit = appState.habits.find(h => h.id === habitId);
+      if (!habit) return;
+
+      const today = getTodayKey();
+      if (!appState.logs[today]) appState.logs[today] = {};
+      const currentVal = appState.logs[today][habitId] || 0;
+
+      // If already completed, toggle off directly
+      if (currentVal >= 1) {
+        appState.logs[today][habitId] = 0;
+        saveLocalData();
+        renderTodayHabits();
+        checkAutoSyncTrigger();
+        return;
+      }
+
+      // If habit has configured suggested minutes, show decision modal
+      if (habit.minutes && habit.minutes > 0) {
+        pendingDecisionHabitId = habitId;
+        openHabitDecisionModal(habit);
+      } else {
+        // Simple direct complete
+        completeHabitDirect(habitId);
+      }
+    }
+
+    function openHabitDecisionModal(habit) {
+      const modal = document.getElementById('habit-decision-modal');
+      const content = document.getElementById('habit-decision-content');
+      document.getElementById('decision-habit-icon').textContent = habit.icon || '⏱️';
+      document.getElementById('decision-habit-name').textContent = habit.name;
+      document.getElementById('decision-habit-time-hint').textContent = `Tiempo sugerido: ${habit.minutes} Minutos`;
+
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      content.classList.remove('scale-95');
+    }
+
+    function closeHabitDecisionModal() {
+      const modal = document.getElementById('habit-decision-modal');
+      const content = document.getElementById('habit-decision-content');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      content.classList.add('scale-95');
+      pendingDecisionHabitId = null;
+    }
+
+    function executeHabitDecisionDirect() {
+      if (pendingDecisionHabitId) {
+        completeHabitDirect(pendingDecisionHabitId);
+      }
+      closeHabitDecisionModal();
+    }
+
+    function executeHabitDecisionPomodoro() {
+      if (pendingDecisionHabitId) {
+        startPomodoroFromHabit(pendingDecisionHabitId);
+      }
+      closeHabitDecisionModal();
+    }
+
+    function completeHabitDirect(habitId) {
+      const today = getTodayKey();
+      if (!appState.logs[today]) appState.logs[today] = {};
+      appState.logs[today][habitId] = 1;
+
+      saveLocalData();
+      renderTodayHabits();
+      playSynthesizedChime('success');
+      triggerCelebrationConfetti();
+      showToast("¡Hábito completado con éxito! 🌟", "🎉");
+      checkAutoSyncTrigger();
+    }
+
+    function updateHabitValue(habitId, delta) {
+      const habit = appState.habits.find(h => h.id === habitId);
+      if (!habit) return;
+
+      const today = getTodayKey();
+      if (!appState.logs[today]) appState.logs[today] = {};
+
+      let currentVal = appState.logs[today][habitId] || 0;
+      const wasCompleted = currentVal >= habit.target;
+
+      currentVal = Math.round((currentVal + delta) * 10) / 10;
+      if (currentVal < 0) currentVal = 0;
+
+      appState.logs[today][habitId] = currentVal;
+      saveLocalData();
+      renderTodayHabits();
+
+      if (!wasCompleted && currentVal >= habit.target) {
+        playSynthesizedChime('success');
+        triggerCelebrationConfetti();
+        showToast(`¡Meta alcanzada: ${habit.name}! 🎯`, "🚀");
+      }
+      checkAutoSyncTrigger();
+    }
+
     function moveHabitUp(habitId) {
       const index = appState.habits.findIndex(h => h.id === habitId);
       if (index > 0) {
@@ -764,13 +1277,11 @@
         appState.habits.splice(index - 1, 0, item);
         saveLocalData();
         renderTodayHabits();
-        renderManagerList();
         checkAutoSyncTrigger();
         showToast("Hábito movido hacia arriba", "⬆️");
       }
     }
 
-    // Reorder Habit: Move Down
     function moveHabitDown(habitId) {
       const index = appState.habits.findIndex(h => h.id === habitId);
       if (index !== -1 && index < appState.habits.length - 1) {
@@ -778,14 +1289,12 @@
         appState.habits.splice(index + 1, 0, item);
         saveLocalData();
         renderTodayHabits();
-        renderManagerList();
         checkAutoSyncTrigger();
         showToast("Hábito movido hacia abajo", "⬇️");
       }
     }
 
-    // Drag and Drop Event Listeners
-    function setupDragAndDropHandlers(element, habitId) {
+    function setupHabitDragEvents(element, habitId) {
       element.addEventListener('dragstart', (e) => {
         draggedHabitId = habitId;
         element.classList.add('dragging');
@@ -827,366 +1336,405 @@
           appState.habits.splice(toIdx, 0, movedItem);
           saveLocalData();
           renderTodayHabits();
-          renderManagerList();
           checkAutoSyncTrigger();
           showToast("¡Nuevo orden guardado!", "✨");
         }
       });
     }
 
-    function renderTodayHabits() {
-      const container = document.getElementById('habit-cards-container');
-      const emptyState = document.getElementById('habits-empty-state');
-      const today = getTodayKey();
+    function renderFoldersAndTasks() {
+      const pillsContainer = document.getElementById('folder-pills-container');
+      const selectDropdown = document.getElementById('task-folder-select');
+      const tasksContainer = document.getElementById('tasks-list-container');
+      const emptyState = document.getElementById('tasks-empty-state');
 
-      if (!appState.logs[today]) {
-        appState.logs[today] = {};
+      // 1. Render folder pills
+      pillsContainer.innerHTML = '';
+      appState.folders.forEach(f => {
+        const isActive = f.id === activeFolderFilter;
+        const count = f.id === 'f-all' 
+          ? appState.tasks.length 
+          : appState.tasks.filter(t => t.folderId === f.id).length;
+
+        const pill = document.createElement('button');
+        pill.className = `flex items-center gap-1.5 px-3 py-1.5 rounded-xl text-xs font-bold whitespace-nowrap transition bounce-active ${
+          isActive 
+            ? 'bg-brand-600 text-white shadow-sm' 
+            : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700'
+        }`;
+        pill.innerHTML = `<span>${f.icon || '📁'}</span> <span>${escapeHtml(f.name)}</span> <span class="text-[10px] opacity-75">(${count})</span>`;
+        pill.onclick = () => selectFolder(f.id);
+        pillsContainer.appendChild(pill);
+      });
+
+      // 2. Populate modal select
+      if (selectDropdown) {
+        selectDropdown.innerHTML = '';
+        appState.folders.filter(f => f.id !== 'f-all').forEach(f => {
+          const opt = document.createElement('option');
+          opt.value = f.id;
+          opt.textContent = `${f.icon} ${f.name}`;
+          selectDropdown.appendChild(opt);
+        });
       }
-      const todayLogs = appState.logs[today];
 
-      let filteredHabits = appState.habits;
-      if (activeCategoryFilter !== 'all') {
-        filteredHabits = filteredHabits.filter(h => h.category === activeCategoryFilter);
+      // 3. Render filtered tasks
+      let filteredTasks = appState.tasks;
+      if (activeFolderFilter !== 'f-all') {
+        filteredTasks = filteredTasks.filter(t => t.folderId === activeFolderFilter);
       }
 
-      if (!appState.habits || appState.habits.length === 0) {
-        container.innerHTML = '';
+      const activeFolderObj = appState.folders.find(f => f.id === activeFolderFilter) || appState.folders[0];
+      document.getElementById('active-folder-title').textContent = activeFolderObj.name;
+      document.getElementById('active-folder-badge-icon').textContent = activeFolderObj.icon;
+      document.getElementById('active-folder-count').textContent = `${filteredTasks.length} tareas`;
+      document.getElementById('active-folder-name-tag').textContent = activeFolderObj.name;
+
+      if (filteredTasks.length === 0) {
+        tasksContainer.innerHTML = '';
         emptyState.classList.remove('hidden');
-        updateDailyProgress();
-        updateGlobalStreak();
         return;
       }
 
       emptyState.classList.add('hidden');
-      container.innerHTML = '';
+      tasksContainer.innerHTML = '';
 
-      const isFilterActive = activeCategoryFilter !== 'all';
+      filteredTasks.forEach(task => {
+        const folder = appState.folders.find(f => f.id === task.folderId) || { name: 'General', icon: '📁' };
+        const priorityLabels = {
+          high: { text: '🔴 Alta', bg: 'bg-rose-50 dark:bg-rose-950/30 text-rose-600' },
+          medium: { text: '🟡 Media', bg: 'bg-amber-50 dark:bg-amber-950/30 text-amber-600' },
+          low: { text: '🟢 Baja', bg: 'bg-emerald-50 dark:bg-emerald-950/30 text-emerald-600' }
+        };
+        const prio = priorityLabels[task.priority] || priorityLabels.low;
 
-      filteredHabits.forEach((habit) => {
-        const globalIndex = appState.habits.findIndex(h => h.id === habit.id);
-        const isFirst = globalIndex === 0;
-        const isLast = globalIndex === appState.habits.length - 1;
-
-        const cat = CATEGORIES[habit.category] || CATEGORIES.wellness;
-        const currentVal = todayLogs[habit.id] || 0;
-        const isCompleted = habit.type === 'simple' ? currentVal >= 1 : currentVal >= habit.target;
-        const habitStreak = calculateHabitStreak(habit.id);
-
-        const card = document.createElement('div');
-        card.className = `habit-draggable relative overflow-hidden bg-white dark:bg-slate-900 rounded-2xl p-3.5 sm:p-4 border transition-all duration-200 shadow-soft flex items-center justify-between gap-3 ${
-          isCompleted 
-            ? 'border-emerald-500/40 bg-emerald-50/20 dark:bg-emerald-950/10' 
-            : 'border-slate-200/80 dark:border-slate-800 hover:border-slate-300 dark:hover:border-slate-700'
+        const item = document.createElement('div');
+        item.className = `p-3 rounded-2xl border transition flex items-center justify-between gap-3 ${
+          task.completed 
+            ? 'bg-slate-50/60 dark:bg-slate-900/40 border-slate-200/50 dark:border-slate-800/60 opacity-65' 
+            : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 shadow-sm'
         }`;
-        
-        // Draggable enabled when viewing all habits
-        if (!isFilterActive) {
-          card.setAttribute('draggable', 'true');
-          setupDragAndDropHandlers(card, habit.id);
-        }
 
-        // Left section: Reorder Controls (▲ ▼ & Handle) + Habit Info
-        const leftDiv = document.createElement('div');
-        leftDiv.className = 'flex items-center gap-2.5 sm:gap-3 flex-1 min-w-0';
-
-        // Reordering UI buttons
-        const reorderControls = document.createElement('div');
-        reorderControls.className = 'flex items-center gap-0.5 shrink-0 select-none';
-        reorderControls.innerHTML = `
-          <div class="flex flex-col gap-0.5">
-            <button onclick="moveHabitUp('${habit.id}')" title="Subir orden" ${isFirst ? 'disabled' : ''} class="w-6 h-5 flex items-center justify-center rounded text-[10px] font-bold ${isFirst ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-500 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition'}">
-              ▲
-            </button>
-            <button onclick="moveHabitDown('${habit.id}')" title="Bajar orden" ${isLast ? 'disabled' : ''} class="w-6 h-5 flex items-center justify-center rounded text-[10px] font-bold ${isLast ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-500 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition'}">
-              ▼
-            </button>
-          </div>
-          <div title="Arrastra para ordenar" class="cursor-grab active:cursor-grabbing p-1 text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 hidden sm:block">
-            <i data-lucide="grip-vertical" class="w-4 h-4"></i>
-          </div>
-        `;
-        leftDiv.appendChild(reorderControls);
-
-        // Icon Box
-        const iconBox = document.createElement('div');
-        iconBox.className = `w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-sm ${
-          isCompleted ? 'bg-emerald-500 text-white' : 'bg-slate-100 dark:bg-slate-800'
-        }`;
-        iconBox.innerHTML = `<span>${habit.icon || '🎯'}</span>`;
-        leftDiv.appendChild(iconBox);
-
-        // Habit details
-        const infoDiv = document.createElement('div');
-        infoDiv.className = 'min-w-0 flex-1';
-        infoDiv.innerHTML = `
-          <div class="flex items-center gap-1.5 flex-wrap">
-            <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate ${isCompleted ? 'line-through text-slate-400 dark:text-slate-500' : ''}">
-              ${escapeHtml(habit.name)}
-            </h4>
-            <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase tracking-wider ${cat.bg}">
-              ${cat.label.split(' ')[0]}
-            </span>
-          </div>
-          <div class="flex items-center gap-2 mt-1 text-[11px] text-slate-500 dark:text-slate-400">
-            <span class="flex items-center gap-0.5 text-amber-600 dark:text-amber-400 font-semibold">
-              🔥 ${habitStreak} días
-            </span>
-            <span>•</span>
-            <span>${habit.type === 'quantitative' ? `Meta: ${habit.target} ${habit.unit}` : 'Diario'}</span>
-          </div>
-        `;
-        leftDiv.appendChild(infoDiv);
-        card.appendChild(leftDiv);
-
-        // Right Section: Interaction buttons (Simple Checkbox OR Quantitative Controls)
-        const rightDiv = document.createElement('div');
-        rightDiv.className = 'flex items-center gap-2 shrink-0';
-
-        if (habit.type === 'quantitative') {
-          rightDiv.innerHTML = `
-            <div class="flex items-center bg-slate-100 dark:bg-slate-800 rounded-xl p-1 gap-1">
-              <button onclick="updateHabitValue('${habit.id}', -${habit.step || 1})" title="Restar" class="w-7 h-7 rounded-lg bg-white dark:bg-slate-700 hover:bg-slate-200 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 flex items-center justify-center font-bold text-sm transition bounce-active">
-                -
-              </button>
-              <span class="text-xs font-bold px-2 text-slate-800 dark:text-slate-100 min-w-[50px] text-center">
-                ${currentVal} / ${habit.target} <span class="text-[10px] text-slate-400 font-normal">${habit.unit}</span>
-              </span>
-              <button onclick="updateHabitValue('${habit.id}', ${habit.step || 1})" title="Sumar" class="w-7 h-7 rounded-lg ${isCompleted ? 'bg-emerald-600 text-white' : 'bg-brand-600 text-white hover:bg-brand-700'} flex items-center justify-center font-bold text-sm transition bounce-active">
-                +
-              </button>
-            </div>
-          `;
-        } else {
-          rightDiv.innerHTML = `
-            <button onclick="toggleHabitProgress('${habit.id}')" title="${isCompleted ? 'Desmarcar' : 'Completar hábito'}" class="w-10 h-10 rounded-2xl flex items-center justify-center transition-all duration-300 bounce-active ${
-              isCompleted 
-                ? 'bg-emerald-500 text-white shadow-md shadow-emerald-500/25 pop-anim' 
-                : 'bg-slate-100 dark:bg-slate-800 border-2 border-slate-300 dark:border-slate-700 text-transparent hover:border-brand-500'
-            }">
-              <i data-lucide="check" class="w-5 h-5 stroke-[3] ${isCompleted ? 'text-white' : 'opacity-0'}"></i>
-            </button>
-          `;
-        }
-
-        card.appendChild(rightDiv);
-        container.appendChild(card);
-      });
-
-      lucide.createIcons();
-      updateDailyProgress();
-      updateGlobalStreak();
-    }
-
-    function toggleHabitProgress(habitId) {
-      const today = getTodayKey();
-      if (!appState.logs[today]) appState.logs[today] = {};
-
-      const currentVal = appState.logs[today][habitId] || 0;
-      const isFinishing = currentVal < 1;
-
-      appState.logs[today][habitId] = isFinishing ? 1 : 0;
-      saveLocalData();
-      renderTodayHabits();
-
-      if (isFinishing) {
-        playCelebrationSound();
-        showToast("¡Hábito completado! Gran trabajo 🌟", "🎉");
-      }
-
-      checkAutoSyncTrigger();
-    }
-
-    function updateHabitValue(habitId, delta) {
-      const habit = appState.habits.find(h => h.id === habitId);
-      if (!habit) return;
-
-      const today = getTodayKey();
-      if (!appState.logs[today]) appState.logs[today] = {};
-
-      let currentVal = appState.logs[today][habitId] || 0;
-      const wasCompleted = currentVal >= habit.target;
-
-      currentVal = Math.round((currentVal + delta) * 10) / 10;
-      if (currentVal < 0) currentVal = 0;
-
-      appState.logs[today][habitId] = currentVal;
-      saveLocalData();
-      renderTodayHabits();
-
-      if (!wasCompleted && currentVal >= habit.target) {
-        playCelebrationSound();
-        showToast(`¡Meta de "${habit.name}" alcanzada! 🎯`, "🚀");
-      }
-
-      checkAutoSyncTrigger();
-    }
-
-    function updateDailyProgress() {
-      const today = getTodayKey();
-      const todayLogs = appState.logs[today] || {};
-      const totalHabits = appState.habits.length;
-
-      if (totalHabits === 0) {
-        document.getElementById('progress-percent-label').textContent = '0%';
-        document.getElementById('progress-count-label').textContent = '0 de 0 completados';
-        document.getElementById('daily-progress-bar').style.width = '0%';
-        return;
-      }
-
-      let completedCount = 0;
-      appState.habits.forEach(h => {
-        const val = todayLogs[h.id] || 0;
-        if (h.type === 'simple' && val >= 1) completedCount++;
-        else if (h.type === 'quantitative' && val >= h.target) completedCount++;
-      });
-
-      const percentage = Math.round((completedCount / totalHabits) * 100);
-      document.getElementById('progress-percent-label').textContent = `${percentage}%`;
-      document.getElementById('progress-count-label').textContent = `${completedCount} de ${totalHabits} completados`;
-      document.getElementById('daily-progress-bar').style.width = `${percentage}%`;
-    }
-
-    function calculateHabitStreak(habitId) {
-      const habit = appState.habits.find(h => h.id === habitId);
-      if (!habit) return 0;
-
-      let streak = 0;
-      let checkDate = new Date();
-      const todayKey = getTodayKey();
-      const todayVal = (appState.logs[todayKey] || {})[habitId] || 0;
-      const isTodayComplete = habit.type === 'simple' ? todayVal >= 1 : todayVal >= habit.target;
-
-      if (!isTodayComplete) {
-        checkDate.setDate(checkDate.getDate() - 1);
-      }
-
-      while (true) {
-        const k = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
-        const val = (appState.logs[k] || {})[habitId] || 0;
-        const ok = habit.type === 'simple' ? val >= 1 : val >= habit.target;
-
-        if (ok) {
-          streak++;
-          checkDate.setDate(checkDate.getDate() - 1);
-        } else {
-          break;
-        }
-      }
-      return streak;
-    }
-
-    function updateGlobalStreak() {
-      let streak = 0;
-      let checkDate = new Date();
-      const todayKey = getTodayKey();
-
-      const hasAnyToday = hasAtLeastOneCompleted(todayKey);
-      if (!hasAnyToday) {
-        checkDate.setDate(checkDate.getDate() - 1);
-      }
-
-      while (true) {
-        const k = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
-        if (hasAtLeastOneCompleted(k)) {
-          streak++;
-          checkDate.setDate(checkDate.getDate() - 1);
-        } else {
-          break;
-        }
-      }
-
-      const streakEl = document.getElementById('global-streak-count');
-      if (streakEl) streakEl.textContent = streak;
-    }
-
-    function hasAtLeastOneCompleted(dateKey) {
-      const dayLog = appState.logs[dateKey];
-      if (!dayLog) return false;
-
-      return appState.habits.some(h => {
-        const val = dayLog[h.id] || 0;
-        return h.type === 'simple' ? val >= 1 : val >= h.target;
-      });
-    }
-
-    function renderManagerList() {
-      const container = document.getElementById('manager-habits-list');
-      if (!container) return;
-
-      if (!appState.habits || appState.habits.length === 0) {
-        container.innerHTML = `
-          <div class="text-center py-8 px-4 rounded-2xl border border-dashed border-slate-300 dark:border-slate-800 text-slate-400">
-            No hay hábitos creados. Pulsa en "+ Nuevo Hábito" arriba.
-          </div>
-        `;
-        return;
-      }
-
-      container.innerHTML = '';
-
-      appState.habits.forEach((h, idx) => {
-        const cat = CATEGORIES[h.category] || CATEGORIES.wellness;
-        const isFirst = idx === 0;
-        const isLast = idx === appState.habits.length - 1;
-
-        const row = document.createElement('div');
-        row.className = 'habit-draggable bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl p-3 sm:p-4 flex items-center justify-between gap-3 shadow-sm hover:border-slate-300 dark:hover:border-slate-700 transition';
-        row.setAttribute('draggable', 'true');
-        setupDragAndDropHandlers(row, h.id);
-
-        row.innerHTML = `
+        item.innerHTML = `
           <div class="flex items-center gap-3 min-w-0 flex-1">
-            <!-- Up / Down Reorder Buttons -->
-            <div class="flex flex-col gap-0.5 shrink-0">
-              <button onclick="moveHabitUp('${h.id}')" title="Subir en la lista" ${isFirst ? 'disabled' : ''} class="w-6 h-5 flex items-center justify-center rounded text-[10px] font-bold ${isFirst ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition'}">
-                ▲
-              </button>
-              <button onclick="moveHabitDown('${h.id}')" title="Bajar en la lista" ${isLast ? 'disabled' : ''} class="w-6 h-5 flex items-center justify-center rounded text-[10px] font-bold ${isLast ? 'text-slate-300 dark:text-slate-700 cursor-not-allowed' : 'text-slate-600 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-800 transition'}">
-                ▼
-              </button>
-            </div>
-
-            <!-- Drag grip icon -->
-            <div class="cursor-grab active:cursor-grabbing text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 p-1 hidden sm:block" title="Arrastra para cambiar el orden">
-              <i data-lucide="grip-vertical" class="w-4 h-4"></i>
-            </div>
-
-            <!-- Habit Icon -->
-            <div class="w-10 h-10 rounded-xl bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-lg shrink-0">
-              ${h.icon || '🎯'}
-            </div>
-
-            <!-- Details -->
+            <button onclick="toggleTaskCompleted('${task.id}')" class="w-7 h-7 rounded-xl flex items-center justify-center transition ${
+              task.completed 
+                ? 'bg-emerald-500 text-white' 
+                : 'border-2 border-slate-300 dark:border-slate-600 hover:border-brand-500'
+            }">
+              <i data-lucide="check" class="w-4 h-4 ${task.completed ? 'text-white' : 'opacity-0'}"></i>
+            </button>
             <div class="min-w-0 flex-1">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-bold text-slate-400">#${idx + 1}</span>
-                <h4 class="text-xs sm:text-sm font-bold text-slate-900 dark:text-white truncate">${escapeHtml(h.name)}</h4>
-              </div>
-              <div class="flex items-center gap-2 mt-0.5">
-                <span class="text-[10px] px-2 py-0.5 rounded-full font-bold uppercase ${cat.bg}">
-                  ${cat.label}
-                </span>
-                <span class="text-[11px] text-slate-400">
-                  ${h.type === 'quantitative' ? `Meta: ${h.target} ${h.unit}` : 'Checkbox'}
-                </span>
+              <p class="text-xs font-bold text-slate-900 dark:text-white truncate ${task.completed ? 'line-through text-slate-400' : ''}">
+                ${escapeHtml(task.name)}
+              </p>
+              <div class="flex items-center gap-2 mt-0.5 text-[10px] text-slate-400">
+                <span>${folder.icon} ${folder.name}</span>
+                <span>•</span>
+                <span class="px-1.5 py-0.5 rounded-md font-semibold ${prio.bg}">${prio.text}</span>
               </div>
             </div>
           </div>
 
-          <!-- Edit & Delete Action Buttons -->
-          <div class="flex items-center gap-1 shrink-0">
-            <button onclick="editHabit('${h.id}')" title="Editar hábito" class="p-2 rounded-xl text-slate-500 hover:text-brand-600 hover:bg-slate-100 dark:hover:bg-slate-800 transition">
-              <i data-lucide="edit-3" class="w-4 h-4"></i>
+          <div class="flex items-center gap-1">
+            <button onclick="linkTaskToPomodoro('${task.id}')" title="Hacer en Pomodoro" class="p-1.5 text-slate-400 hover:text-brand-600 rounded-lg">
+              <i data-lucide="timer" class="w-4 h-4"></i>
             </button>
-            <button onclick="confirmDeleteHabit('${h.id}')" title="Eliminar hábito" class="p-2 rounded-xl text-rose-500 hover:text-rose-700 hover:bg-rose-50 dark:hover:bg-rose-950/30 transition">
+            <button onclick="deleteTask('${task.id}')" title="Eliminar tarea" class="p-1.5 text-slate-400 hover:text-rose-600 rounded-lg">
               <i data-lucide="trash-2" class="w-4 h-4"></i>
             </button>
           </div>
         `;
-        container.appendChild(row);
+
+        tasksContainer.appendChild(item);
       });
 
       lucide.createIcons();
+    }
+
+    function selectFolder(folderId) {
+      activeFolderFilter = folderId;
+      renderFoldersAndTasks();
+    }
+
+    function toggleTaskCompleted(taskId) {
+      const t = appState.tasks.find(x => x.id === taskId);
+      if (t) {
+        t.completed = !t.completed;
+        saveLocalData();
+        renderFoldersAndTasks();
+        if (t.completed) {
+          playSynthesizedChime('success');
+          showToast("¡Tarea completada!", "✅");
+        }
+        checkAutoSyncTrigger();
+      }
+    }
+
+    function deleteTask(taskId) {
+      appState.tasks = appState.tasks.filter(x => x.id !== taskId);
+      saveLocalData();
+      renderFoldersAndTasks();
+      showToast("Tarea eliminada", "🗑️");
+      checkAutoSyncTrigger();
+    }
+
+    function setPomodoroMode(mode) {
+      pomodoroState.mode = mode;
+      pomodoroState.timeLeft = pomodoroState.durations[mode];
+      clearInterval(pomodoroState.timerId);
+      pomodoroState.isRunning = false;
+
+      // Update UI tabs
+      ['focus', 'short', 'long'].forEach(m => {
+        const btn = document.getElementById(`pomo-mode-${m}`);
+        if (m === mode) {
+          btn.className = 'flex-1 py-1.5 px-3 rounded-xl text-xs font-bold bg-white dark:bg-slate-700 text-brand-600 dark:text-brand-400 shadow-sm transition';
+        } else {
+          btn.className = 'flex-1 py-1.5 px-3 rounded-xl text-xs font-semibold text-slate-600 dark:text-slate-300 hover:text-slate-900 transition';
+        }
+      });
+
+      updatePomodoroDisplay();
+      updatePomodoroPlayButtonUI();
+    }
+
+    function togglePomodoroTimer() {
+      if (pomodoroState.isRunning) {
+        clearInterval(pomodoroState.timerId);
+        pomodoroState.isRunning = false;
+      } else {
+        pomodoroState.isRunning = true;
+        pomodoroState.timerId = setInterval(() => {
+          if (pomodoroState.timeLeft > 0) {
+            pomodoroState.timeLeft--;
+            updatePomodoroDisplay();
+          } else {
+            handlePomodoroCycleComplete();
+          }
+        }, 1000);
+      }
+      updatePomodoroPlayButtonUI();
+    }
+
+    function resetPomodoroTimer() {
+      clearInterval(pomodoroState.timerId);
+      pomodoroState.isRunning = false;
+      pomodoroState.timeLeft = pomodoroState.durations[pomodoroState.mode];
+      updatePomodoroDisplay();
+      updatePomodoroPlayButtonUI();
+      showToast("Temporizador reiniciado", "🔄");
+    }
+
+    function skipPomodoroCycle() {
+      handlePomodoroCycleComplete();
+    }
+
+    function handlePomodoroCycleComplete() {
+      clearInterval(pomodoroState.timerId);
+      pomodoroState.isRunning = false;
+
+      playSynthesizedChime('bell');
+      triggerCelebrationConfetti();
+
+      if (pomodoroState.mode === 'focus') {
+        showToast("¡Sesión de enfoque completada! Tómate un descanso ☕", "🔔");
+        if (pomodoroState.cycleCount >= 4) {
+          pomodoroState.cycleCount = 1;
+          setPomodoroMode('long');
+        } else {
+          pomodoroState.cycleCount++;
+          setPomodoroMode('short');
+        }
+      } else {
+        showToast("Descanso finalizado. ¡A por otro ciclo de enfoque! 🚀", "🧠");
+        setPomodoroMode('focus');
+      }
+
+      document.getElementById('pomodoro-cycle-label').textContent = `Ciclo ${pomodoroState.cycleCount} de 4`;
+      updatePomodoroPlayButtonUI();
+    }
+
+    function updatePomodoroDisplay() {
+      const minutes = Math.floor(pomodoroState.timeLeft / 60);
+      const seconds = pomodoroState.timeLeft % 60;
+      const str = `${String(minutes).padStart(2, '0')}:${String(seconds).padStart(2, '0')}`;
+      
+      const el = document.getElementById('pomodoro-timer-display');
+      if (el) el.textContent = str;
+    }
+
+    function updatePomodoroPlayButtonUI() {
+      const icon = document.getElementById('pomo-toggle-icon');
+      const text = document.getElementById('pomo-toggle-text');
+      const btn = document.getElementById('pomo-btn-toggle');
+
+      if (pomodoroState.isRunning) {
+        text.textContent = 'Pausar';
+        btn.classList.add('bg-amber-600', 'hover:bg-amber-700');
+        btn.classList.remove('bg-brand-600', 'hover:bg-brand-700');
+        icon.setAttribute('data-lucide', 'pause');
+      } else {
+        text.textContent = 'Iniciar';
+        btn.classList.add('bg-brand-600', 'hover:bg-brand-700');
+        btn.classList.remove('bg-amber-600', 'hover:bg-amber-700');
+        icon.setAttribute('data-lucide', 'play');
+      }
+      lucide.createIcons();
+    }
+
+    function startPomodoroFromHabit(habitId) {
+      const h = appState.habits.find(x => x.id === habitId);
+      if (!h) return;
+
+      pomodoroState.linkedTargetName = h.name;
+      pomodoroState.linkedTargetIcon = h.icon || '🎯';
+
+      if (h.minutes && h.minutes > 0) {
+        pomodoroState.durations.focus = h.minutes * 60;
+      } else {
+        pomodoroState.durations.focus = 25 * 60;
+      }
+
+      setPomodoroMode('focus');
+      updateLinkedPomodoroTargetUI();
+      switchTab('pomodoro');
+      showToast(`Pomodoro vinculado a "${h.name}"`, "⏱️");
+    }
+
+    function linkTaskToPomodoro(taskId) {
+      const t = appState.tasks.find(x => x.id === taskId);
+      if (!t) return;
+
+      pomodoroState.linkedTargetName = t.name;
+      pomodoroState.linkedTargetIcon = '📋';
+      pomodoroState.durations.focus = 25 * 60;
+
+      setPomodoroMode('focus');
+      updateLinkedPomodoroTargetUI();
+      switchTab('pomodoro');
+      showToast(`Pomodoro vinculado a la tarea "${t.name}"`, "⏱️");
+    }
+
+    function updateLinkedPomodoroTargetUI() {
+      document.getElementById('pomodoro-linked-title').textContent = pomodoroState.linkedTargetName;
+      document.getElementById('pomodoro-linked-icon').textContent = pomodoroState.linkedTargetIcon;
+    }
+
+    function promptLinkPomodoroTarget() {
+      const habitNames = appState.habits.map(h => h.name).join('\n• ');
+      showCustomDialog({
+        title: "Vincular a Pomodoro",
+        message: `Selecciona cualquier hábito en "Mi Día" o tarea en "Carpetas & Tareas" haciendo clic en el ícono ⏱️ Pomodoro para enfocar tu sesión.`,
+        icon: "timer",
+        confirmText: "Entendido"
+      });
+    }
+
+    function loadJournalForToday() {
+      const today = getTodayKey();
+      const textarea = document.getElementById('daily-journal-input');
+      if (textarea) {
+        textarea.value = appState.journal[today] || '';
+      }
+    }
+
+    function saveJournalEntry(showFeedback = false) {
+      const today = getTodayKey();
+      const textarea = document.getElementById('daily-journal-input');
+      if (!textarea) return;
+
+      appState.journal[today] = textarea.value.trim();
+      saveLocalData();
+      checkAutoSyncTrigger();
+
+      const statusEl = document.getElementById('journal-status');
+      if (statusEl) {
+        statusEl.textContent = 'Guardado ' + new Date().toLocaleTimeString('es-ES', { hour: '2-digit', minute: '2-digit' });
+      }
+
+      if (showFeedback) {
+        showToast("¡Reflexión del día guardada!", "✍️");
+      }
+    }
+
+    function renderMonthlyGoals() {
+      const container = document.getElementById('monthly-goals-container');
+      const badge = document.getElementById('monthly-goals-progress-badge');
+      if (!container) return;
+
+      if (!appState.monthlyGoals || appState.monthlyGoals.length === 0) {
+        container.innerHTML = '<p class="text-[11px] text-slate-400 py-3 text-center">No hay metas agregadas para este mes.</p>';
+        if (badge) badge.textContent = '0%';
+        return;
+      }
+
+      container.innerHTML = '';
+      let completed = 0;
+
+      appState.monthlyGoals.forEach(goal => {
+        if (goal.completed) completed++;
+
+        const row = document.createElement('div');
+        row.className = 'flex items-center justify-between p-2 rounded-xl border border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-800/40 text-xs';
+        row.innerHTML = `
+          <label class="flex items-center gap-2 cursor-pointer min-w-0 flex-1">
+            <input type="checkbox" ${goal.completed ? 'checked' : ''} onchange="toggleGoal('${goal.id}')" class="w-4 h-4 rounded text-brand-600 focus:ring-brand-500">
+            <span class="truncate text-slate-800 dark:text-slate-200 ${goal.completed ? 'line-through text-slate-400' : ''}">
+              ${escapeHtml(goal.text)}
+            </span>
+          </label>
+          <button onclick="deleteGoal('${goal.id}')" class="p-1 text-slate-400 hover:text-rose-500">
+            <i data-lucide="trash-2" class="w-3.5 h-3.5"></i>
+          </button>
+        `;
+        container.appendChild(row);
+      });
+
+      const pct = Math.round((completed / appState.monthlyGoals.length) * 100);
+      if (badge) badge.textContent = `${pct}% cumplido`;
+
+      lucide.createIcons();
+    }
+
+    function addMonthlyGoal() {
+      const input = document.getElementById('new-monthly-goal-input');
+      const text = input.value.trim();
+      if (!text) return;
+
+      appState.monthlyGoals.push({
+        id: 'g-' + Date.now(),
+        text,
+        completed: false
+      });
+
+      input.value = '';
+      saveLocalData();
+      renderMonthlyGoals();
+      showToast("Meta del mes agregada", "🎯");
+      checkAutoSyncTrigger();
+    }
+
+    function toggleGoal(id) {
+      const g = appState.monthlyGoals.find(x => x.id === id);
+      if (g) {
+        g.completed = !g.completed;
+        saveLocalData();
+        renderMonthlyGoals();
+        if (g.completed) {
+          playSynthesizedChime('success');
+          triggerCelebrationConfetti();
+        }
+        checkAutoSyncTrigger();
+      }
+    }
+
+    function deleteGoal(id) {
+      appState.monthlyGoals = appState.monthlyGoals.filter(x => x.id !== id);
+      saveLocalData();
+      renderMonthlyGoals();
+      showToast("Meta eliminada", "🗑️");
+      checkAutoSyncTrigger();
     }
 
     function renderConsistencyHeatmap() {
@@ -1215,13 +1763,9 @@
         const ratio = totalHabits > 0 ? (completed / totalHabits) : 0;
         let colorClass = 'bg-slate-100 dark:bg-slate-800';
 
-        if (ratio > 0 && ratio <= 0.33) {
-          colorClass = 'bg-emerald-200 dark:bg-emerald-950 text-emerald-800';
-        } else if (ratio > 0.33 && ratio <= 0.66) {
-          colorClass = 'bg-emerald-400 dark:bg-emerald-700 text-emerald-950';
-        } else if (ratio > 0.66) {
-          colorClass = 'bg-emerald-600 dark:bg-emerald-500 text-white';
-        }
+        if (ratio > 0 && ratio <= 0.33) colorClass = 'bg-emerald-200 dark:bg-emerald-950 text-emerald-800';
+        else if (ratio > 0.33 && ratio <= 0.66) colorClass = 'bg-emerald-400 dark:bg-emerald-700 text-emerald-950';
+        else if (ratio > 0.66) colorClass = 'bg-emerald-600 dark:bg-emerald-500 text-white';
 
         const dateFormatted = d.toLocaleDateString('es-ES', { weekday: 'short', day: 'numeric', month: 'short' });
         const box = document.createElement('div');
@@ -1247,7 +1791,7 @@
       const textColor = isDark ? '#94a3b8' : '#64748b';
       const gridColor = isDark ? '#334155' : '#e2e8f0';
 
-      // 1. Category Chart
+      // 1. Categories doughnut
       const ctxCat = document.getElementById('categoryChart');
       if (ctxCat) {
         if (chartInstanceCategory) chartInstanceCategory.destroy();
@@ -1282,7 +1826,7 @@
         });
       }
 
-      // 2. Weekly Trend Chart
+      // 2. Weekly Trend Bar Chart
       const ctxWeekly = document.getElementById('weeklyChart');
       if (ctxWeekly) {
         if (chartInstanceWeekly) chartInstanceWeekly.destroy();
@@ -1336,12 +1880,94 @@
                 grid: { display: false }
               }
             },
-            plugins: {
-              legend: { display: false }
-            }
+            plugins: { legend: { display: false } }
           }
         });
       }
+    }
+
+    function updateDailyProgress() {
+      const today = getTodayKey();
+      const todayLogs = appState.logs[today] || {};
+      const totalHabits = appState.habits.length;
+
+      if (totalHabits === 0) {
+        document.getElementById('progress-percent-label').textContent = '0%';
+        document.getElementById('progress-count-label').textContent = '0 de 0 completados';
+        document.getElementById('daily-progress-bar').style.width = '0%';
+        return;
+      }
+
+      let completedCount = 0;
+      appState.habits.forEach(h => {
+        const val = todayLogs[h.id] || 0;
+        if (h.type === 'simple' && val >= 1) completedCount++;
+        else if (h.type === 'quantitative' && val >= h.target) completedCount++;
+      });
+
+      const percentage = Math.round((completedCount / totalHabits) * 100);
+      document.getElementById('progress-percent-label').textContent = `${percentage}%`;
+      document.getElementById('progress-count-label').textContent = `${completedCount} de ${totalHabits} completados`;
+      document.getElementById('daily-progress-bar').style.width = `${percentage}%`;
+    }
+
+    function calculateHabitStreak(habitId) {
+      const habit = appState.habits.find(h => h.id === habitId);
+      if (!habit) return 0;
+
+      let streak = 0;
+      let checkDate = new Date();
+      const todayKey = getTodayKey();
+      const todayVal = (appState.logs[todayKey] || {})[habitId] || 0;
+      const isTodayComplete = habit.type === 'simple' ? todayVal >= 1 : todayVal >= habit.target;
+
+      if (!isTodayComplete) checkDate.setDate(checkDate.getDate() - 1);
+
+      while (true) {
+        const k = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+        const val = (appState.logs[k] || {})[habitId] || 0;
+        const ok = habit.type === 'simple' ? val >= 1 : val >= habit.target;
+
+        if (ok) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+      return streak;
+    }
+
+    function updateGlobalStreak() {
+      let streak = 0;
+      let checkDate = new Date();
+      const todayKey = getTodayKey();
+
+      const hasAnyToday = hasAtLeastOneCompleted(todayKey);
+      if (!hasAnyToday) checkDate.setDate(checkDate.getDate() - 1);
+
+      while (true) {
+        const k = `${checkDate.getFullYear()}-${String(checkDate.getMonth() + 1).padStart(2, '0')}-${String(checkDate.getDate()).padStart(2, '0')}`;
+        if (hasAtLeastOneCompleted(k)) {
+          streak++;
+          checkDate.setDate(checkDate.getDate() - 1);
+        } else {
+          break;
+        }
+      }
+
+      const streakEl = document.getElementById('global-streak-count');
+      if (streakEl) streakEl.textContent = streak;
+    }
+
+    function hasAtLeastOneCompleted(dateKey) {
+      const dayLog = appState.logs[dateKey];
+      if (!dayLog) return false;
+
+      return appState.habits.some(h => {
+        const val = dayLog[h.id] || 0;
+        return h.type === 'simple' ? val >= 1 : val >= h.target;
+      });
     }
 
     function filterCategory(catKey) {
@@ -1359,7 +1985,7 @@
     }
 
     function switchTab(tabId) {
-      const tabs = ['today', 'stats', 'manager'];
+      const tabs = ['today', 'tasks', 'pomodoro', 'journal', 'stats'];
       tabs.forEach(t => {
         const btn = document.getElementById(`tab-btn-${t}`);
         const content = document.getElementById(`tab-content-${t}`);
@@ -1376,11 +2002,16 @@
       });
 
       if (tabId === 'today') renderTodayHabits();
+      if (tabId === 'tasks') renderFoldersAndTasks();
+      if (tabId === 'pomodoro') updatePomodoroDisplay();
+      if (tabId === 'journal') {
+        loadJournalForToday();
+        renderMonthlyGoals();
+      }
       if (tabId === 'stats') {
         renderConsistencyHeatmap();
         renderAnalyticsCharts();
       }
-      if (tabId === 'manager') renderManagerList();
 
       lucide.createIcons();
     }
@@ -1443,6 +2074,7 @@
           document.getElementById('habit-id').value = habit.id;
           document.getElementById('habit-name').value = habit.name;
           document.getElementById('habit-icon').value = habit.icon || '🎯';
+          document.getElementById('habit-minutes').value = habit.minutes || 25;
           
           const catRadio = form.querySelector(`input[name="habit-category"][value="${habit.category}"]`);
           if (catRadio) catRadio.checked = true;
@@ -1460,7 +2092,8 @@
           }
         }
       } else {
-        title.textContent = 'Nuevo Hábito';
+        title.textContent = 'Crear Nuevo Hábito';
+        document.getElementById('habit-minutes').value = 25;
         toggleHabitTypeFields('simple');
       }
 
@@ -1477,11 +2110,8 @@
 
     function toggleHabitTypeFields(type) {
       const quantFields = document.getElementById('quantitative-fields');
-      if (type === 'quantitative') {
-        quantFields.classList.remove('hidden');
-      } else {
-        quantFields.classList.add('hidden');
-      }
+      if (type === 'quantitative') quantFields.classList.remove('hidden');
+      else quantFields.classList.add('hidden');
     }
 
     function selectIcon(iconChar) {
@@ -1501,16 +2131,11 @@
       const category = document.querySelector('input[name="habit-category"]:checked').value;
       const type = document.querySelector('input[name="habit-type"]:checked').value;
       const icon = document.getElementById('habit-icon').value || '🎯';
+      const minutes = parseInt(document.getElementById('habit-minutes').value, 10) || 0;
 
       if (!name) return;
 
-      let habitObj = {
-        name,
-        category,
-        type,
-        icon,
-        createdAt: new Date().toISOString()
-      };
+      let habitObj = { name, category, type, icon, minutes };
 
       if (type === 'quantitative') {
         habitObj.target = parseFloat(document.getElementById('habit-target').value) || 1;
@@ -1524,46 +2149,84 @@
 
       if (id) {
         const index = appState.habits.findIndex(h => h.id === id);
-        if (index !== -1) {
-          appState.habits[index] = { ...appState.habits[index], ...habitObj };
-        }
-        showToast("Hábito actualizado correctamente", "✏️");
+        if (index !== -1) appState.habits[index] = { ...appState.habits[index], ...habitObj };
+        showToast("Hábito actualizado", "✏️");
       } else {
         habitObj.id = 'h-' + Date.now();
-        // New habits are appended to the user list
         appState.habits.push(habitObj);
-        showToast("¡Nuevo hábito agregado con éxito!", "✨");
+        showToast("¡Hábito creado con éxito!", "✨");
       }
 
       saveLocalData();
       closeHabitModal();
       renderTodayHabits();
-      renderManagerList();
       checkAutoSyncTrigger();
     }
 
-    function editHabit(habitId) {
-      openHabitModal(habitId);
+    function openFolderModal() {
+      const modal = document.getElementById('folder-modal');
+      const content = document.getElementById('folder-modal-content');
+      document.getElementById('folder-name-input').value = '';
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      content.classList.remove('scale-95');
     }
 
-    function confirmDeleteHabit(habitId) {
-      const habit = appState.habits.find(h => h.id === habitId);
-      if (!habit) return;
+    function closeFolderModal() {
+      const modal = document.getElementById('folder-modal');
+      const content = document.getElementById('folder-modal-content');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      content.classList.add('scale-95');
+    }
 
-      showCustomDialog({
-        title: "¿Eliminar Hábito?",
-        message: `¿Estás seguro de que deseas eliminar "${habit.name}"? Los datos de progreso histórico se conservarán pero el hábito ya no aparecerá en tu día.`,
-        icon: "trash-2",
-        confirmText: "Sí, Eliminar",
-        onConfirm: () => {
-          appState.habits = appState.habits.filter(h => h.id !== habitId);
-          saveLocalData();
-          renderTodayHabits();
-          renderManagerList();
-          showToast("Hábito eliminado", "🗑️");
-          checkAutoSyncTrigger();
-        }
+    function handleFolderSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('folder-name-input').value.trim();
+      const icon = document.getElementById('folder-icon-input').value.trim() || '📁';
+      if (!name) return;
+
+      appState.folders.push({ id: 'f-' + Date.now(), name, icon });
+      saveLocalData();
+      closeFolderModal();
+      renderFoldersAndTasks();
+      showToast("¡Carpeta Madre creada!", "📁");
+      checkAutoSyncTrigger();
+    }
+
+    function openTaskModal() {
+      const modal = document.getElementById('task-modal');
+      const content = document.getElementById('task-modal-content');
+      document.getElementById('task-name-input').value = '';
+      modal.classList.remove('opacity-0', 'pointer-events-none');
+      content.classList.remove('scale-95');
+    }
+
+    function closeTaskModal() {
+      const modal = document.getElementById('task-modal');
+      const content = document.getElementById('task-modal-content');
+      modal.classList.add('opacity-0', 'pointer-events-none');
+      content.classList.add('scale-95');
+    }
+
+    function handleTaskSubmit(e) {
+      e.preventDefault();
+      const name = document.getElementById('task-name-input').value.trim();
+      const folderId = document.getElementById('task-folder-select').value;
+      const priority = document.querySelector('input[name="task-priority"]:checked').value;
+      if (!name) return;
+
+      appState.tasks.push({
+        id: 't-' + Date.now(),
+        name,
+        folderId: folderId || 'f-uni',
+        priority,
+        completed: false
       });
+
+      saveLocalData();
+      closeTaskModal();
+      renderFoldersAndTasks();
+      showToast("¡Tarea creada exitosamente!", "📋");
+      checkAutoSyncTrigger();
     }
 
     function openSettingsModal() {
@@ -1597,7 +2260,7 @@
         appSettings.userName = nameInput.value.trim();
         saveLocalData();
         updateGreetingAndDate();
-        showToast("Nombre actualizado", "👋");
+        showToast("Nombre guardado", "👋");
       }
     }
 
@@ -1625,7 +2288,7 @@
       appSettings.gasUrl = url;
       saveLocalData();
       updateCloudStatusBadge();
-      showToast("Configuración de nube guardada", "☁️");
+      showToast("Configuración de Sheets guardada", "☁️");
     }
 
     function toggleAutoSync(enabled) {
@@ -1653,7 +2316,7 @@
         return;
       }
 
-      if (!isSilent) showToast("Enviando datos a Google Sheets...", "⏳");
+      if (!isSilent) showToast("Subiendo datos a Google Sheets...", "⏳");
 
       try {
         const payload = {
@@ -1676,8 +2339,7 @@
 
         if (!isSilent) showToast("¡Sincronizado con Google Sheets!", "✅");
       } catch (err) {
-        console.error("Error en sincronización con Sheets:", err);
-        if (!isSilent) showToast("Error de conexión con Google Sheets.", "❌");
+        if (!isSilent) showToast("Error de conexión con Sheets.", "❌");
       }
     }
 
@@ -1692,7 +2354,7 @@
         return;
       }
 
-      showToast("Descargando datos de Google Sheets...", "⏳");
+      showToast("Descargando desde Google Sheets...", "⏳");
 
       try {
         const res = await fetch(appSettings.gasUrl);
@@ -1702,20 +2364,19 @@
           appState = data.state;
           saveLocalData();
           renderTodayHabits();
-          renderManagerList();
+          renderFoldersAndTasks();
           showToast("¡Datos restaurados desde Google Sheets!", "🎉");
         } else {
-          showToast("No se encontraron datos válidos en la hoja.", "⚠️");
+          showToast("No se encontraron datos en la hoja.", "⚠️");
         }
       } catch (err) {
-        console.error("Error al descargar:", err);
-        showToast("No se pudo descargar la hoja. Verifica permisos públicos.", "❌");
+        showToast("No se pudo descargar de la hoja.", "❌");
       }
     }
 
     function exportJSONBackup() {
       const backupData = {
-        version: "2.0",
+        version: "3.0",
         exportedAt: new Date().toISOString(),
         state: appState,
         settings: appSettings
@@ -1728,7 +2389,7 @@
       link.download = `HabitFlow360_Respaldo_${getTodayKey()}.json`;
       link.click();
       URL.revokeObjectURL(url);
-      showToast("Respaldo descargado con éxito", "📁");
+      showToast("Respaldo descargado", "📁");
     }
 
     function importJSONBackup(event) {
@@ -1745,10 +2406,10 @@
             saveLocalData();
             applyTheme();
             renderTodayHabits();
-            renderManagerList();
-            showToast("¡Respaldo importado satisfactoriamente!", "🚀");
+            renderFoldersAndTasks();
+            showToast("¡Respaldo importado!", "🚀");
           } else {
-            showToast("Formato de archivo inválido", "❌");
+            showToast("Formato JSON inválido", "❌");
           }
         } catch (err) {
           showToast("Error al leer el archivo JSON", "❌");
@@ -1761,18 +2422,21 @@
     function confirmFactoryReset() {
       showCustomDialog({
         title: "¿Reiniciar Todo a 0?",
-        message: "Esta acción borrará permanentemente todos tus hábitos, el progreso histórico y reiniciará la racha a 0 días. ¿Deseas continuar?",
+        message: "Esta acción borrará hábitos, tareas, carpetas, notas del diario y pondrá la racha en 0 días. ¿Deseas continuar?",
         icon: "alert-triangle",
         confirmText: "Sí, reiniciar todo",
         onConfirm: () => {
           appState.habits = [];
+          appState.tasks = [];
+          appState.folders = [{ id: 'f-all', name: 'Todas las Carpetas', icon: '📂' }];
+          appState.monthlyGoals = [];
+          appState.journal = {};
           appState.logs = {};
           saveLocalData();
           closeSettingsModal();
           renderTodayHabits();
-          renderManagerList();
-          renderConsistencyHeatmap();
-          renderAnalyticsCharts();
+          renderFoldersAndTasks();
+          renderMonthlyGoals();
           showToast("Aplicación restablecida a 0", "🔄");
         }
       });
@@ -1847,24 +2511,20 @@
 
     function escapeHtml(text) {
       if (!text) return '';
-      return text
-        .replace(/&/g, "&amp;")
-        .replace(/</g, "&lt;")
-        .replace(/>/g, "&gt;")
-        .replace(/"/g, "&quot;")
-        .replace(/'/g, "&#039;");
+      return text.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
     }
 
-    // Initialize application on DOM ready
     window.addEventListener('DOMContentLoaded', () => {
       loadLocalData();
       applyTheme();
       updateGreetingAndDate();
       renderTodayHabits();
-      renderManagerList();
+      renderFoldersAndTasks();
+      loadJournalForToday();
+      renderMonthlyGoals();
       updateCloudStatusBadge();
 
-      // Theme button listener
+      // Theme toggle listener
       const themeBtn = document.getElementById('theme-toggle-btn');
       if (themeBtn) {
         themeBtn.addEventListener('click', () => {
@@ -1877,11 +2537,19 @@
         });
       }
 
-      // Quick cloud sync button in header
+      // Quick cloud sync listener
       const quickSyncBtn = document.getElementById('btn-quick-sync');
       if (quickSyncBtn) {
         quickSyncBtn.addEventListener('click', () => {
           syncToCloud(false);
+        });
+      }
+
+      // Auto-save journal on input changes
+      const journalInput = document.getElementById('daily-journal-input');
+      if (journalInput) {
+        journalInput.addEventListener('input', () => {
+          saveJournalEntry(false);
         });
       }
 
