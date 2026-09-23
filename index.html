@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>HabitFlow 360 v6 — Mascotas de Cuerpo Completo & Gamificación</title>
+  <title>HabitFlow 360 v6 — Hábitos, Tareas y Mascotas Realistas</title>
   
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -48,12 +48,14 @@
       -webkit-tap-highlight-color: transparent;
     }
     
-    /* Modern sleek scrollbar */
     ::-webkit-scrollbar {
       width: 5px;
       height: 5px;
     }
     ::-webkit-scrollbar-track {
+      background: rgba(15, 23, 42, 0.1);
+    }
+    .dark ::-webkit-scrollbar-track {
       background: rgba(15, 23, 42, 0.4);
     }
     ::-webkit-scrollbar-thumb {
@@ -74,198 +76,124 @@
       pointer-events: none;
     }
 
-    /* Glassmorphism containers */
+    /* Glassmorphism containers with full light and dark mode support */
     .glassmorphism {
-      background: rgba(15, 23, 42, 0.82);
+      background: rgba(255, 255, 255, 0.88);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border: 1px solid rgba(226, 232, 240, 0.8);
+    }
+    .dark .glassmorphism {
+      background: rgba(15, 23, 42, 0.85);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    .light .glassmorphism {
-      background: rgba(255, 255, 255, 0.88);
-      backdrop-filter: blur(16px);
-      -webkit-backdrop-filter: blur(16px);
-      border: 1px solid rgba(0, 0, 0, 0.08);
-    }
 
-    /* Mascot full-body physics animation */
-    @keyframes petBreathing {
-      0%, 100% { transform: translateY(0px) scale(1) rotate(0deg); }
-      50% { transform: translateY(-7px) scale(1.02) rotate(1deg); }
+    /* Realistic breathing & life motion */
+    @keyframes realisticBreathing {
+      0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15)); }
+      50% { transform: translateY(-8px) scale(1.015); filter: drop-shadow(0 20px 25px rgba(16, 185, 129, 0.25)); }
     }
     @keyframes auraPulse {
-      0%, 100% { box-shadow: 0 0 20px rgba(16, 185, 129, 0.25); filter: drop-shadow(0 0 8px rgba(16, 185, 129, 0.3)); }
-      50% { box-shadow: 0 0 38px rgba(16, 185, 129, 0.7); filter: drop-shadow(0 0 16px rgba(16, 185, 129, 0.6)); }
+      0%, 100% { opacity: 0.5; transform: scale(0.98); }
+      50% { opacity: 0.9; transform: scale(1.04); }
     }
-    .pet-floating { animation: petBreathing 3.6s ease-in-out infinite; }
-    .aura-glow { animation: auraPulse 3.4s ease-in-out infinite; }
+    @keyframes tailWag {
+      0%, 100% { transform: rotate(0deg); }
+      50% { transform: rotate(7deg); }
+    }
+    .pet-life-animation { 
+      animation: realisticBreathing 4s ease-in-out infinite; 
+      transform-origin: bottom center;
+    }
+    .aura-glow-effect { 
+      animation: auraPulse 3.5s ease-in-out infinite; 
+    }
+    .wag-tail {
+      transform-origin: 25px 75px;
+      animation: tailWag 1.8s ease-in-out infinite;
+    }
 
-    /* Custom touch tap prevention */
     button:active { transform: scale(0.97); }
   </style>
 </head>
 
-<body class="bg-slate-950 text-slate-100 min-h-screen selection:bg-emerald-500 selection:text-white transition-colors duration-300 relative pb-24 md:pb-12 overflow-x-hidden">
+<body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen selection:bg-emerald-500 selection:text-white transition-colors duration-300 relative pb-28 md:pb-12 overflow-x-hidden">
 
   <!-- Interactive 3D Background Canvas -->
   <canvas id="canvas3d"></canvas>
 
   <!-- Main Container -->
-  <div class="max-w-4xl mx-auto px-3.5 py-4 md:py-7 relative z-10">
+  <div class="max-w-4xl mx-auto px-3.5 py-4 md:py-6 relative z-10">
 
     <!-- Daily Motivational Banner -->
-    <div class="bg-gradient-to-r from-emerald-600/20 via-teal-600/20 to-blue-600/20 border border-emerald-500/30 backdrop-blur-md p-3 rounded-2xl mb-4 text-center text-xs font-semibold text-emerald-300 flex items-center justify-center gap-2 shadow-sm">
+    <div class="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 dark:from-emerald-600/20 dark:via-teal-600/20 dark:to-blue-600/20 border border-emerald-500/30 backdrop-blur-md p-3 rounded-2xl mb-4 text-center text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center justify-center gap-2 shadow-sm">
       <span class="text-base">✨</span>
       <span id="quoteText">"El éxito es la suma de pequeños esfuerzos repetidos día tras día."</span>
     </div>
 
     <!-- App Header & Control Bar -->
-    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glassmorphism p-4 md:p-5 rounded-3xl shadow-lg mb-5">
+    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glassmorphism p-4 md:p-5 rounded-3xl shadow-sm mb-4">
       <div>
         <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 flex items-center justify-center shadow-lg shadow-emerald-500/30 text-white font-black text-lg">
+          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-black text-lg">
             ⚡
           </div>
           <div>
-            <h1 class="text-xl md:text-2xl font-black tracking-tight bg-gradient-to-r from-emerald-400 via-teal-300 to-cyan-300 bg-clip-text text-transparent flex items-center gap-2">
-              HabitFlow 360 <span class="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-300 border border-emerald-500/40">v6</span>
+            <h1 class="text-xl md:text-2xl font-black tracking-tight bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent flex items-center gap-2">
+              HabitFlow 360 <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">v6</span>
             </h1>
-            <p id="greetingText" class="text-xs text-slate-400 font-medium">
-              ¡Hola! 👋 Tu rutina diaria y evolución de cuerpo completo a 1 clic.
+            <p id="greetingText" class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+              ¡Hola! Tu rutina diaria y productividad al alcance de un toque.
             </p>
           </div>
         </div>
       </div>
 
       <!-- Right Header Controls -->
-      <div class="flex items-center gap-2">
-        <button onclick="openTourModal()" class="p-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 font-bold text-xs transition border border-slate-700" title="Guía Rápida">
-          ❓
+      <div class="flex items-center gap-2 flex-wrap">
+        <!-- Quick compact Pet Pill: jumps to Pet Tab without cluttering the screen -->
+        <button onclick="switchTab('tabPet')" class="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold hover:scale-105 transition shadow-sm" title="Ver mi Mascota">
+          <span id="headerPetIcon" class="text-sm">🐾</span>
+          <span id="headerPetName" class="font-extrabold max-w-[90px] truncate">Perro Fiel</span>
+          <span id="headerPetStageBadge" class="text-[10px] px-1.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-black">Fase 1</span>
         </button>
 
-        <div class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-2 rounded-2xl text-amber-300 font-black text-xs shadow-sm">
+        <div class="flex items-center gap-1.5 bg-amber-500/10 border border-amber-500/30 px-3 py-2 rounded-2xl text-amber-600 dark:text-amber-300 font-black text-xs shadow-sm">
           <span>🔥</span>
           <span id="streakCounter">0 Días</span>
         </div>
 
-        <button onclick="toggleTheme()" class="p-2.5 rounded-2xl bg-slate-800/80 hover:bg-slate-700 text-slate-300 transition border border-slate-700" title="Alternar Modo Claro/Oscuro">
+        <button onclick="openTourModal()" class="p-2.5 rounded-2xl bg-slate-200 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition border border-slate-300 dark:border-slate-700" title="Guía Rápida">
+          ❓
+        </button>
+
+        <button onclick="toggleTheme()" class="p-2.5 rounded-2xl bg-slate-200 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition border border-slate-300 dark:border-slate-700" title="Modo Claro/Oscuro">
           <i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i>
         </button>
 
-        <button onclick="openSettingsModal()" class="p-2.5 rounded-2xl bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/40 transition shadow-sm" title="Ajustes">
+        <button onclick="openSettingsModal()" class="p-2.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 transition shadow-sm" title="Ajustes">
           <i data-lucide="settings" class="w-4 h-4"></i>
         </button>
       </div>
     </header>
 
-    <!-- Full-Body Mascot Evolution Card -->
-    <div class="bg-gradient-to-br from-slate-900/95 via-emerald-950/80 to-slate-900/95 p-5 md:p-6 rounded-3xl shadow-2xl border border-emerald-500/30 mb-6 backdrop-blur-md relative overflow-hidden aura-glow">
-      <div class="flex flex-col sm:flex-row items-center gap-6">
-        
-        <!-- Mascot 3D Pedestal & Habitat -->
-        <div class="relative flex-shrink-0 text-center flex flex-col items-center justify-center">
-          <div class="w-40 h-40 md:w-44 md:h-44 rounded-3xl bg-slate-950/70 border border-emerald-500/40 p-3 flex flex-col items-center justify-center relative shadow-inner overflow-hidden">
-            
-            <!-- Pedestal Habitat Base / Shadow Platform -->
-            <div class="absolute bottom-2.5 w-32 h-6 bg-emerald-500/25 rounded-full blur-sm"></div>
-            
-            <!-- Floating Level Accessory Badge -->
-            <div id="petAccessory" class="absolute top-2.5 right-2.5 text-2xl z-20 transition-all duration-300">🍼</div>
-
-            <!-- Full-Body Animal Visual Component -->
-            <div id="petFullBodyContainer" class="w-28 h-28 pet-floating z-10 flex items-center justify-center transition-all duration-500">
-              <!-- Dynamically populated Full-Body SVG -->
-            </div>
-          </div>
-
-          <span id="petPhaseBadge" class="inline-block mt-3 px-3.5 py-1 rounded-full bg-emerald-500/20 text-emerald-300 text-[10px] font-black uppercase tracking-wider border border-emerald-500/40 shadow-sm">
-            Fase 1: Bebé 🐣
-          </span>
-        </div>
-
-        <!-- Mascot Stats, Levels & Auto-care Vitals -->
-        <div class="flex-1 w-full space-y-3.5">
-          <div class="flex items-center justify-between">
-            <div>
-              <h3 class="text-lg md:text-xl font-black text-white flex items-center gap-2">
-                <span id="petNameText">Perro Fiel</span> 
-                <button onclick="openPetSelectModal()" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold bg-emerald-950/90 px-2.5 py-1 rounded-xl border border-emerald-500/40 transition">
-                  (Cambiar 🐾)
-                </button>
-              </h3>
-              <p id="petStageTitle" class="text-xs text-emerald-300 font-bold mt-0.5">🐾 Cachorrito de Cuerpo Completo</p>
-            </div>
-            <div class="text-right">
-              <span id="petXpTotal" class="text-2xl font-black text-amber-400">0 XP</span>
-              <span class="block text-[10px] text-slate-400 font-semibold uppercase">Experiencia</span>
-            </div>
-          </div>
-
-          <!-- Evolution Level Bar -->
-          <div>
-            <div class="flex justify-between text-[11px] font-extrabold text-slate-300 mb-1">
-              <span>Progreso de Fase</span>
-              <span id="petXpRatio">0 / 100 XP</span>
-            </div>
-            <div class="w-full bg-slate-800/90 rounded-full h-3 p-0.5 overflow-hidden border border-slate-700">
-              <div id="petXpBarFill" class="bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 h-full rounded-full transition-all duration-500 shadow-sm" style="width: 0%"></div>
-            </div>
-          </div>
-
-          <!-- Automated Vitals: Nutrition & Evolutionary Happiness -->
-          <div class="grid grid-cols-2 gap-3 pt-1">
-            <div class="bg-slate-800/70 p-2.5 rounded-2xl border border-slate-700/60 flex flex-col justify-between">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1">🍎 Nutrición</span>
-                <button onclick="feedPetManual()" class="text-[10px] text-emerald-400 font-bold hover:underline bg-slate-900/50 px-2 py-0.5 rounded-lg border border-emerald-500/30">+ Snack</button>
-              </div>
-              <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
-                <div id="petHungerFill" class="bg-emerald-400 h-full rounded-full transition-all duration-300" style="width: 85%"></div>
-              </div>
-            </div>
-            <div class="bg-slate-800/70 p-2.5 rounded-2xl border border-slate-700/60 flex flex-col justify-between">
-              <div class="flex items-center justify-between mb-1.5">
-                <span class="text-[11px] font-bold text-slate-300 flex items-center gap-1">💖 Felicidad</span>
-                <button onclick="petMascotManual()" class="text-[10px] text-pink-400 font-bold hover:underline bg-slate-900/50 px-2 py-0.5 rounded-lg border border-pink-500/30">✨ Acariciar</button>
-              </div>
-              <div class="w-full bg-slate-700 h-2 rounded-full overflow-hidden">
-                <div id="petHappinessFill" class="bg-amber-400 h-full rounded-full transition-all duration-300" style="width: 90%"></div>
-              </div>
-            </div>
-          </div>
-        </div>
-
-      </div>
-    </div>
-
-    <!-- Daily Progress Summary Card -->
-    <div class="bg-gradient-to-br from-emerald-600 via-emerald-700 to-teal-800 text-white p-5 rounded-3xl shadow-xl mb-6 backdrop-blur-md">
-      <div class="flex items-center justify-between mb-2.5">
-        <div>
-          <span class="text-[10px] uppercase tracking-widest font-black text-emerald-100">Progreso de Hoy</span>
-          <h2 id="progressRatio" class="text-xl md:text-2xl font-black mt-0.5">0 de 0 completados</h2>
-        </div>
-        <div class="text-right">
-          <span id="progressPercentage" class="text-2xl md:text-3xl font-black">0%</span>
-        </div>
+    <!-- Desktop Navigation Bar (Direct view switching) -->
+    <div class="hidden md:flex items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3 mb-5">
+      <div class="flex items-center gap-1.5 flex-wrap">
+        <button onclick="switchTab('tabToday')" id="tabTodayBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold bg-emerald-600 text-white shadow-md transition">📋 Hábitos</button>
+        <button onclick="switchTab('tabTasks')" id="tabTasksBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">📁 Tareas</button>
+        <button onclick="switchTab('tabPomodoro')" id="tabPomodoroBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">⏱️ Pomodoro</button>
+        <button onclick="switchTab('tabPet')" id="tabPetBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition flex items-center gap-1.5">
+          <span>🐾 Mascota</span>
+          <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+        </button>
+        <button onclick="switchTab('tabJournal')" id="tabJournalBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">✍️ Diario</button>
+        <button onclick="switchTab('tabStats')" id="tabStatsBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">📊 Analítica</button>
       </div>
 
-      <div class="w-full bg-emerald-950/40 rounded-full h-3.5 p-0.5 overflow-hidden border border-emerald-400/30">
-        <div id="progressBarFill" class="bg-white h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
-      </div>
-    </div>
-
-    <!-- Desktop Navigation Bar -->
-    <div class="hidden md:flex items-center justify-between gap-3 border-b border-slate-800 pb-3 mb-6">
-      <div class="flex items-center gap-2">
-        <button onclick="switchTab('tabToday')" id="tabTodayBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold bg-emerald-500 text-white shadow-md transition">📋 Hábitos</button>
-        <button onclick="switchTab('tabTasks')" id="tabTasksBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-400 hover:bg-slate-800 transition">📁 Tareas</button>
-        <button onclick="switchTab('tabPomodoro')" id="tabPomodoroBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-400 hover:bg-slate-800 transition">⏱️ Pomodoro</button>
-        <button onclick="switchTab('tabJournal')" id="tabJournalBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-400 hover:bg-slate-800 transition">✍️ Diario</button>
-        <button onclick="switchTab('tabStats')" id="tabStatsBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-400 hover:bg-slate-800 transition">📊 Analítica</button>
-      </div>
-
-      <button onclick="openAddHabitModal()" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-4 py-2 rounded-2xl text-xs md:text-sm font-bold shadow-lg shadow-emerald-600/30 transition active:scale-95">
+      <button onclick="openAddHabitModal()" class="flex items-center gap-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white px-4 py-2 rounded-2xl text-xs md:text-sm font-bold shadow-md shadow-emerald-600/20 transition active:scale-95">
         <i data-lucide="plus-circle" class="w-4 h-4"></i>
         <span>Nuevo Hábito</span>
       </button>
@@ -273,19 +201,42 @@
 
     <!-- ================= TAB 1: HÁBITOS ================= -->
     <section id="tabToday" class="tab-pane space-y-4">
-      <div class="flex md:hidden justify-between items-center mb-2">
-        <h3 class="font-bold text-sm text-slate-200">Mis Hábitos Diarios</h3>
-        <button onclick="openAddHabitModal()" class="bg-emerald-600 text-white px-3 py-1.5 rounded-xl text-xs font-bold shadow-sm">+ Agregar</button>
+      
+      <!-- Daily Habit Progress Summary Bar (Clean & Lightweight) -->
+      <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 md:p-5 rounded-3xl shadow-lg">
+        <div class="flex items-center justify-between mb-2">
+          <div>
+            <span class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-100">Progreso de Hábitos Hoy</span>
+            <h2 id="progressRatio" class="text-lg md:text-xl font-black mt-0.5">0 de 0 completados</h2>
+          </div>
+          <div class="text-right">
+            <span id="progressPercentage" class="text-2xl md:text-3xl font-black">0%</span>
+          </div>
+        </div>
+        <div class="w-full bg-emerald-950/30 rounded-full h-3 p-0.5 overflow-hidden">
+          <div id="progressBarFill" class="bg-white h-full rounded-full transition-all duration-500 ease-out" style="width: 0%"></div>
+        </div>
+      </div>
+
+      <div class="flex justify-between items-center px-1">
+        <h3 class="font-black text-sm md:text-base text-slate-800 dark:text-slate-100 flex items-center gap-2">
+          <span>📋 Rutina Diaria</span>
+          <span class="text-xs font-normal text-slate-500 dark:text-slate-400">(Reordena con ⬆️ ⬇️)</span>
+        </h3>
+        <button onclick="openAddHabitModal()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-3.5 py-1.5 rounded-xl text-xs font-bold shadow-sm transition active:scale-95 flex items-center gap-1.5">
+          <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+          <span>Agregar</span>
+        </button>
       </div>
       
       <!-- Habits Grid -->
       <div id="habitsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
       
       <!-- Empty state -->
-      <div id="emptyHabitsState" class="hidden text-center py-12 glassmorphism rounded-3xl border border-dashed border-slate-700 p-6">
+      <div id="emptyHabitsState" class="hidden text-center py-12 glassmorphism rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 p-6">
         <span class="text-4xl block mb-2">🌱</span>
-        <h3 class="text-base font-bold text-slate-200">No tienes hábitos registrados</h3>
-        <p class="text-xs text-slate-400 mt-1 mb-4">Crea tu primer hábito para alimentar a tu mascota y subir de nivel.</p>
+        <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">No tienes hábitos registrados</h3>
+        <p class="text-xs text-slate-500 dark:text-slate-400 mt-1 mb-4">Crea tu primer hábito para sumar XP y alimentar a tu mascota.</p>
         <button onclick="openAddHabitModal()" class="px-5 py-2.5 rounded-2xl bg-emerald-600 text-white text-xs font-bold shadow-md hover:bg-emerald-500 transition">
           + Crear Primer Hábito
         </button>
@@ -293,14 +244,14 @@
     </section>
 
     <!-- ================= TAB 2: TAREAS ================= -->
-    <section id="tabTasks" class="tab-pane hidden space-y-5">
+    <section id="tabTasks" class="tab-pane hidden space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glassmorphism p-4 md:p-5 rounded-3xl shadow-sm">
         <div>
-          <h3 class="text-base font-bold text-slate-100 flex items-center gap-2">📂 Tareas por Carpetas Madre</h3>
-          <p class="text-xs text-slate-400">Organiza por Universidad, Casa, Trabajo o Proyectos (+10 XP cada una).</p>
+          <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">📂 Tareas por Carpetas Madre</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Organiza pendientes por Universidad, Casa, Trabajo (+10 XP cada una).</p>
         </div>
         <div class="flex items-center gap-2">
-          <button onclick="openAddFolderModal()" class="bg-slate-800 hover:bg-slate-700 text-slate-200 px-3.5 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-700">
+          <button onclick="openAddFolderModal()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-3.5 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-300 dark:border-slate-700">
             <i data-lucide="folder-plus" class="w-3.5 h-3.5"></i>
             <span>Nueva Carpeta</span>
           </button>
@@ -320,30 +271,30 @@
 
     <!-- ================= TAB 3: POMODORO ================= -->
     <section id="tabPomodoro" class="tab-pane hidden space-y-5">
-      <div class="glassmorphism p-6 md:p-8 rounded-3xl shadow-2xl text-center max-w-xl mx-auto border border-emerald-500/20 relative overflow-hidden">
+      <div class="glassmorphism p-6 md:p-8 rounded-3xl shadow-lg text-center max-w-xl mx-auto border border-emerald-500/20 relative overflow-hidden">
         
-        <!-- Linked Habit Banner (when invoked from habit) -->
-        <div id="pomoLinkedBanner" class="hidden mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/20 border border-purple-500/40 text-purple-300 text-xs font-bold animate-pulse">
+        <!-- Linked Habit Banner -->
+        <div id="pomoLinkedBanner" class="hidden mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-bold animate-pulse">
           <i data-lucide="link" class="w-3.5 h-3.5"></i>
           <span id="pomoLinkedTitle">Enfoque: Estudiar Código</span>
         </div>
 
         <div class="flex items-center justify-center gap-2 mb-3">
-          <span class="px-3.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-full text-xs font-black uppercase" id="pomoModeBadge">
+          <span class="px-3.5 py-1 bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 rounded-full text-xs font-black uppercase" id="pomoModeBadge">
             🧠 Enfoque
           </span>
-          <span class="px-3.5 py-1 bg-amber-500/20 text-amber-300 border border-amber-500/40 rounded-full text-xs font-black uppercase" id="pomoCycleBadge">
+          <span class="px-3.5 py-1 bg-amber-500/10 dark:bg-amber-500/20 text-amber-700 dark:text-amber-300 border border-amber-500/30 rounded-full text-xs font-black uppercase" id="pomoCycleBadge">
             Ciclo 1 / 4
           </span>
         </div>
 
         <!-- Timer Display -->
-        <div id="pomoTimerDisplay" class="text-6xl md:text-8xl font-black font-mono my-4 md:my-6 text-emerald-400 tracking-tight select-none">
+        <div id="pomoTimerDisplay" class="text-6xl md:text-8xl font-black font-mono my-4 md:my-6 text-emerald-600 dark:text-emerald-400 tracking-tight select-none">
           25:00
         </div>
 
         <!-- Progress ring bar -->
-        <div class="w-64 max-w-full mx-auto mb-6 bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-700">
+        <div class="w-64 max-w-full mx-auto mb-6 bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-300 dark:border-slate-700">
           <div id="pomoProgressBar" class="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
         </div>
 
@@ -354,57 +305,152 @@
             <span id="pomoToggleLabel">Iniciar</span>
           </button>
           
-          <button onclick="finishPomodoroEarly()" class="bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-300 text-xs font-black px-4 py-3 rounded-2xl shadow-md transition active:scale-95 flex items-center gap-1.5">
+          <button onclick="finishPomodoroEarly()" class="bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/30 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 text-xs font-black px-4 py-3 rounded-2xl shadow-sm transition active:scale-95 flex items-center gap-1.5">
             <i data-lucide="check-circle" class="w-3.5 h-3.5"></i>
-            <span>✅ Marcar Hecho Ahora (+30 XP)</span>
+            <span>✅ Marcar Hecho (+30 XP)</span>
           </button>
           
-          <button onclick="cancelPomodoroSession()" class="bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-300 text-xs font-bold px-3.5 py-3 rounded-2xl transition active:scale-95" title="Cancelar Sesión">
+          <button onclick="cancelPomodoroSession()" class="bg-red-500/10 dark:bg-red-500/20 hover:bg-red-500/30 border border-red-500/40 text-red-600 dark:text-red-300 text-xs font-bold px-3.5 py-3 rounded-2xl transition active:scale-95" title="Cancelar Sesión">
             <i data-lucide="square" class="w-3.5 h-3.5"></i>
             <span>⏹️ Cancelar</span>
           </button>
 
-          <button onclick="resetPomodoroTimer()" class="bg-slate-800 hover:bg-slate-700 text-slate-300 p-3 rounded-2xl border border-slate-700 transition active:scale-95" title="Reiniciar">
+          <button onclick="resetPomodoroTimer()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 p-3 rounded-2xl border border-slate-300 dark:border-slate-700 transition active:scale-95" title="Reiniciar">
             <i data-lucide="rotate-ccw" class="w-4 h-4"></i>
           </button>
         </div>
 
         <!-- Recommendations by Study Level -->
-        <div class="border-t border-slate-800 pt-4">
-          <label class="block text-[11px] font-bold uppercase text-slate-400 mb-2.5">Recomendaciones por Nivel de Estudio</label>
+        <div class="border-t border-slate-200 dark:border-slate-800 pt-4">
+          <label class="block text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-2.5">Recomendaciones por Nivel</label>
           <div class="grid grid-cols-3 gap-2">
-            <button onclick="setPomoPreset('beginner')" id="pomoPreset-beginner" class="p-2.5 rounded-2xl border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 text-xs font-black transition">🌱 Principiante<br><span class="text-[10px] font-semibold text-slate-300">25m / 5m</span></button>
-            <button onclick="setPomoPreset('intermediate')" id="pomoPreset-intermediate" class="p-2.5 rounded-2xl border border-slate-800 bg-slate-800/70 text-slate-300 hover:text-white text-xs font-black transition">⚡ Intermedio<br><span class="text-[10px] font-semibold text-slate-400">40m / 8m</span></button>
-            <button onclick="setPomoPreset('pro')" id="pomoPreset-pro" class="p-2.5 rounded-2xl border border-slate-800 bg-slate-800/70 text-slate-300 hover:text-white text-xs font-black transition">🔥 Avanzado<br><span class="text-[10px] font-semibold text-slate-400">50m / 10m</span></button>
+            <button onclick="setPomoPreset('beginner')" id="pomoPreset-beginner" class="p-2.5 rounded-2xl border border-emerald-500/40 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-black transition">🌱 Principiante<br><span class="text-[10px] font-semibold opacity-75">25m / 5m</span></button>
+            <button onclick="setPomoPreset('intermediate')" id="pomoPreset-intermediate" class="p-2.5 rounded-2xl border border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:text-emerald-500 text-xs font-black transition">⚡ Intermedio<br><span class="text-[10px] font-semibold opacity-75">40m / 8m</span></button>
+            <button onclick="setPomoPreset('pro')" id="pomoPreset-pro" class="p-2.5 rounded-2xl border border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:text-emerald-500 text-xs font-black transition">🔥 Avanzado<br><span class="text-[10px] font-semibold opacity-75">50m / 10m</span></button>
           </div>
-          <p class="text-[11px] text-slate-400 mt-3.5">
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-3.5">
             💡 Al completar 4 ciclos continuos, se activa automáticamente un <b>descanso prolongado (triple de tiempo)</b>.
           </p>
         </div>
       </div>
     </section>
 
-    <!-- ================= TAB 4: DIARIO ================= -->
+    <!-- ================= TAB 4: MASCOTA (DEDICATED FULL-BODY SCREEN) ================= -->
+    <section id="tabPet" class="tab-pane hidden space-y-5">
+      
+      <div class="bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white p-6 md:p-8 rounded-3xl shadow-2xl border border-emerald-500/40 relative overflow-hidden">
+        
+        <div class="flex flex-col md:flex-row items-center gap-8">
+          
+          <!-- Realistic Full-Body Stage & Pedestal Habitat -->
+          <div class="flex-shrink-0 flex flex-col items-center">
+            
+            <div class="w-56 h-56 md:w-64 md:h-64 rounded-3xl bg-slate-950/80 border-2 border-emerald-500/40 p-3 flex flex-col items-center justify-end relative shadow-2xl overflow-hidden">
+              
+              <!-- Mystical Backdrop Aura -->
+              <div class="absolute inset-0 bg-gradient-to-t from-emerald-500/20 via-transparent to-transparent aura-glow-effect pointer-events-none"></div>
+              
+              <!-- Pedestal base platform with realistic shadow -->
+              <div class="absolute bottom-3 w-44 h-8 bg-emerald-500/30 rounded-full blur-md"></div>
+              <div class="absolute bottom-4 w-36 h-4 bg-slate-900 rounded-full border border-emerald-400/40"></div>
+
+              <!-- Floating stage accessory badge -->
+              <div id="petAccessory" class="absolute top-3 right-3 text-3xl z-20 transition-all duration-300 p-2 rounded-2xl bg-slate-900/80 border border-emerald-500/40 shadow-lg">🍼</div>
+
+              <!-- Animated Realistic Vector Pet -->
+              <div id="petFullBodyContainer" class="w-48 h-48 pet-life-animation z-10 flex items-center justify-center transition-all duration-500 mb-2">
+                <!-- Dynamically loaded realistic SVG -->
+              </div>
+            </div>
+
+            <span id="petPhaseBadge" class="mt-3.5 px-4 py-1.5 rounded-full bg-emerald-500/20 text-emerald-300 text-xs font-black uppercase tracking-wider border border-emerald-500/40 shadow-sm">
+              Fase 1: Bebé 🐣
+            </span>
+          </div>
+
+          <!-- Pet Information & Autonomous Vitals -->
+          <div class="flex-1 w-full space-y-4">
+            <div class="flex items-center justify-between">
+              <div>
+                <h3 class="text-xl md:text-2xl font-black text-white flex items-center gap-2">
+                  <span id="petNameText">Perro Fiel</span> 
+                  <button onclick="openPetSelectModal()" class="text-xs text-emerald-400 hover:text-emerald-300 font-semibold bg-emerald-950/90 px-3 py-1 rounded-xl border border-emerald-500/40 transition">
+                    (Cambiar Mascota 🐾)
+                  </button>
+                </h3>
+                <p id="petStageTitle" class="text-sm text-emerald-300 font-bold mt-1">🐾 Cachorro de Anatomía Realista</p>
+              </div>
+              <div class="text-right">
+                <span id="petXpTotal" class="text-3xl font-black text-amber-400">0 XP</span>
+                <span class="block text-[10px] text-slate-400 font-semibold uppercase">Puntos de Experiencia</span>
+              </div>
+            </div>
+
+            <!-- Evolutionary Level Bar -->
+            <div class="bg-slate-950/50 p-3 rounded-2xl border border-emerald-500/20">
+              <div class="flex justify-between text-xs font-extrabold text-slate-300 mb-1.5">
+                <span>Progreso hacia la Siguiente Fase</span>
+                <span id="petXpRatio">0 / 100 XP</span>
+              </div>
+              <div class="w-full bg-slate-800 rounded-full h-3.5 p-0.5 overflow-hidden border border-slate-700">
+                <div id="petXpBarFill" class="bg-gradient-to-r from-amber-400 via-emerald-400 to-teal-300 h-full rounded-full transition-all duration-500" style="width: 0%"></div>
+              </div>
+            </div>
+
+            <!-- Autonomous Vitals: Nutrition & Evolutionary Happiness -->
+            <div class="grid grid-cols-2 gap-3 pt-1">
+              <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-700/80 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-slate-200 flex items-center gap-1">🍎 Nutrición</span>
+                  <button onclick="feedPetManual()" class="text-[10px] text-emerald-400 font-bold hover:underline bg-slate-950 px-2 py-0.5 rounded-lg border border-emerald-500/30">+ Snack</button>
+                </div>
+                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                  <div id="petHungerFill" class="bg-emerald-400 h-full rounded-full transition-all duration-300" style="width: 85%"></div>
+                </div>
+              </div>
+
+              <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-700/80 flex flex-col justify-between">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-bold text-slate-200 flex items-center gap-1">💖 Felicidad</span>
+                  <button onclick="petMascotManual()" class="text-[10px] text-pink-400 font-bold hover:underline bg-slate-950 px-2 py-0.5 rounded-lg border border-pink-500/30">✨ Acariciar</button>
+                </div>
+                <div class="w-full bg-slate-800 h-2.5 rounded-full overflow-hidden">
+                  <div id="petHappinessFill" class="bg-amber-400 h-full rounded-full transition-all duration-300" style="width: 90%"></div>
+                </div>
+              </div>
+            </div>
+
+            <div class="p-3 bg-emerald-950/30 rounded-2xl border border-emerald-500/30 text-xs text-emerald-300 leading-relaxed">
+              💡 <b>¿Cómo evoluciona tu mascota?</b> Gana <b>+20 XP</b> por cada hábito, <b>+10 XP</b> por tarea y <b>+30 XP</b> por sesión Pomodoro. ¡Alimentan automáticamente la vitalidad de tu compañero!
+            </div>
+          </div>
+
+        </div>
+      </div>
+
+    </section>
+
+    <!-- ================= TAB 5: DIARIO ================= -->
     <section id="tabJournal" class="tab-pane hidden space-y-5">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div class="md:col-span-2 glassmorphism p-5 md:p-6 rounded-3xl shadow-sm space-y-3.5">
           <div class="flex items-center justify-between">
-            <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">✍️ Micro-Diario de Reflexión</h3>
-            <span id="journalCurrentDate" class="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-800 text-slate-300 border border-slate-700 font-mono">Hoy</span>
+            <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">✍️ Micro-Diario de Reflexión</h3>
+            <span id="journalCurrentDate" class="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 font-mono">Hoy</span>
           </div>
 
           <!-- Mood Selector -->
           <div>
-            <label class="block text-[11px] font-bold uppercase text-slate-400 mb-1.5">Estado de Ánimo</label>
+            <label class="block text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1.5">Estado de Ánimo</label>
             <div class="flex items-center gap-2 flex-wrap" id="journalMoodButtons">
-              <button onclick="selectJournalMood('🔥')" class="mood-opt px-3 py-1.5 rounded-xl bg-slate-800 border border-emerald-500 text-xs font-bold">🔥 Enérgico</button>
-              <button onclick="selectJournalMood('🧘')" class="mood-opt px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold">🧘 Zen</button>
-              <button onclick="selectJournalMood('💡')" class="mood-opt px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold">💡 Inspirado</button>
-              <button onclick="selectJournalMood('😴')" class="mood-opt px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold">😴 Agotado</button>
+              <button onclick="selectJournalMood('🔥')" class="mood-opt px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 border border-emerald-500 text-xs font-bold">🔥 Enérgico</button>
+              <button onclick="selectJournalMood('🧘')" class="mood-opt px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold">🧘 Zen</button>
+              <button onclick="selectJournalMood('💡')" class="mood-opt px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold">💡 Inspirado</button>
+              <button onclick="selectJournalMood('😴')" class="mood-opt px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold">😴 Agotado</button>
             </div>
           </div>
 
-          <textarea id="journalInput" rows="4" placeholder="Hoy completé mis misiones, me enfoqué en una sola tarea a la vez y alimenté a mi mascota..." class="w-full p-3.5 rounded-2xl border border-slate-700 bg-slate-900/80 text-xs text-slate-100 focus:ring-2 focus:ring-emerald-500 outline-none resize-none"></textarea>
+          <textarea id="journalInput" rows="4" placeholder="Hoy completé mis misiones, me enfoqué en una sola tarea a la vez y alimenté a mi mascota..." class="w-full p-3.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-white/80 dark:bg-slate-900/80 text-xs text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-emerald-500 outline-none resize-none"></textarea>
           
           <div class="flex justify-end">
             <button onclick="saveJournalNote()" class="bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white text-xs font-black px-4 py-2.5 rounded-2xl shadow-md transition active:scale-95">
@@ -415,9 +461,9 @@
 
         <!-- Monthly Goals -->
         <div class="glassmorphism p-5 rounded-3xl shadow-sm space-y-3">
-          <h3 class="text-sm font-bold text-slate-100 flex items-center gap-1.5">🎯 Metas del Mes</h3>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">🎯 Metas del Mes</h3>
           <div id="monthlyGoalsContainer" class="space-y-2.5 text-xs"></div>
-          <button onclick="openAddMonthlyGoalModal()" class="w-full py-2.5 bg-slate-800/80 hover:bg-slate-700 text-emerald-300 font-bold text-xs rounded-2xl border border-emerald-500/20 transition">
+          <button onclick="openAddMonthlyGoalModal()" class="w-full py-2.5 bg-slate-200 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700 text-emerald-700 dark:text-emerald-300 font-bold text-xs rounded-2xl border border-emerald-500/20 transition">
             + Añadir Meta Mensual
           </button>
         </div>
@@ -425,18 +471,18 @@
 
       <!-- Historical Journal Feed -->
       <div class="space-y-3">
-        <h4 class="text-xs font-black text-slate-400 uppercase tracking-wider">Historial de Entradas</h4>
+        <h4 class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Historial de Entradas</h4>
         <div id="journalHistoryContainer" class="space-y-2.5"></div>
       </div>
     </section>
 
-    <!-- ================= TAB 5: ANALÍTICA ================= -->
+    <!-- ================= TAB 6: ANALÍTICA ================= -->
     <section id="tabStats" class="tab-pane hidden space-y-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
         <!-- 7-Day XP Chart -->
         <div class="glassmorphism p-5 md:p-6 rounded-3xl shadow-sm">
-          <h3 class="text-sm font-bold text-slate-100 mb-3 flex items-center gap-2">
-            <i data-lucide="bar-chart-2" class="w-4 h-4 text-emerald-400"></i>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+            <i data-lucide="bar-chart-2" class="w-4 h-4 text-emerald-500"></i>
             <span>📈 XP Acumulado en la Semana</span>
           </h3>
           <div class="h-48 relative">
@@ -446,8 +492,8 @@
 
         <!-- Habits vs Tasks Doughnut Chart -->
         <div class="glassmorphism p-5 md:p-6 rounded-3xl shadow-sm">
-          <h3 class="text-sm font-bold text-slate-100 mb-3 flex items-center gap-2">
-            <i data-lucide="pie-chart" class="w-4 h-4 text-teal-400"></i>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
+            <i data-lucide="pie-chart" class="w-4 h-4 text-teal-500"></i>
             <span>🍩 Hábitos vs Tareas Completadas</span>
           </h3>
           <div class="h-48 relative flex items-center justify-center">
@@ -459,11 +505,11 @@
       <!-- 30-Day Constancy Heatmap -->
       <div class="glassmorphism p-5 md:p-6 rounded-3xl shadow-sm space-y-2.5">
         <div class="flex items-center justify-between">
-          <h3 class="text-sm font-bold text-slate-100 flex items-center gap-2">
-            <i data-lucide="calendar" class="w-4 h-4 text-amber-400"></i>
+          <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
+            <i data-lucide="calendar" class="w-4 h-4 text-amber-500"></i>
             <span>📅 Constancia (Últimos 30 Días)</span>
           </h3>
-          <span class="text-[11px] text-slate-400">Mayor intensidad = Más XP</span>
+          <span class="text-[11px] text-slate-500 dark:text-slate-400">Mayor intensidad = Más XP</span>
         </div>
         <div id="heatmapGrid" class="grid grid-cols-10 gap-2 pt-2"></div>
       </div>
@@ -471,88 +517,90 @@
 
   </div>
 
-  <!-- Mobile Bottom Navigation Bar (< 768px) -->
-  <nav class="md:hidden fixed bottom-0 left-0 right-0 glassmorphism border-t border-slate-800 z-40 flex justify-around py-2">
-    <button onclick="switchTab('tabToday')" id="mobTabToday" class="mob-nav-btn flex flex-col items-center text-emerald-400 font-bold text-[10px]">
-      <span class="text-base">📋</span>
+  <!-- Mobile Bottom Navigation Bar (< 768px) with direct Mascot tab -->
+  <nav class="md:hidden fixed bottom-0 left-0 right-0 glassmorphism border-t border-slate-300 dark:border-slate-800 z-40 flex justify-around py-2.5 shadow-2xl">
+    <button onclick="switchTab('tabToday')" id="mobTabToday" class="mob-nav-btn flex flex-col items-center text-emerald-600 dark:text-emerald-400 font-bold text-[10px]">
+      <span class="text-lg">📋</span>
       <span>Hábitos</span>
     </button>
-    <button onclick="switchTab('tabTasks')" id="mobTabTasks" class="mob-nav-btn flex flex-col items-center text-slate-400 font-bold text-[10px]">
-      <span class="text-base">📁</span>
+    <button onclick="switchTab('tabTasks')" id="mobTabTasks" class="mob-nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 font-bold text-[10px]">
+      <span class="text-lg">📁</span>
       <span>Tareas</span>
     </button>
-    <button onclick="switchTab('tabPomodoro')" id="mobTabPomodoro" class="mob-nav-btn flex flex-col items-center text-slate-400 font-bold text-[10px]">
-      <span class="text-base">⏱️</span>
+    <button onclick="switchTab('tabPomodoro')" id="mobTabPomodoro" class="mob-nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 font-bold text-[10px]">
+      <span class="text-lg">⏱️</span>
       <span>Pomodoro</span>
     </button>
-    <button onclick="switchTab('tabJournal')" id="mobTabJournal" class="mob-nav-btn flex flex-col items-center text-slate-400 font-bold text-[10px]">
-      <span class="text-base">✍️</span>
+    <button onclick="switchTab('tabPet')" id="mobTabPet" class="mob-nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 font-bold text-[10px]">
+      <span class="text-lg">🐾</span>
+      <span>Mascota</span>
+    </button>
+    <button onclick="switchTab('tabJournal')" id="mobTabJournal" class="mob-nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 font-bold text-[10px]">
+      <span class="text-lg">✍️</span>
       <span>Diario</span>
     </button>
-    <button onclick="switchTab('tabStats')" id="mobTabStats" class="mob-nav-btn flex flex-col items-center text-slate-400 font-bold text-[10px]">
-      <span class="text-base">📊</span>
+    <button onclick="switchTab('tabStats')" id="mobTabStats" class="mob-nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 font-bold text-[10px]">
+      <span class="text-lg">📊</span>
       <span>Analítica</span>
     </button>
   </nav>
 
-  <!-- ================= MODALS SECTION ================= -->
-
-  <!-- Modal: Select Full-Body Pets (Dog, Cat, Fox, Panda) -->
+  <!-- Modal: Select Full-Body Pets -->
   <div id="petSelectModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-emerald-500/40 space-y-4">
       <div class="flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-bold text-white">Elige tu Mascota de Cuerpo Completo</h3>
-          <p class="text-xs text-slate-300">Cada mascota cuenta con diseño de cuerpo entero, hábitat y 4 fases evolutivas.</p>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Elige tu Mascota de Cuerpo Completo</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-300">Cada mascota cuenta con diseño de cuerpo entero, hábitat y 4 fases evolutivas.</p>
         </div>
-        <button onclick="closeModal('petSelectModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
+        <button onclick="closeModal('petSelectModal')" class="text-slate-400 hover:text-slate-700 dark:hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
       
       <div class="grid grid-cols-2 gap-3">
         <!-- Pet 1: Perro -->
-        <button onclick="choosePet('dog', 'Perro Fiel')" class="p-3 bg-slate-900/80 rounded-2xl hover:border-emerald-500 border border-slate-700 text-left transition flex items-center gap-3 active:scale-95">
+        <button onclick="choosePet('dog', 'Perro Fiel')" class="p-3 bg-white/70 dark:bg-slate-900/80 rounded-2xl hover:border-emerald-500 border border-slate-300 dark:border-slate-700 text-left transition flex items-center gap-3 active:scale-95">
           <div class="text-3xl select-none">🐶🐕</div>
           <div>
-            <span class="text-xs font-bold block text-white">1. Perro Fiel</span>
-            <span class="text-[10px] text-emerald-400 font-semibold block">Cachorro ➔ Lobo Místico</span>
+            <span class="text-xs font-bold block text-slate-900 dark:text-white">1. Perro Fiel</span>
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block">Cachorro ➔ Lobo Místico</span>
           </div>
         </button>
 
         <!-- Pet 2: Gato -->
-        <button onclick="choosePet('cat', 'Gato Ágil')" class="p-3 bg-slate-900/80 rounded-2xl hover:border-emerald-500 border border-slate-700 text-left transition flex items-center gap-3 active:scale-95">
+        <button onclick="choosePet('cat', 'Gato Ágil')" class="p-3 bg-white/70 dark:bg-slate-900/80 rounded-2xl hover:border-emerald-500 border border-slate-300 dark:border-slate-700 text-left transition flex items-center gap-3 active:scale-95">
           <div class="text-3xl select-none">🐱🐈</div>
           <div>
-            <span class="text-xs font-bold block text-white">2. Gato Ágil</span>
-            <span class="text-[10px] text-emerald-400 font-semibold block">Gatito ➔ Tigre Dorado</span>
+            <span class="text-xs font-bold block text-slate-900 dark:text-white">2. Gato Ágil</span>
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block">Gatito ➔ Tigre Dorado</span>
           </div>
         </button>
 
         <!-- Pet 3: Zorro -->
-        <button onclick="choosePet('fox', 'Zorro Astuto')" class="p-3 bg-slate-900/80 rounded-2xl hover:border-emerald-500 border border-slate-700 text-left transition flex items-center gap-3 active:scale-95">
+        <button onclick="choosePet('fox', 'Zorro Astuto')" class="p-3 bg-white/70 dark:bg-slate-900/80 rounded-2xl hover:border-emerald-500 border border-slate-300 dark:border-slate-700 text-left transition flex items-center gap-3 active:scale-95">
           <div class="text-3xl select-none">🦊🐾</div>
           <div>
-            <span class="text-xs font-bold block text-white">3. Zorro Astuto</span>
-            <span class="text-[10px] text-emerald-400 font-semibold block">Zorrito ➔ Kitsune Místico</span>
+            <span class="text-xs font-bold block text-slate-900 dark:text-white">3. Zorro Astuto</span>
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block">Zorrito ➔ Kitsune Místico</span>
           </div>
         </button>
 
         <!-- Pet 4: Panda -->
-        <button onclick="choosePet('panda', 'Panda Sabio')" class="p-3 bg-slate-900/80 rounded-2xl hover:border-emerald-500 border border-slate-700 text-left transition flex items-center gap-3 active:scale-95">
+        <button onclick="choosePet('panda', 'Panda Sabio')" class="p-3 bg-white/70 dark:bg-slate-900/80 rounded-2xl hover:border-emerald-500 border border-slate-300 dark:border-slate-700 text-left transition flex items-center gap-3 active:scale-95">
           <div class="text-3xl select-none">🐼🎋</div>
           <div>
-            <span class="text-xs font-bold block text-white">4. Panda Sabio</span>
-            <span class="text-[10px] text-emerald-400 font-semibold block">Pandita ➔ Panda Celestial</span>
+            <span class="text-xs font-bold block text-slate-900 dark:text-white">4. Panda Sabio</span>
+            <span class="text-[10px] text-emerald-600 dark:text-emerald-400 font-semibold block">Pandita ➔ Panda Celestial</span>
           </div>
         </button>
       </div>
 
       <div>
-        <label class="block text-xs font-bold uppercase text-slate-300 mb-1.5">Nombre Personalizado</label>
-        <input type="text" id="customPetNameInput" placeholder="Ej. Toby, Luna, Kiko..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white focus:ring-2 focus:ring-emerald-500 outline-none">
+        <label class="block text-xs font-bold uppercase text-slate-500 dark:text-slate-300 mb-1.5">Nombre Personalizado</label>
+        <input type="text" id="customPetNameInput" placeholder="Ej. Toby, Luna, Kiko..." class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-2 focus:ring-emerald-500 outline-none">
       </div>
 
       <div class="flex justify-end gap-2 pt-1">
-        <button onclick="closeModal('petSelectModal')" class="px-4 py-2 text-xs text-slate-400 hover:text-white">Cancelar</button>
+        <button onclick="closeModal('petSelectModal')" class="px-4 py-2 text-xs text-slate-500 dark:text-slate-400 hover:text-slate-800 dark:hover:text-white">Cancelar</button>
         <button onclick="confirmPetChoice()" class="py-2.5 px-5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold text-xs rounded-2xl shadow-md transition">
           Confirmar Mascota
         </button>
@@ -564,12 +612,12 @@
   <div id="tourModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-md rounded-3xl p-6 shadow-2xl border border-emerald-500/40 text-center space-y-4">
       <span id="tourIcon" class="text-4xl block select-none">🚀</span>
-      <h3 id="tourTitle" class="text-lg font-bold text-white">¡Bienvenido a HabitFlow 360 v6!</h3>
-      <p id="tourBody" class="text-xs text-slate-300 leading-relaxed">
-        Aquí podrás registrar tus hábitos diarios en 1 clic, mantener tus rachas activas y hacer evolucionar el cuerpo completo de tu mascota.
+      <h3 id="tourTitle" class="text-lg font-bold text-slate-900 dark:text-white">¡Bienvenido a HabitFlow 360 v6!</h3>
+      <p id="tourBody" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+        Ahora la Mascota cuenta con su propia pantalla dedicada para que no estorbe en celular, mientras registras tus hábitos y tareas en 1 solo clic.
       </p>
       <div class="flex justify-between items-center pt-2">
-        <span id="tourStepIndicator" class="text-[11px] font-bold text-emerald-400">Paso 1 / 4</span>
+        <span id="tourStepIndicator" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">Paso 1 / 4</span>
         <button id="tourNextBtn" onclick="nextTourStep()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition active:scale-95">
           Siguiente
         </button>
@@ -579,44 +627,53 @@
 
   <!-- Modal: Ajustes & Configuración -->
   <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="glassmorphism w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-slate-700 max-h-[90vh] overflow-y-auto space-y-4">
-      <div class="flex items-center justify-between border-b border-slate-800 pb-3">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i data-lucide="settings" class="w-4 h-4 text-emerald-400"></i>
+    <div class="glassmorphism w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-slate-300 dark:border-slate-700 max-h-[90vh] overflow-y-auto space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="settings" class="w-4 h-4 text-emerald-500"></i>
           <span>Ajustes & Configuración</span>
         </h3>
-        <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-white">
+        <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-slate-700 dark:hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
         </button>
       </div>
 
       <div class="space-y-4 text-xs">
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Nombre de Usuario Personalizado</label>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nombre de Usuario</label>
           <div class="flex gap-2">
-            <input type="text" id="usernameInput" placeholder="Escribe tu nombre..." class="flex-1 px-3 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
+            <input type="text" id="usernameInput" placeholder="Escribe tu nombre..." class="flex-1 px-3 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
             <button onclick="saveUsername()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition">Guardar</button>
           </div>
         </div>
 
-        <!-- Backup export -->
-        <div class="flex items-center justify-between pt-2 border-t border-slate-800">
+        <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
           <div>
-            <span class="font-bold text-white block">Copia de Respaldo JSON</span>
-            <span class="text-[11px] text-slate-400">Descarga tu historial completo en un archivo.</span>
+            <span class="font-bold text-slate-800 dark:text-white block">Tema de Visualización</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400">Alternar entre Modo Claro y Oscuro</span>
           </div>
-          <button onclick="exportDataJSON()" class="px-3.5 py-2 bg-slate-800 hover:bg-slate-700 text-emerald-300 font-bold rounded-2xl border border-emerald-500/30 transition">
+          <button onclick="toggleTheme()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-2xl transition">
+            Cambiar Modo
+          </button>
+        </div>
+
+        <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
+          <div>
+            <span class="font-bold text-slate-800 dark:text-white block">Copia de Respaldo JSON</span>
+            <span class="text-[11px] text-slate-500 dark:text-slate-400">Descarga tu historial completo en un archivo.</span>
+          </div>
+          <button onclick="exportDataJSON()" class="px-3.5 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-emerald-700 dark:text-emerald-300 font-bold rounded-2xl border border-emerald-500/30 transition">
             Exportar
           </button>
         </div>
 
         <!-- Danger Zone: Total Reset -->
-        <div class="p-4 bg-red-950/40 border border-red-500/40 rounded-2xl space-y-2">
-          <h4 class="font-bold text-red-400 flex items-center gap-1.5">
+        <div class="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-500/40 rounded-2xl space-y-2">
+          <h4 class="font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5">
             <i data-lucide="alert-triangle" class="w-4 h-4"></i>
             <span>Zona de Peligro: Borrado Total</span>
           </h4>
-          <p class="text-[11px] text-red-300/80">
+          <p class="text-[11px] text-red-700/80 dark:text-red-300/80">
             Esta acción restablecerá la racha a 0, vaciará hábitos y tareas, y colocará la mascota en Fase 1 Bebé (0 XP) sin recargar datos de demo.
           </p>
           <button onclick="promptTotalReset()" class="w-full bg-red-600 hover:bg-red-500 text-white py-2.5 rounded-2xl font-black transition active:scale-95">
@@ -631,8 +688,8 @@
   <div id="addHabitModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-md rounded-3xl p-6 shadow-2xl border border-emerald-500/30 space-y-3.5">
       <div class="flex items-center justify-between">
-        <h3 class="text-base font-bold text-white flex items-center gap-2">
-          <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-400"></i>
+        <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
+          <i data-lucide="plus-circle" class="w-4 h-4 text-emerald-500"></i>
           <span>Crear Nuevo Hábito</span>
         </h3>
         <button onclick="closeModal('addHabitModal')" class="text-slate-400 hover:text-white"><i data-lucide="x" class="w-4 h-4"></i></button>
@@ -640,13 +697,13 @@
 
       <div class="space-y-3 text-xs">
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Nombre del Hábito</label>
-          <input type="text" id="habitNameInput" required placeholder="Ej. Meditar, Estudiar Código, Beber Agua" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white focus:ring-1 focus:ring-emerald-500 outline-none">
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Nombre del Hábito</label>
+          <input type="text" id="habitNameInput" required placeholder="Ej. Meditar, Estudiar Código, Beber Agua" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-1 focus:ring-emerald-500 outline-none">
         </div>
 
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Tipo de Hábito</label>
-          <select id="habitTypeSelect" onchange="onHabitTypeChanged()" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white focus:ring-1 focus:ring-emerald-500 outline-none">
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Tipo de Hábito</label>
+          <select id="habitTypeSelect" onchange="onHabitTypeChanged()" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-1 focus:ring-emerald-500 outline-none">
             <option value="check">Simple (Check diario)</option>
             <option value="counter">Cuantitativo (Contador con metas +/-)</option>
             <option value="timed">Con Tiempo Configurable (Minutos con Pomodoro)</option>
@@ -654,18 +711,18 @@
         </div>
 
         <div id="habitTargetField" class="hidden">
-          <label class="block font-bold text-slate-300 mb-1">Meta Diaria (Vasos, Páginas, etc.)</label>
-          <input type="number" id="habitTargetInput" value="5" min="2" max="100" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white outline-none">
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Meta Diaria (Vasos, Páginas, etc.)</label>
+          <input type="number" id="habitTargetInput" value="5" min="2" max="100" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white outline-none">
         </div>
 
         <div id="habitMinutesField" class="hidden">
-          <label class="block font-bold text-slate-300 mb-1">Minutos de Sesión</label>
-          <input type="number" id="habitMinutesInput" value="30" min="5" max="180" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white outline-none">
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Minutos de Sesión</label>
+          <input type="number" id="habitMinutesInput" value="30" min="5" max="180" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white outline-none">
         </div>
 
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Categoría</label>
-          <select id="habitCategorySelect" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white focus:ring-1 focus:ring-emerald-500 outline-none">
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Categoría</label>
+          <select id="habitCategorySelect" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:ring-1 focus:ring-emerald-500 outline-none">
             <option value="salud">🏋️ Salud</option>
             <option value="mente">🧠 Mente</option>
             <option value="trabajo">💼 Trabajo</option>
@@ -675,7 +732,7 @@
         </div>
 
         <div class="flex justify-end gap-2 pt-2">
-          <button type="button" onclick="closeModal('addHabitModal')" class="px-4 py-2 font-bold text-slate-400 hover:text-white">Cancelar</button>
+          <button type="button" onclick="closeModal('addHabitModal')" class="px-4 py-2 font-bold text-slate-400 hover:text-slate-700 dark:hover:text-white">Cancelar</button>
           <button type="button" onclick="confirmCreateHabit()" class="px-5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl shadow-md transition">Guardar</button>
         </div>
       </div>
@@ -685,12 +742,12 @@
   <!-- Modal: Opción Hábito con Tiempo (Pomodoro vs Manual) -->
   <div id="modalTimedChoice" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-emerald-500/40 text-center space-y-4">
-      <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-500/20 text-emerald-300 flex items-center justify-center text-xl font-bold">
+      <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xl font-bold">
         ⏱️
       </div>
       <div>
-        <h3 id="modalTimedTitle" class="text-base font-bold text-white">Completar Hábito</h3>
-        <p class="text-xs text-slate-300 mt-1">
+        <h3 id="modalTimedTitle" class="text-base font-bold text-slate-900 dark:text-white">Completar Hábito</h3>
+        <p class="text-xs text-slate-600 dark:text-slate-300 mt-1">
           Duración: <b><span id="modalTimedMinutes">30</span> minutos</b>. ¿Cómo deseas proceder?
         </p>
       </div>
@@ -700,22 +757,22 @@
           <i data-lucide="play" class="w-4 h-4"></i>
           <span>⏱️ Iniciar Sesión de Pomodoro</span>
         </button>
-        <button id="btnMarkHabitManual" class="w-full py-3 bg-slate-800 hover:bg-slate-700 border border-emerald-500/40 text-emerald-300 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-2">
+        <button id="btnMarkHabitManual" class="w-full py-3 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 border border-emerald-500/40 text-emerald-700 dark:text-emerald-300 font-bold text-xs rounded-2xl transition flex items-center justify-center gap-2">
           <i data-lucide="check" class="w-4 h-4"></i>
           <span>⚡ Marcar como Hecho Manualmente (+20 XP)</span>
         </button>
       </div>
 
-      <button onclick="closeModal('modalTimedChoice')" class="text-xs text-slate-400 hover:text-white">Cerrar</button>
+      <button onclick="closeModal('modalTimedChoice')" class="text-xs text-slate-400 hover:text-slate-700 dark:hover:text-white">Cerrar</button>
     </div>
   </div>
 
   <!-- Modal: Crear Carpeta Madre -->
   <div id="addFolderModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-md rounded-3xl p-6 shadow-2xl border border-emerald-500/30 space-y-3.5">
-      <h3 class="text-base font-bold text-white">Nueva Carpeta Madre</h3>
+      <h3 class="text-base font-bold text-slate-900 dark:text-white">Nueva Carpeta Madre</h3>
       <div class="space-y-3 text-xs">
-        <input type="text" id="folderNameInput" placeholder="Ej. 🎓 Universidad, 🏠 Casa, 🚀 Proyectos" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white outline-none">
+        <input type="text" id="folderNameInput" placeholder="Ej. 🎓 Universidad, 🏠 Casa, 🚀 Proyectos" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white outline-none">
         <div class="flex justify-end gap-2">
           <button onclick="closeModal('addFolderModal')" class="px-4 py-2 font-bold text-slate-400">Cancelar</button>
           <button onclick="confirmCreateFolder()" class="px-5 py-2 bg-emerald-600 text-white font-bold rounded-2xl">Crear</button>
@@ -727,15 +784,15 @@
   <!-- Modal: Crear Tarea -->
   <div id="addTaskModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-md rounded-3xl p-6 shadow-2xl border border-emerald-500/30 space-y-3.5">
-      <h3 class="text-base font-bold text-white">Nueva Tarea</h3>
+      <h3 class="text-base font-bold text-slate-900 dark:text-white">Nueva Tarea</h3>
       <div class="space-y-3 text-xs">
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Título de la Tarea</label>
-          <input type="text" id="taskTitleInput" placeholder="Ej. Entregar informe final de investigación" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white outline-none">
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Título de la Tarea</label>
+          <input type="text" id="taskTitleInput" placeholder="Ej. Entregar informe final de investigación" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white outline-none">
         </div>
         <div>
-          <label class="block font-bold text-slate-300 mb-1">Carpeta Madre</label>
-          <select id="taskFolderSelect" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white outline-none"></select>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Carpeta Madre</label>
+          <select id="taskFolderSelect" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white outline-none"></select>
         </div>
         <div class="flex justify-end gap-2 pt-2">
           <button onclick="closeModal('addTaskModal')" class="px-4 py-2 font-bold text-slate-400">Cancelar</button>
@@ -748,8 +805,8 @@
   <!-- Modal: Agregar Meta del Mes -->
   <div id="addGoalModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-emerald-500/30 space-y-3 text-xs">
-      <h3 class="text-sm font-bold text-white">Nueva Meta del Mes</h3>
-      <input type="text" id="goalTitleInput" placeholder="Ej. Leer 2 libros de desarrollo personal" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-700 bg-slate-900 text-sm text-white outline-none">
+      <h3 class="text-sm font-bold text-slate-900 dark:text-white">Nueva Meta del Mes</h3>
+      <input type="text" id="goalTitleInput" placeholder="Ej. Leer 2 libros de desarrollo personal" class="w-full px-3.5 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white outline-none">
       <div class="flex justify-end gap-2 pt-1">
         <button onclick="closeModal('addGoalModal')" class="px-3 py-1.5 font-bold text-slate-400">Cancelar</button>
         <button onclick="confirmCreateGoal()" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-2xl">Guardar</button>
@@ -759,14 +816,14 @@
 
   <!-- Custom In-App Modal Dialog (Zero alert / confirm) -->
   <div id="customDialogOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="glassmorphism w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-700 text-center space-y-4">
-      <div id="dialogIcon" class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/20 text-amber-300 flex items-center justify-center text-xl font-bold">
+    <div class="glassmorphism w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-300 dark:border-slate-700 text-center space-y-4">
+      <div id="dialogIcon" class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center text-xl font-bold">
         ⚠️
       </div>
-      <h3 id="dialogTitle" class="text-base font-bold text-white">Confirmación</h3>
-      <p id="dialogMessage" class="text-xs text-slate-300 leading-relaxed">¿Deseas confirmar esta acción?</p>
+      <h3 id="dialogTitle" class="text-base font-bold text-slate-900 dark:text-white">Confirmación</h3>
+      <p id="dialogMessage" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">¿Deseas confirmar esta acción?</p>
       <div class="flex justify-center gap-2 pt-1">
-        <button id="dialogBtnCancel" class="px-4 py-2.5 rounded-2xl text-xs font-semibold text-slate-400 hover:text-white bg-slate-800">Cancelar</button>
+        <button id="dialogBtnCancel" class="px-4 py-2.5 rounded-2xl text-xs font-semibold text-slate-600 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white bg-slate-200 dark:bg-slate-800">Cancelar</button>
         <button id="dialogBtnConfirm" class="px-5 py-2.5 rounded-2xl text-xs font-bold text-white bg-emerald-600 hover:bg-emerald-500 shadow-md">Confirmar</button>
       </div>
     </div>
@@ -777,244 +834,365 @@
 
   <script>
     /* ==========================================================================
-       HABITFLOW 360 v6 — FULL LOGICAL ENGINE
+       HABITFLOW 360 v6 — REALISTIC ANIMAL ILLUSTRATIONS & DEDICATED PET ENGINE
        ========================================================================== */
 
-    // SVGs of full-body pets (Dog, Cat, Fox, Panda) across 4 stages
-    const PET_BODY_SVGS = {
+    // High-definition Realistic Vector SVGs with anatomical contours and shading
+    const REALISTIC_PET_SVGS = {
       dog: [
-        // Fase 1: Bebé Cachorro
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-          <ellipse cx="50" cy="68" rx="22" ry="18" fill="#d97706"/>
-          <ellipse cx="36" cy="84" rx="6" ry="4" fill="#b45309"/>
-          <ellipse cx="64" cy="84" rx="6" ry="4" fill="#b45309"/>
-          <ellipse cx="50" cy="70" rx="12" ry="10" fill="#fed7aa"/>
-          <circle cx="50" cy="42" r="19" fill="#d97706"/>
-          <path d="M34 28 C 30 18, 22 28, 28 42 Z" fill="#92400e"/>
-          <path d="M66 28 C 70 18, 78 28, 72 42 Z" fill="#92400e"/>
-          <circle cx="43" cy="40" r="3.5" fill="#1e293b"/>
-          <circle cx="57" cy="40" r="3.5" fill="#1e293b"/>
-          <circle cx="44" cy="38.5" r="1" fill="#fff"/>
-          <circle cx="58" cy="38.5" r="1" fill="#fff"/>
-          <ellipse cx="50" cy="47" rx="4" ry="2.5" fill="#1e293b"/>
-          <path d="M48 50 Q50 53 52 50" stroke="#1e293b" stroke-width="1.5" fill="none"/>
-          <path d="M70 70 Q79 60 74 52" stroke="#d97706" stroke-width="4" stroke-linecap="round" fill="none"/>
+        // Fase 1: Cachorro de Perro Fiel Realista
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+          <defs>
+            <linearGradient id="dogFur1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ea580c"/>
+              <stop offset="60%" stop-color="#9a3412"/>
+              <stop offset="100%" stop-color="#431407"/>
+            </linearGradient>
+            <linearGradient id="dogChest1" x1="0" y1="0" x2="0" y2="1">
+              <stop offset="0%" stop-color="#ffedd5"/>
+              <stop offset="100%" stop-color="#fdba74"/>
+            </linearGradient>
+          </defs>
+          <!-- Cola -->
+          <path d="M50 140 Q30 110 40 85 Q45 80 50 95 Q48 120 65 145 Z" fill="url(#dogFur1)"/>
+          <!-- Patas traseras -->
+          <ellipse cx="60" cy="165" rx="16" ry="12" fill="#7c2d12"/>
+          <ellipse cx="65" cy="170" rx="14" ry="7" fill="#431407"/>
+          <!-- Cuerpo cachorro -->
+          <path d="M60 145 C55 110, 85 95, 115 105 C135 112, 145 135, 140 165 C120 175, 75 170, 60 145 Z" fill="url(#dogFur1)"/>
+          <!-- Pecho claro -->
+          <path d="M100 110 C115 115, 130 130, 125 155 C110 162, 95 145, 100 110 Z" fill="url(#dogChest1)"/>
+          <!-- Patas delanteras -->
+          <path d="M105 135 L108 175 Q115 178 122 175 L120 135 Z" fill="#9a3412"/>
+          <path d="M125 138 L130 174 Q138 177 144 174 L140 138 Z" fill="#7c2d12"/>
+          <!-- Cabeza realista con hocico -->
+          <ellipse cx="120" cy="80" rx="28" ry="26" fill="url(#dogFur1)"/>
+          <!-- Orejas caídas suaves -->
+          <path d="M100 65 C90 60, 85 85, 95 100 C98 90, 102 75, 105 68 Z" fill="#431407"/>
+          <path d="M138 65 C150 60, 155 85, 145 100 C142 90, 138 75, 135 68 Z" fill="#431407"/>
+          <!-- Hocico realista -->
+          <ellipse cx="130" cy="90" rx="14" ry="11" fill="#fed7aa"/>
+          <path d="M132 84 C128 84, 126 88, 130 92 C134 94, 138 92, 138 87 Z" fill="#1e293b"/>
+          <circle cx="130" cy="87" r="1.5" fill="#fff"/>
+          <path d="M130 92 Q130 98 126 99 M130 92 Q132 98 136 99" stroke="#1e293b" stroke-width="1.8" fill="none"/>
+          <!-- Ojos almendrados expresivos -->
+          <ellipse cx="112" cy="74" rx="4.5" ry="5.5" fill="#1e293b"/>
+          <ellipse cx="132" cy="74" rx="4" ry="5" fill="#1e293b"/>
+          <circle cx="111" cy="72" r="1.5" fill="#fff"/>
+          <circle cx="131" cy="72" r="1.5" fill="#fff"/>
         </svg>`,
-        // Fase 2: Joven Perro Guardián con Arnés
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-          <ellipse cx="50" cy="65" rx="24" ry="20" fill="#b45309"/>
-          <rect x="36" y="58" width="28" height="12" rx="4" fill="#10b981"/>
-          <circle cx="50" cy="64" r="3" fill="#fbbf24"/>
-          <ellipse cx="34" cy="85" rx="7" ry="5" fill="#92400e"/>
-          <ellipse cx="66" cy="85" rx="7" ry="5" fill="#92400e"/>
-          <circle cx="50" cy="38" r="18" fill="#b45309"/>
-          <polygon points="32,24 38,12 44,24" fill="#92400e"/>
-          <polygon points="56,24 62,12 68,24" fill="#92400e"/>
-          <circle cx="43" cy="36" r="3.5" fill="#0f172a"/>
-          <circle cx="57" cy="36" r="3.5" fill="#0f172a"/>
-          <ellipse cx="50" cy="42" rx="4" ry="2.5" fill="#0f172a"/>
-          <path d="M72 65 Q85 52 80 40" stroke="#b45309" stroke-width="5" stroke-linecap="round" fill="none"/>
+
+        // Fase 2: Perro Joven Guardián con Arnés
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+          <defs>
+            <linearGradient id="dogFur2" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#b45309"/>
+              <stop offset="50%" stop-color="#78350f"/>
+              <stop offset="100%" stop-color="#292524"/>
+            </linearGradient>
+          </defs>
+          <path d="M40 145 Q20 115 28 85 Q35 80 40 100 Q38 125 55 150 Z" fill="#451a03"/>
+          <path d="M50 140 C45 100, 80 85, 125 95 C150 105, 155 145, 145 170 C120 180, 65 175, 50 140 Z" fill="url(#dogFur2)"/>
+          <!-- Arnés verde esmeralda táctico -->
+          <path d="M85 105 L135 120 L130 136 L80 120 Z" fill="#059669"/>
+          <circle cx="110" cy="122" r="5" fill="#fbbf24"/>
+          <!-- Patas atléticas -->
+          <path d="M100 135 L102 178 Q112 182 120 178 L116 135 Z" fill="#78350f"/>
+          <path d="M130 135 L135 177 Q144 180 150 176 L144 135 Z" fill="#451a03"/>
+          <path d="M48 160 Q55 178 72 178 Q78 165 72 150 Z" fill="#292524"/>
+          <!-- Cabeza alerta de pastor -->
+          <ellipse cx="132" cy="70" rx="26" ry="24" fill="url(#dogFur2)"/>
+          <!-- Orejas erguidas -->
+          <polygon points="112,58 116,25 130,52" fill="#451a03"/>
+          <polygon points="135,52 148,26 152,58" fill="#451a03"/>
+          <ellipse cx="146" cy="76" rx="14" ry="10" fill="#d97706"/>
+          <path d="M150 72 C146 72, 144 76, 148 79 C152 80, 156 78, 155 74 Z" fill="#0f172a"/>
+          <circle cx="126" cy="66" rx="4.5" ry="4.5" fill="#0f172a"/>
+          <circle cx="140" cy="66" rx="4.5" ry="4.5" fill="#0f172a"/>
+          <circle cx="125" cy="64" r="1.5" fill="#fff"/>
+          <circle cx="139" cy="64" r="1.5" fill="#fff"/>
         </svg>`,
-        // Fase 3: Adulto Guardián Alfa
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-lg">
-          <polygon points="50,10 54,20 64,20 56,26 59,36 50,30 41,36 44,26 36,20 46,20" fill="#f59e0b"/>
-          <ellipse cx="50" cy="64" rx="26" ry="21" fill="#78350f"/>
-          <path d="M30 52 L50 78 L70 52 Z" fill="#06b6d4" opacity="0.85"/>
-          <ellipse cx="32" cy="85" rx="7" ry="5" fill="#451a03"/>
-          <ellipse cx="68" cy="85" rx="7" ry="5" fill="#451a03"/>
-          <circle cx="50" cy="38" r="18" fill="#78350f"/>
-          <polygon points="30,22 36,8 44,22" fill="#451a03"/>
-          <polygon points="56,22 64,8 70,22" fill="#451a03"/>
-          <circle cx="43" cy="36" r="3.5" fill="#38bdf8"/>
-          <circle cx="57" cy="36" r="3.5" fill="#38bdf8"/>
-          <ellipse cx="50" cy="42" rx="4" ry="2.5" fill="#0f172a"/>
-          <path d="M74 65 Q92 48 84 34" stroke="#78350f" stroke-width="6" stroke-linecap="round" fill="none"/>
+
+        // Fase 3: Guardián Alfa con Armadura
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <defs>
+            <linearGradient id="armorGrad" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#06b6d4"/>
+              <stop offset="100%" stop-color="#0e7490"/>
+            </linearGradient>
+          </defs>
+          <path d="M35 140 Q10 100 20 65 Q30 65 35 90 Q30 120 50 148 Z" fill="#1c1917"/>
+          <path d="M48 135 C40 90, 80 75, 130 85 C160 95, 165 140, 150 172 C120 182, 60 178, 48 135 Z" fill="#292524"/>
+          <!-- Peto de armadura rúnica -->
+          <path d="M75 95 L145 105 L135 145 L70 125 Z" fill="url(#armorGrad)" stroke="#38bdf8" stroke-width="1.5"/>
+          <circle cx="108" cy="120" r="7" fill="#fbbf24"/>
+          <!-- Cabeza imponente de lobo/perro alfa -->
+          <ellipse cx="138" cy="62" rx="27" ry="25" fill="#1c1917"/>
+          <polygon points="115,50 120,15 136,44" fill="#0f172a"/>
+          <polygon points="142,44 158,16 162,50" fill="#0f172a"/>
+          <ellipse cx="154" cy="68" rx="15" ry="10" fill="#44403c"/>
+          <path d="M158 64 C154 64, 153 68, 157 71 C161 72, 164 70, 163 66 Z" fill="#0f172a"/>
+          <!-- Ojos cyan brillantes -->
+          <ellipse cx="132" cy="58" rx="5" ry="4" fill="#38bdf8"/>
+          <ellipse cx="147" cy="58" rx="5" ry="4" fill="#38bdf8"/>
+          <circle cx="132" cy="58" r="1.5" fill="#fff"/>
+          <circle cx="147" cy="58" r="1.5" fill="#fff"/>
+          <!-- Patas firmes -->
+          <path d="M98 130 L102 180 Q114 184 122 180 L118 130 Z" fill="#1c1917"/>
+          <path d="M134 130 L140 179 Q150 183 158 179 L150 130 Z" fill="#0f172a"/>
         </svg>`,
-        // Fase 4: Épico Lobo Místico Celestial
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-2xl">
-          <circle cx="50" cy="50" r="45" fill="none" stroke="#38bdf8" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.7"/>
-          <path d="M18 55 Q2 40 18 25 Q25 45 32 50 Z" fill="#38bdf8" opacity="0.8"/>
-          <path d="M82 55 Q98 40 82 25 Q75 45 68 50 Z" fill="#38bdf8" opacity="0.8"/>
-          <ellipse cx="50" cy="64" rx="26" ry="22" fill="#1e1b4b"/>
-          <ellipse cx="50" cy="65" rx="15" ry="12" fill="#6366f1"/>
-          <ellipse cx="32" cy="86" rx="7" ry="5" fill="#0f172a"/>
-          <ellipse cx="68" cy="86" rx="7" ry="5" fill="#0f172a"/>
-          <circle cx="50" cy="36" r="18" fill="#1e1b4b"/>
-          <polygon points="28,20 34,4 42,20" fill="#38bdf8"/>
-          <polygon points="58,20 66,4 72,20" fill="#38bdf8"/>
-          <circle cx="43" cy="34" r="3.5" fill="#fbbf24"/>
-          <circle cx="57" cy="34" r="3.5" fill="#fbbf24"/>
-          <ellipse cx="50" cy="41" rx="4" ry="2.5" fill="#38bdf8"/>
-          <path d="M72 65 Q96 45 88 20" stroke="#6366f1" stroke-width="6" stroke-linecap="round" fill="none"/>
+
+        // Fase 4: Lobo Místico Celestial
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <!-- Aura exterior cósmica -->
+          <circle cx="100" cy="100" r="85" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6,4" opacity="0.7"/>
+          <!-- Alas celestiales espectrales -->
+          <path d="M40 100 Q10 40 50 20 Q70 60 75 95 Z" fill="#38bdf8" opacity="0.65"/>
+          <path d="M150 95 Q185 35 150 15 Q130 55 125 90 Z" fill="#38bdf8" opacity="0.65"/>
+          <!-- Cola llameante -->
+          <path d="M30 145 Q0 100 15 50 Q35 60 35 95 Q30 120 50 152 Z" fill="#6366f1"/>
+          <!-- Cuerpo místico de lobo -->
+          <path d="M46 130 C40 85, 80 70, 135 80 C165 90, 170 135, 155 170 C125 180, 60 175, 46 130 Z" fill="#0f172a"/>
+          <!-- Patas -->
+          <path d="M96 128 L100 178 Q112 182 120 178 L114 128 Z" fill="#1e1b4b"/>
+          <path d="M134 128 L140 178 Q150 182 158 178 L150 128 Z" fill="#1e1b4b"/>
+          <!-- Cabeza con marcas cósmicas -->
+          <ellipse cx="140" cy="58" rx="27" ry="24" fill="#0f172a"/>
+          <polygon points="118,46 124,10 140,40" fill="#38bdf8"/>
+          <polygon points="144,40 160,12 165,48" fill="#38bdf8"/>
+          <circle cx="140" cy="45" r="3" fill="#facc15"/>
+          <ellipse cx="134" cy="56" rx="5" ry="4" fill="#facc15"/>
+          <ellipse cx="149" cy="56" rx="5" ry="4" fill="#facc15"/>
         </svg>`
       ],
+
       cat: [
-        // Fase 1: Gatito Bebé
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-          <ellipse cx="50" cy="68" rx="20" ry="17" fill="#fb923c"/>
-          <ellipse cx="36" cy="84" rx="5.5" ry="3.5" fill="#ea580c"/>
-          <ellipse cx="64" cy="84" rx="5.5" ry="3.5" fill="#ea580c"/>
-          <circle cx="50" cy="42" r="18" fill="#fb923c"/>
-          <polygon points="34,28 32,15 44,24" fill="#ea580c"/>
-          <polygon points="66,28 68,15 56,24" fill="#ea580c"/>
-          <circle cx="43" cy="41" r="3.5" fill="#047857"/>
-          <circle cx="57" cy="41" r="3.5" fill="#047857"/>
-          <polygon points="48,46 52,46 50,48" fill="#fda4af"/>
-          <line x1="30" y1="45" x2="42" y2="45" stroke="#431407" stroke-width="1"/>
-          <line x1="70" y1="45" x2="58" y2="45" stroke="#431407" stroke-width="1"/>
-          <path d="M68 68 Q80 58 75 48" stroke="#fb923c" stroke-width="4" stroke-linecap="round" fill="none"/>
+        // Fase 1: Gatito Realista
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+          <defs>
+            <linearGradient id="catFur1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#fb923c"/>
+              <stop offset="60%" stop-color="#c2410c"/>
+              <stop offset="100%" stop-color="#7c2d12"/>
+            </linearGradient>
+          </defs>
+          <path d="M45 130 Q15 90 35 60 Q45 65 40 85 Q35 110 55 140 Z" fill="#c2410c"/>
+          <path d="M55 140 C50 110, 75 95, 110 105 C130 112, 138 135, 132 165 C115 174, 70 170, 55 140 Z" fill="url(#catFur1)"/>
+          <ellipse cx="118" cy="80" rx="25" ry="23" fill="url(#catFur1)"/>
+          <polygon points="98,68 100,40 114,62" fill="#7c2d12"/>
+          <polygon points="126,62 140,40 142,68" fill="#7c2d12"/>
+          <!-- Ojos felinos verdes profundos -->
+          <ellipse cx="110" cy="76" rx="5" ry="6" fill="#10b981"/>
+          <ellipse cx="128" cy="76" rx="5" ry="6" fill="#10b981"/>
+          <ellipse cx="110" cy="76" rx="1.5" ry="5.5" fill="#0f172a"/>
+          <ellipse cx="128" cy="76" rx="1.5" ry="5.5" fill="#0f172a"/>
+          <!-- Bigotes y hocico -->
+          <ellipse cx="119" cy="86" rx="8" ry="6" fill="#ffedd5"/>
+          <polygon points="117,84 121,84 119,87" fill="#f43f5e"/>
+          <line x1="102" y1="86" x2="88" y2="84" stroke="#431407" stroke-width="1.2"/>
+          <line x1="102" y1="89" x2="88" y2="92" stroke="#431407" stroke-width="1.2"/>
+          <line x1="134" y1="86" x2="148" y2="84" stroke="#431407" stroke-width="1.2"/>
+          <line x1="134" y1="89" x2="148" y2="92" stroke="#431407" stroke-width="1.2"/>
+          <!-- Patas -->
+          <path d="M102 135 L104 175 Q112 178 118 175 L114 135 Z" fill="#9a3412"/>
+          <path d="M122 135 L126 175 Q134 178 140 175 L135 135 Z" fill="#7c2d12"/>
         </svg>`,
-        // Fase 2: Gato Cazador
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-          <ellipse cx="50" cy="64" rx="22" ry="19" fill="#c2410c"/>
-          <rect x="36" y="56" width="28" height="6" rx="3" fill="#ec4899"/>
-          <circle cx="50" cy="61" r="2.5" fill="#fef08a"/>
-          <ellipse cx="34" cy="83" rx="6" ry="4" fill="#9a3412"/>
-          <ellipse cx="66" cy="83" rx="6" ry="4" fill="#9a3412"/>
-          <circle cx="50" cy="38" r="17" fill="#c2410c"/>
-          <polygon points="33,24 31,10 43,20" fill="#7c2d12"/>
-          <polygon points="67,24 69,10 57,20" fill="#7c2d12"/>
-          <circle cx="43" cy="37" r="3.5" fill="#10b981"/>
-          <circle cx="57" cy="37" r="3.5" fill="#10b981"/>
-          <path d="M70 64 Q88 48 80 32" stroke="#c2410c" stroke-width="4.5" stroke-linecap="round" fill="none"/>
+
+        // Fase 2: Gato Cazador con Cascabel
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+          <path d="M35 135 Q10 90 25 50 Q35 55 32 80 Q25 110 48 145 Z" fill="#9a3412"/>
+          <path d="M48 135 C42 98, 75 85, 120 95 C145 105, 150 140, 140 168 C115 178, 62 174, 48 135 Z" fill="#c2410c"/>
+          <!-- Collar con cascabel -->
+          <path d="M108 92 L140 102 L136 112 L104 102 Z" fill="#e11d48"/>
+          <circle cx="122" cy="106" r="4.5" fill="#facc15"/>
+          <ellipse cx="126" cy="68" rx="24" ry="22" fill="#c2410c"/>
+          <polygon points="106,56 108,28 122,50" fill="#7c2d12"/>
+          <polygon points="134,50 148,28 150,56" fill="#7c2d12"/>
+          <ellipse cx="118" cy="65" rx="5" ry="6" fill="#22c55e"/>
+          <ellipse cx="136" cy="65" rx="5" ry="6" fill="#22c55e"/>
+          <ellipse cx="118" cy="65" rx="1.5" ry="5.5" fill="#0f172a"/>
+          <ellipse cx="136" cy="65" rx="1.5" ry="5.5" fill="#0f172a"/>
+          <!-- Patas ágiles -->
+          <path d="M96 130 L98 178 Q108 182 116 178 L110 130 Z" fill="#9a3412"/>
+          <path d="M125 130 L130 178 Q140 182 146 178 L140 130 Z" fill="#7c2d12"/>
         </svg>`,
+
         // Fase 3: Pantera Veloz
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-lg">
-          <ellipse cx="50" cy="64" rx="24" ry="20" fill="#18181b"/>
-          <ellipse cx="34" cy="84" rx="6.5" ry="4.5" fill="#09090b"/>
-          <ellipse cx="66" cy="84" rx="6.5" ry="4.5" fill="#09090b"/>
-          <circle cx="50" cy="38" r="17" fill="#18181b"/>
-          <polygon points="32,23 30,8 43,19" fill="#27272a"/>
-          <polygon points="68,23 70,8 57,19" fill="#27272a"/>
-          <ellipse cx="43" cy="37" rx="3" ry="4" fill="#eab308"/>
-          <ellipse cx="57" cy="37" rx="3" ry="4" fill="#eab308"/>
-          <ellipse cx="43" cy="37" rx="1" ry="3.5" fill="#09090b"/>
-          <ellipse cx="57" cy="37" rx="1" ry="3.5" fill="#09090b"/>
-          <path d="M72 64 Q94 44 88 28" stroke="#18181b" stroke-width="5" stroke-linecap="round" fill="none"/>
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <path d="M30 130 Q5 75 22 40 Q32 45 30 75 Q20 105 45 145 Z" fill="#09090b"/>
+          <path d="M45 130 C38 88, 75 75, 128 85 C158 95, 162 140, 148 172 C118 182, 58 178, 45 130 Z" fill="#18181b"/>
+          <ellipse cx="135" cy="62" rx="25" ry="23" fill="#18181b"/>
+          <polygon points="112,50 116,22 130,44" fill="#09090b"/>
+          <polygon points="142,44 156,22 160,50" fill="#09090b"/>
+          <!-- Ojos dorados penetrantes -->
+          <ellipse cx="126" cy="58" rx="5" ry="6" fill="#eab308"/>
+          <ellipse cx="144" cy="58" rx="5" ry="6" fill="#eab308"/>
+          <ellipse cx="126" cy="58" rx="1.2" ry="5.5" fill="#000"/>
+          <ellipse cx="144" cy="58" rx="1.2" ry="5.5" fill="#000"/>
+          <!-- Patas musculosas -->
+          <path d="M94 126 L98 180 Q110 184 118 180 L112 126 Z" fill="#09090b"/>
+          <path d="M130 126 L136 179 Q148 183 154 179 L146 126 Z" fill="#09090b"/>
         </svg>`,
-        // Fase 4: Tigre Dorado Legendario
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-2xl">
-          <circle cx="50" cy="50" r="46" fill="none" stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.8"/>
-          <ellipse cx="50" cy="64" rx="25" ry="21" fill="#f59e0b"/>
-          <path d="M42 56 L46 62 L40 64 Z" fill="#1e1b4b"/>
-          <path d="M58 56 L54 62 L60 64 Z" fill="#1e1b4b"/>
-          <circle cx="50" cy="36" r="18" fill="#f59e0b"/>
-          <polygon points="32,21 28,6 43,18" fill="#b45309"/>
-          <polygon points="68,21 72,6 57,18" fill="#b45309"/>
-          <polygon points="46,18 50,10 54,18" fill="#ef4444"/>
-          <circle cx="43" cy="35" r="3.5" fill="#38bdf8"/>
-          <circle cx="57" cy="35" r="3.5" fill="#38bdf8"/>
-          <path d="M72 64 Q96 46 90 18" stroke="#f59e0b" stroke-width="6" stroke-linecap="round" fill="none"/>
+
+        // Fase 4: Tigre Legendario Dorado
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <circle cx="100" cy="100" r="85" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5,4" opacity="0.8"/>
+          <path d="M30 130 Q0 80 20 40 Q30 45 28 75 Q20 105 45 145 Z" fill="#b45309"/>
+          <!-- Cuerpo con rayas -->
+          <path d="M45 130 C38 88, 75 75, 128 85 C158 95, 162 140, 148 172 C118 182, 58 178, 45 130 Z" fill="#f59e0b"/>
+          <path d="M70 100 L76 115 L68 120 Z" fill="#18181b"/>
+          <path d="M90 98 L98 116 L88 122 Z" fill="#18181b"/>
+          <path d="M115 105 L122 122 L112 126 Z" fill="#18181b"/>
+          <!-- Cabeza de tigre -->
+          <ellipse cx="136" cy="60" rx="26" ry="24" fill="#f59e0b"/>
+          <polygon points="114,48 118,20 132,42" fill="#b45309"/>
+          <polygon points="144,42 158,20 162,48" fill="#b45309"/>
+          <polygon points="132,38 136,26 140,38" fill="#ef4444"/>
+          <!-- Ojos celestiales -->
+          <ellipse cx="127" cy="56" rx="5" ry="6" fill="#38bdf8"/>
+          <ellipse cx="145" cy="56" rx="5" ry="6" fill="#38bdf8"/>
+          <ellipse cx="127" cy="56" rx="1.5" ry="5.5" fill="#000"/>
+          <ellipse cx="145" cy="56" rx="1.5" ry="5.5" fill="#000"/>
         </svg>`
       ],
+
       fox: [
-        // Fase 1: Zorrito Bebé
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-          <ellipse cx="50" cy="68" rx="21" ry="17" fill="#ea580c"/>
-          <ellipse cx="50" cy="70" rx="10" ry="8" fill="#ffedd5"/>
-          <circle cx="50" cy="42" r="18" fill="#ea580c"/>
-          <polygon points="32,28 26,12 42,24" fill="#431407"/>
-          <polygon points="68,28 74,12 58,24" fill="#431407"/>
-          <polygon points="50,42 41,52 59,52" fill="#ffedd5"/>
-          <circle cx="43" cy="40" r="3" fill="#1e293b"/>
-          <circle cx="57" cy="40" r="3" fill="#1e293b"/>
-          <circle cx="50" cy="48" r="2.5" fill="#0f172a"/>
-          <path d="M68 68 Q88 64 82 46" stroke="#ea580c" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <circle cx="82" cy="46" r="4.5" fill="#ffedd5"/>
+        // Fase 1: Zorrito Bebé Realista
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+          <defs>
+            <linearGradient id="foxFur1" x1="0" y1="0" x2="1" y2="1">
+              <stop offset="0%" stop-color="#ea580c"/>
+              <stop offset="70%" stop-color="#c2410c"/>
+              <stop offset="100%" stop-color="#431407"/>
+            </linearGradient>
+          </defs>
+          <!-- Gran cola esponjosa con punta blanca -->
+          <path d="M40 145 C10 110, 15 65, 45 45 C65 65, 55 110, 60 145 Z" fill="url(#foxFur1)"/>
+          <path d="M35 55 C42 48, 50 52, 45 45 C35 50, 30 65, 35 55 Z" fill="#fff"/>
+          <path d="M55 140 C50 110, 75 95, 110 105 C130 112, 138 135, 132 165 C115 174, 70 170, 55 140 Z" fill="url(#foxFur1)"/>
+          <!-- Cabeza de zorro con mejillas blancas -->
+          <ellipse cx="118" cy="78" rx="25" ry="23" fill="url(#foxFur1)"/>
+          <polygon points="96,62 94,30 112,55" fill="#431407"/>
+          <polygon points="128,55 144,30 144,62" fill="#431407"/>
+          <polygon points="105,75 130,75 124,96" fill="#fff"/>
+          <circle cx="124" cy="94" r="2.5" fill="#0f172a"/>
+          <!-- Ojos astutos -->
+          <ellipse cx="110" cy="72" rx="4.5" ry="4" fill="#0f172a"/>
+          <ellipse cx="128" cy="72" rx="4.5" ry="4" fill="#0f172a"/>
+          <circle cx="109" cy="70" r="1.5" fill="#fff"/>
+          <circle cx="127" cy="70" r="1.5" fill="#fff"/>
         </svg>`,
-        // Fase 2: Zorro Explorador
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-          <ellipse cx="50" cy="64" rx="23" ry="19" fill="#c2410c"/>
-          <rect x="36" y="58" width="28" height="14" rx="4" fill="#15803d"/>
-          <circle cx="50" cy="38" r="18" fill="#c2410c"/>
-          <polygon points="30,24 24,8 42,20" fill="#7c2d12"/>
-          <polygon points="70,24 76,8 58,20" fill="#7c2d12"/>
-          <circle cx="43" cy="37" r="3.5" fill="#0f172a"/>
-          <circle cx="57" cy="37" r="3.5" fill="#0f172a"/>
-          <path d="M72 64 Q94 60 88 40" stroke="#c2410c" stroke-width="10" stroke-linecap="round" fill="none"/>
-          <circle cx="88" cy="40" r="5" fill="#fff"/>
+
+        // Fase 2: Zorro Explorador con Mochila
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+          <path d="M35 140 C5 100, 10 50, 45 35 C65 55, 55 105, 58 145 Z" fill="#c2410c"/>
+          <path d="M35 48 C42 40, 50 45, 45 35 C35 40, 30 55, 35 48 Z" fill="#fff"/>
+          <path d="M48 135 C42 98, 75 85, 120 95 C145 105, 150 140, 140 168 C115 178, 62 174, 48 135 Z" fill="#c2410c"/>
+          <!-- Mochila de explorador -->
+          <rect x="75" y="100" width="30" height="24" rx="6" fill="#15803d"/>
+          <ellipse cx="126" cy="68" rx="25" ry="22" fill="#c2410c"/>
+          <polygon points="102,52 100,20 120,45" fill="#7c2d12"/>
+          <polygon points="135,45 152,20 152,52" fill="#7c2d12"/>
+          <polygon points="112,68 138,68 132,88" fill="#fff"/>
+          <circle cx="132" cy="86" r="2.5" fill="#0f172a"/>
+          <ellipse cx="118" cy="62" rx="4.5" ry="4" fill="#0f172a"/>
+          <ellipse cx="136" cy="62" rx="4.5" ry="4" fill="#0f172a"/>
         </svg>`,
+
         // Fase 3: Zorro Alfa
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-lg">
-          <ellipse cx="50" cy="64" rx="24" ry="20" fill="#9a3412"/>
-          <circle cx="50" cy="36" r="18" fill="#9a3412"/>
-          <polygon points="28,20 22,4 40,16" fill="#431407"/>
-          <polygon points="72,20 78,4 60,16" fill="#431407"/>
-          <circle cx="43" cy="35" r="3.5" fill="#facc15"/>
-          <circle cx="57" cy="35" r="3.5" fill="#facc15"/>
-          <path d="M72 64 Q96 54 90 32" stroke="#ea580c" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <path d="M70 68 Q95 72 88 52" stroke="#ea580c" stroke-width="8" stroke-linecap="round" fill="none"/>
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <path d="M30 140 C-5 90, 5 35, 45 20 C65 45, 50 100, 55 145 Z" fill="#9a3412"/>
+          <path d="M45 130 C38 88, 75 75, 128 85 C158 95, 162 140, 148 172 C118 182, 58 178, 45 130 Z" fill="#9a3412"/>
+          <ellipse cx="132" cy="62" rx="26" ry="23" fill="#9a3412"/>
+          <polygon points="108,46 106,14 126,40" fill="#431407"/>
+          <polygon points="140,40 158,14 160,46" fill="#431407"/>
+          <ellipse cx="124" cy="56" rx="5" ry="4" fill="#facc15"/>
+          <ellipse cx="142" cy="56" rx="5" ry="4" fill="#facc15"/>
         </svg>`,
-        // Fase 4: Kitsune Místico (Nueve Colas)
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-2xl">
-          <circle cx="50" cy="50" r="46" fill="none" stroke="#ec4899" stroke-width="1.5" stroke-dasharray="3,3" opacity="0.8"/>
-          <path d="M68 64 Q98 30 84 15" stroke="#f43f5e" stroke-width="5" stroke-linecap="round" fill="none"/>
-          <path d="M70 66 Q99 50 90 30" stroke="#f43f5e" stroke-width="5" stroke-linecap="round" fill="none"/>
-          <path d="M68 70 Q98 70 88 50" stroke="#f43f5e" stroke-width="5" stroke-linecap="round" fill="none"/>
-          <ellipse cx="50" cy="64" rx="24" ry="20" fill="#fff"/>
-          <circle cx="50" cy="36" r="18" fill="#fff"/>
-          <polygon points="28,20 22,4 40,16" fill="#f43f5e"/>
-          <polygon points="72,20 78,4 60,16" fill="#f43f5e"/>
-          <circle cx="43" cy="35" r="3.5" fill="#06b6d4"/>
-          <circle cx="57" cy="35" r="3.5" fill="#06b6d4"/>
-          <ellipse cx="50" cy="42" rx="3.5" ry="2" fill="#0f172a"/>
+
+        // Fase 4: Kitsune Místico de Nueve Colas
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <circle cx="100" cy="100" r="85" fill="none" stroke="#ec4899" stroke-width="2" stroke-dasharray="4,4" opacity="0.8"/>
+          <!-- Múltiples colas celestiales -->
+          <path d="M50 130 Q10 70 30 30" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+          <path d="M45 135 Q5 90 15 50" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+          <path d="M40 140 Q0 115 10 75" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
+          <path d="M45 130 C38 88, 75 75, 128 85 C158 95, 162 140, 148 172 C118 182, 58 178, 45 130 Z" fill="#fff"/>
+          <ellipse cx="134" cy="60" rx="25" ry="23" fill="#fff"/>
+          <polygon points="110,44 108,12 128,38" fill="#f43f5e"/>
+          <polygon points="142,38 160,12 162,44" fill="#f43f5e"/>
+          <!-- Ojos cyan místicos -->
+          <ellipse cx="126" cy="55" rx="5" ry="4" fill="#06b6d4"/>
+          <ellipse cx="144" cy="55" rx="5" ry="4" fill="#06b6d4"/>
         </svg>`
       ],
+
       panda: [
-        // Fase 1: Pandita Bebé
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-          <ellipse cx="50" cy="68" rx="23" ry="19" fill="#f8fafc"/>
-          <ellipse cx="33" cy="85" rx="7" ry="5" fill="#0f172a"/>
-          <ellipse cx="67" cy="85" rx="7" ry="5" fill="#0f172a"/>
-          <circle cx="50" cy="40" r="19" fill="#f8fafc"/>
-          <circle cx="34" cy="25" r="7" fill="#0f172a"/>
-          <circle cx="66" cy="25" r="7" fill="#0f172a"/>
-          <ellipse cx="43" cy="39" rx="5" ry="6" fill="#0f172a"/>
-          <ellipse cx="57" cy="39" rx="5" ry="6" fill="#0f172a"/>
-          <circle cx="44" cy="38" r="2" fill="#fff"/>
-          <circle cx="56" cy="38" r="2" fill="#fff"/>
-          <ellipse cx="50" cy="46" rx="3.5" ry="2" fill="#0f172a"/>
+        // Fase 1: Pandita Realista Bebé
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+          <path d="M50 145 C45 110, 75 95, 115 105 C135 112, 145 135, 140 165 C120 175, 70 170, 50 145 Z" fill="#f8fafc"/>
+          <!-- Patas negras traseras -->
+          <ellipse cx="60" cy="165" rx="16" ry="12" fill="#0f172a"/>
+          <!-- Hombros y patas delanteras negras -->
+          <path d="M90 115 C100 105, 125 105, 135 118 L130 175 Q122 178 115 175 L110 135 L100 175 Q92 178 86 175 Z" fill="#0f172a"/>
+          <!-- Cabeza redonda -->
+          <ellipse cx="118" cy="75" rx="28" ry="26" fill="#f8fafc"/>
+          <!-- Orejas negras redondeadas -->
+          <circle cx="95" cy="54" r="10" fill="#0f172a"/>
+          <circle cx="140" cy="54" r="10" fill="#0f172a"/>
+          <!-- Manchas en los ojos características del panda -->
+          <ellipse cx="108" cy="74" rx="7" ry="9" fill="#0f172a" transform="rotate(-15 108 74)"/>
+          <ellipse cx="128" cy="74" rx="7" ry="9" fill="#0f172a" transform="rotate(15 128 74)"/>
+          <circle cx="108" cy="74" r="2.5" fill="#fff"/>
+          <circle cx="128" cy="74" r="2.5" fill="#fff"/>
+          <!-- Nariz panda -->
+          <ellipse cx="118" cy="85" rx="5" ry="3.5" fill="#0f172a"/>
         </svg>`,
+
         // Fase 2: Panda Bambú Ninja
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-md">
-          <ellipse cx="50" cy="64" rx="24" ry="20" fill="#f8fafc"/>
-          <rect x="34" y="58" width="32" height="6" rx="3" fill="#15803d"/>
-          <ellipse cx="33" cy="85" rx="7" ry="5" fill="#0f172a"/>
-          <ellipse cx="67" cy="85" rx="7" ry="5" fill="#0f172a"/>
-          <circle cx="50" cy="38" r="18" fill="#f8fafc"/>
-          <circle cx="33" cy="23" r="7" fill="#0f172a"/>
-          <circle cx="67" cy="23" r="7" fill="#0f172a"/>
-          <ellipse cx="43" cy="37" rx="5" ry="6" fill="#0f172a"/>
-          <ellipse cx="57" cy="37" rx="5" ry="6" fill="#0f172a"/>
-          <line x1="72" y1="80" x2="84" y2="30" stroke="#22c55e" stroke-width="4" stroke-linecap="round"/>
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+          <path d="M48 140 C42 100, 75 90, 125 100 C145 110, 150 140, 142 168 C120 178, 65 175, 48 140 Z" fill="#f8fafc"/>
+          <!-- Cinturón cinta verde -->
+          <rect x="75" y="115" width="45" height="10" rx="3" fill="#15803d"/>
+          <!-- Vara de bambú -->
+          <line x1="145" y1="35" x2="135" y2="180" stroke="#22c55e" stroke-width="5" stroke-linecap="round"/>
+          <circle cx="92" cy="50" r="10" fill="#0f172a"/>
+          <circle cx="138" cy="50" r="10" fill="#0f172a"/>
+          <ellipse cx="115" cy="72" rx="27" ry="25" fill="#f8fafc"/>
+          <ellipse cx="105" cy="70" rx="7" ry="9" fill="#0f172a" transform="rotate(-15 105 70)"/>
+          <ellipse cx="125" cy="70" rx="7" ry="9" fill="#0f172a" transform="rotate(15 125 70)"/>
+          <circle cx="105" cy="70" r="2.5" fill="#fff"/>
+          <circle cx="125" cy="70" r="2.5" fill="#fff"/>
         </svg>`,
-        // Fase 3: Panda Maestro Kung-Fu
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-lg">
-          <ellipse cx="50" cy="64" rx="25" ry="21" fill="#f8fafc"/>
-          <circle cx="50" cy="64" r="10" fill="#0f172a"/>
-          <path d="M50 54 A5 5 0 0 1 50 64 A5 5 0 0 0 50 74" stroke="#fff" stroke-width="2" fill="none"/>
-          <circle cx="50" cy="59" r="1.5" fill="#fff"/>
-          <circle cx="50" cy="69" r="1.5" fill="#0f172a"/>
-          <circle cx="50" cy="38" r="18" fill="#f8fafc"/>
-          <circle cx="33" cy="23" r="7" fill="#0f172a"/>
-          <circle cx="67" cy="23" r="7" fill="#0f172a"/>
-          <ellipse cx="43" cy="37" rx="5" ry="6" fill="#0f172a"/>
-          <ellipse cx="57" cy="37" rx="5" ry="6" fill="#0f172a"/>
-          <circle cx="43" cy="36" r="2" fill="#38bdf8"/>
-          <circle cx="57" cy="36" r="2" fill="#38bdf8"/>
+
+        // Fase 3: Maestro Kung-Fu Yin-Yang
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <path d="M48 140 C42 100, 75 90, 125 100 C145 110, 150 140, 142 168 C120 178, 65 175, 48 140 Z" fill="#f8fafc"/>
+          <!-- Medallón Yin-Yang en el pecho -->
+          <circle cx="105" cy="120" r="12" fill="#0f172a"/>
+          <path d="M105 108 A6 6 0 0 1 105 120 A6 6 0 0 0 105 132" stroke="#fff" stroke-width="2.5" fill="none"/>
+          <circle cx="92" cy="48" r="10" fill="#0f172a"/>
+          <circle cx="138" cy="48" r="10" fill="#0f172a"/>
+          <ellipse cx="115" cy="70" rx="27" ry="25" fill="#f8fafc"/>
+          <ellipse cx="105" cy="68" rx="7" ry="9" fill="#0f172a"/>
+          <ellipse cx="125" cy="68" rx="7" ry="9" fill="#0f172a"/>
+          <circle cx="105" cy="68" r="2.5" fill="#38bdf8"/>
+          <circle cx="125" cy="68" r="2.5" fill="#38bdf8"/>
         </svg>`,
-        // Fase 4: Panda Celestial
-        `<svg viewBox="0 0 100 100" class="w-full h-full drop-shadow-2xl">
-          <circle cx="50" cy="50" r="46" fill="none" stroke="#a855f7" stroke-width="1.5" stroke-dasharray="4,2" opacity="0.8"/>
-          <path d="M20 50 Q5 35 20 20 Q28 40 34 46 Z" fill="#c084fc" opacity="0.8"/>
-          <path d="M80 50 Q95 35 80 20 Q72 40 66 46 Z" fill="#c084fc" opacity="0.8"/>
-          <ellipse cx="50" cy="64" rx="25" ry="21" fill="#f8fafc"/>
-          <circle cx="50" cy="36" r="18" fill="#f8fafc"/>
-          <polygon points="44,18 50,10 56,18" fill="#fbbf24"/>
-          <circle cx="33" cy="21" r="7" fill="#0f172a"/>
-          <circle cx="67" cy="21" r="7" fill="#0f172a"/>
-          <circle cx="43" cy="35" r="3" fill="#a855f7"/>
-          <circle cx="57" cy="35" r="3" fill="#a855f7"/>
+
+        // Fase 4: Panda Celestial con Alas
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <circle cx="100" cy="100" r="85" fill="none" stroke="#a855f7" stroke-width="2" stroke-dasharray="5,4" opacity="0.8"/>
+          <!-- Alas místicas púrpuras -->
+          <path d="M35 90 Q10 40 45 20 Q65 60 70 90 Z" fill="#c084fc" opacity="0.75"/>
+          <path d="M145 90 Q180 40 145 20 Q125 60 120 90 Z" fill="#c084fc" opacity="0.75"/>
+          <path d="M48 140 C42 100, 75 90, 125 100 C145 110, 150 140, 142 168 C120 178, 65 175, 48 140 Z" fill="#f8fafc"/>
+          <circle cx="92" cy="46" r="10" fill="#0f172a"/>
+          <circle cx="138" cy="46" r="10" fill="#0f172a"/>
+          <ellipse cx="115" cy="68" rx="27" ry="25" fill="#f8fafc"/>
+          <polygon points="107,35 115,22 123,35" fill="#fbbf24"/>
+          <ellipse cx="105" cy="66" rx="7" ry="9" fill="#a855f7"/>
+          <ellipse cx="125" cy="66" rx="7" ry="9" fill="#a855f7"/>
         </svg>`
       ]
     };
@@ -1022,6 +1200,7 @@
     const ANIMAL_EVOLUTIONS = {
       dog: {
         name: 'Perro Fiel',
+        icon: '🐶',
         stages: [
           { phase: 'Fase 1: Bebé 🐣', title: '🐾 Cachorrito Fiel', accessory: '🍼' },
           { phase: 'Fase 2: Joven 🌿', title: '🐕 Perro Guardián con Arnés', accessory: '🧣' },
@@ -1031,6 +1210,7 @@
       },
       cat: {
         name: 'Gato Ágil',
+        icon: '🐱',
         stages: [
           { phase: 'Fase 1: Bebé 🐣', title: '🐾 Gatito Curioso', accessory: '🍼' },
           { phase: 'Fase 2: Joven 🌿', title: '🐈 Gato Cazador con Cascabel', accessory: '🎀' },
@@ -1040,6 +1220,7 @@
       },
       fox: {
         name: 'Zorro Astuto',
+        icon: '🦊',
         stages: [
           { phase: 'Fase 1: Bebé 🐣', title: '🐾 Zorrito Bebé', accessory: '🍼' },
           { phase: 'Fase 2: Joven 🌿', title: '🦊 Zorro Explorador del Bosque', accessory: '🎒' },
@@ -1049,6 +1230,7 @@
       },
       panda: {
         name: 'Panda Sabio',
+        icon: '🐼',
         stages: [
           { phase: 'Fase 1: Bebé 🐣', title: '🐾 Pandita Pequeño', accessory: '🍼' },
           { phase: 'Fase 2: Joven 🌿', title: '🐼 Bambú Ninja con Vara', accessory: '🎋' },
@@ -1059,11 +1241,11 @@
     };
 
     const CATEGORY_MAP = {
-      salud: { label: 'Salud', bg: 'bg-emerald-500/20', text: 'text-emerald-300 border border-emerald-500/30' },
-      mente: { label: 'Mente', bg: 'bg-blue-500/20', text: 'text-blue-300 border border-blue-500/30' },
-      trabajo: { label: 'Trabajo', bg: 'bg-purple-500/20', text: 'text-purple-300 border border-purple-500/30' },
-      finanzas: { label: 'Finanzas', bg: 'bg-amber-500/20', text: 'text-amber-300 border border-amber-500/30' },
-      bienestar: { label: 'Bienestar', bg: 'bg-rose-500/20', text: 'text-rose-300 border border-rose-500/30' }
+      salud: { label: 'Salud', bg: 'bg-emerald-500/10 dark:bg-emerald-500/20', text: 'text-emerald-700 dark:text-emerald-300 border border-emerald-500/30' },
+      mente: { label: 'Mente', bg: 'bg-blue-500/10 dark:bg-blue-500/20', text: 'text-blue-700 dark:text-blue-300 border border-blue-500/30' },
+      trabajo: { label: 'Trabajo', bg: 'bg-purple-500/10 dark:bg-purple-500/20', text: 'text-purple-700 dark:text-purple-300 border border-purple-500/30' },
+      finanzas: { label: 'Finanzas', bg: 'bg-amber-500/10 dark:bg-amber-500/20', text: 'text-amber-700 dark:text-amber-300 border border-amber-500/30' },
+      bienestar: { label: 'Bienestar', bg: 'bg-rose-500/10 dark:bg-rose-500/20', text: 'text-rose-700 dark:text-rose-300 border border-rose-500/30' }
     };
 
     const MOTIVATIONAL_QUOTES = [
@@ -1110,7 +1292,7 @@
       ],
       pomodoro: {
         preset: 'beginner',
-        mode: 'focus', // 'focus' | 'rest' | 'longRest'
+        mode: 'focus',
         cycle: 1,
         totalCycles: 4,
         timeRemaining: 25 * 60,
@@ -1196,7 +1378,9 @@
     function showToast(message, type = 'success') {
       const container = document.getElementById('toastContainer');
       const toast = document.createElement('div');
-      const borderClass = type === 'success' ? 'border-emerald-500/40 text-emerald-300' : 'border-amber-500/40 text-amber-300';
+      const borderClass = type === 'success' 
+        ? 'border-emerald-500/40 text-emerald-800 dark:text-emerald-300' 
+        : 'border-amber-500/40 text-amber-800 dark:text-amber-300';
 
       toast.className = `flex items-center gap-2 px-4 py-2.5 rounded-2xl glassmorphism border ${borderClass} shadow-2xl text-xs font-bold transform transition-all duration-300 opacity-0 translate-y-2 pointer-events-auto`;
       toast.innerHTML = `<span>${type === 'success' ? '✨' : '⚠️'}</span><span>${message}</span>`;
@@ -1241,7 +1425,7 @@
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-      const particleCount = 120;
+      const particleCount = 100;
       const geometry = new THREE.BufferGeometry();
       const positions = new Float32Array(particleCount * 3);
       for (let i = 0; i < particleCount * 3; i++) {
@@ -1249,11 +1433,12 @@
       }
       geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
 
+      const isLight = document.documentElement.classList.contains('light');
       const material = new THREE.PointsMaterial({
         size: 0.05,
-        color: 0x10b981,
+        color: isLight ? 0x059669 : 0x10b981,
         transparent: true,
-        opacity: 0.45,
+        opacity: isLight ? 0.25 : 0.45,
         blending: THREE.AdditiveBlending
       });
       const particles = new THREE.Points(geometry, material);
@@ -1286,7 +1471,6 @@
       const oldStageIndex = getPetStageIndex(AppState.pet.xp);
       AppState.pet.xp += amount;
       
-      // Automatic Nutrition & Happiness feeding with XP gain
       AppState.pet.hunger = Math.min(100, AppState.pet.hunger + Math.round(amount * 0.4));
       AppState.pet.happiness = Math.min(100, AppState.pet.happiness + Math.round(amount * 0.5));
       AppState.weeklyXP[AppState.weeklyXP.length - 1] += amount;
@@ -1322,14 +1506,20 @@
       const targets = [100, 300, 700, 1200];
       const maxNext = targets[stageIdx] || 1200;
 
+      // Update compact header badge
+      document.getElementById('headerPetIcon').innerText = animalData.icon;
+      document.getElementById('headerPetName').innerText = pet.name;
+      document.getElementById('headerPetStageBadge').innerText = `Fase ${stageIdx + 1}`;
+
+      // Update full pet tab values
       document.getElementById('petNameText').innerText = pet.name;
       document.getElementById('petXpTotal').innerText = `${pet.xp} XP`;
       document.getElementById('petStageTitle').innerText = stage.title;
       document.getElementById('petPhaseBadge').innerText = stage.phase;
       document.getElementById('petAccessory').innerText = stage.accessory;
       
-      // Render Full-Body SVG representation
-      const svgs = PET_BODY_SVGS[pet.key] || PET_BODY_SVGS.dog;
+      // Inject realistic full-body vector
+      const svgs = REALISTIC_PET_SVGS[pet.key] || REALISTIC_PET_SVGS.dog;
       document.getElementById('petFullBodyContainer').innerHTML = svgs[stageIdx];
 
       document.getElementById('petXpRatio').innerText = `${pet.xp} / ${maxNext} XP`;
@@ -1374,7 +1564,7 @@
       closeModal('petSelectModal');
       persistState();
       renderPet();
-      showToast('¡Compañero de cuerpo completo actualizado!');
+      showToast('¡Compañero actualizado!');
     }
 
     function renderHabits() {
@@ -1401,7 +1591,9 @@
         if (h.type === 'check') {
           actionHtml = `
             <button onclick="toggleHabit('${h.id}')" class="px-3.5 py-2 rounded-2xl text-xs font-black transition active:scale-95 ${
-              h.completed ? 'bg-emerald-500 text-white shadow-md' : 'bg-slate-800 hover:bg-slate-700 text-slate-300 border border-slate-700'
+              h.completed 
+                ? 'bg-emerald-600 text-white shadow-md' 
+                : 'bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 border border-slate-300 dark:border-slate-700'
             }">
               ${h.completed ? '✓ Hecho' : 'Completar +20XP'}
             </button>
@@ -1409,16 +1601,18 @@
         } else if (h.type === 'counter') {
           const isDone = (h.current || 0) >= (h.target || 1);
           actionHtml = `
-            <div class="flex items-center gap-1.5 bg-slate-900 border border-slate-700 rounded-2xl p-1">
-              <button onclick="changeHabitCounter('${h.id}', -1)" class="w-7 h-7 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-300 text-xs font-black">-</button>
-              <span class="text-xs font-mono font-black px-2 ${isDone ? 'text-emerald-300' : 'text-slate-200'}">${h.current || 0}/${h.target}</span>
+            <div class="flex items-center gap-1.5 bg-slate-100 dark:bg-slate-900 border border-slate-300 dark:border-slate-700 rounded-2xl p-1">
+              <button onclick="changeHabitCounter('${h.id}', -1)" class="w-7 h-7 rounded-xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-300 text-xs font-black">-</button>
+              <span class="text-xs font-mono font-black px-2 ${isDone ? 'text-emerald-600 dark:text-emerald-300' : 'text-slate-700 dark:text-slate-200'}">${h.current || 0}/${h.target}</span>
               <button onclick="changeHabitCounter('${h.id}', 1)" class="w-7 h-7 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-black">+</button>
             </div>
           `;
         } else if (h.type === 'timed') {
           actionHtml = `
             <button onclick="openTimedHabitChoice('${h.id}')" class="px-3.5 py-2 rounded-2xl text-xs font-black transition active:scale-95 flex items-center gap-1.5 ${
-              h.completed ? 'bg-emerald-500/20 text-emerald-300 border border-emerald-500/40' : 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
+              h.completed 
+                ? 'bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40' 
+                : 'bg-gradient-to-r from-emerald-600 to-teal-600 text-white shadow-md'
             }">
               <i data-lucide="${h.completed ? 'check-check' : 'clock'}" class="w-3.5 h-3.5"></i>
               <span>${h.completed ? 'Completado' : `${h.minutes} min`}</span>
@@ -1427,30 +1621,30 @@
         }
 
         return `
-          <div class="glassmorphism p-4 rounded-3xl border ${h.completed ? 'border-emerald-500/60 bg-emerald-950/20' : 'border-slate-800'} shadow-sm flex flex-col justify-between transition-all">
+          <div class="glassmorphism p-4 rounded-3xl border ${h.completed ? 'border-emerald-500/60 bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-slate-200 dark:border-slate-800'} shadow-sm flex flex-col justify-between transition-all">
             <div class="flex justify-between items-start mb-3">
               <div class="flex items-start gap-2.5">
                 <!-- Reorder Arrows -->
                 <div class="flex flex-col gap-0.5 mt-0.5">
-                  <button onclick="moveHabitOrder('${h.id}', -1)" ${isFirst ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="text-slate-400 hover:text-emerald-400 p-0.5"'} title="Subir">
+                  <button onclick="moveHabitOrder('${h.id}', -1)" ${isFirst ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="text-slate-400 hover:text-emerald-500 p-0.5"'} title="Subir">
                     <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
                   </button>
-                  <button onclick="moveHabitOrder('${h.id}', 1)" ${isLast ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="text-slate-400 hover:text-emerald-400 p-0.5"'} title="Bajar">
+                  <button onclick="moveHabitOrder('${h.id}', 1)" ${isLast ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="text-slate-400 hover:text-emerald-500 p-0.5"'} title="Bajar">
                     <i data-lucide="arrow-down" class="w-3.5 h-3.5"></i>
                   </button>
                 </div>
                 <div>
                   <span class="text-[10px] font-black uppercase px-2.5 py-0.5 rounded-lg ${cat.bg} ${cat.text}">${cat.label}</span>
-                  <h4 class="font-bold text-sm mt-1.5 ${h.completed ? 'line-through text-slate-400' : 'text-white'}">${h.name}</h4>
-                  <span class="text-[11px] text-slate-400 block mt-0.5">
+                  <h4 class="font-bold text-sm mt-1.5 ${h.completed ? 'line-through text-slate-400' : 'text-slate-900 dark:text-white'}">${h.name}</h4>
+                  <span class="text-[11px] text-slate-500 dark:text-slate-400 block mt-0.5">
                     ${h.type === 'timed' ? `⏱️ Sesión programada de ${h.minutes} min` : h.type === 'counter' ? `🎯 Meta diaria: ${h.target}` : '✅ Verificación simple'}
                   </span>
                 </div>
               </div>
-              <button onclick="deleteHabit('${h.id}')" class="text-slate-400 hover:text-red-400 p-1 transition" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
+              <button onclick="deleteHabit('${h.id}')" class="text-slate-400 hover:text-red-500 p-1 transition" title="Eliminar"><i data-lucide="trash-2" class="w-4 h-4"></i></button>
             </div>
-            <div class="flex justify-between items-center pt-2.5 border-t border-slate-800">
-              <span class="text-xs text-amber-400 font-black flex items-center gap-1">🔥 ${h.streak}d racha</span>
+            <div class="flex justify-between items-center pt-2.5 border-t border-slate-200 dark:border-slate-800">
+              <span class="text-xs text-amber-500 font-black flex items-center gap-1">🔥 ${h.streak}d racha</span>
               ${actionHtml}
             </div>
           </div>
@@ -1618,11 +1812,13 @@
 
         return `
           <button onclick="selectFolderFilter('${f.id}')" class="px-3.5 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-2 whitespace-nowrap ${
-            isSel ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-800 text-slate-400 hover:bg-slate-700 border border-slate-700'
+            isSel 
+              ? 'bg-emerald-600 text-white shadow-md' 
+              : 'bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-400 hover:bg-slate-300 dark:hover:bg-slate-700 border border-slate-300 dark:border-slate-700'
           }">
             <span>${f.emoji}</span>
             <span>${f.name}</span>
-            <span class="text-[10px] px-1.5 py-0.5 rounded-full ${isSel ? 'bg-white/20 text-white' : 'bg-slate-700 text-slate-300'}">${count}</span>
+            <span class="text-[10px] px-1.5 py-0.5 rounded-full ${isSel ? 'bg-white/20 text-white' : 'bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-slate-300'}">${count}</span>
           </button>
         `;
       }).join('');
@@ -1633,7 +1829,7 @@
 
       if (filtered.length === 0) {
         container.innerHTML = `
-          <div class="glassmorphism p-8 rounded-3xl text-center text-slate-400 text-xs border border-dashed border-slate-700">
+          <div class="glassmorphism p-8 rounded-3xl text-center text-slate-400 text-xs border border-dashed border-slate-300 dark:border-slate-700">
             No hay tareas en esta carpeta madre.
           </div>
         `;
@@ -1643,15 +1839,15 @@
       container.innerHTML = filtered.map(t => {
         const folder = AppState.folders.find(f => f.id === t.folderId) || { name: 'General', emoji: '📁' };
         return `
-          <div class="p-3.5 rounded-2xl glassmorphism border border-slate-800 shadow-sm flex items-center justify-between text-xs transition">
+          <div class="p-3.5 rounded-2xl glassmorphism border border-slate-200 dark:border-slate-800 shadow-sm flex items-center justify-between text-xs transition">
             <div class="flex items-center gap-3">
-              <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}')" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
+              <input type="checkbox" ${t.done ? 'checked' : ''} onchange="toggleTask('${t.id}')" class="w-4 h-4 accent-emerald-600 rounded cursor-pointer">
               <div>
-                <span class="${t.done ? 'line-through text-slate-500' : 'font-bold text-white'}">${t.title}</span>
-                <span class="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">${folder.emoji} ${folder.name}</span>
+                <span class="${t.done ? 'line-through text-slate-400' : 'font-bold text-slate-900 dark:text-white'}">${t.title}</span>
+                <span class="text-[10px] text-slate-500 dark:text-slate-400 flex items-center gap-1 mt-0.5">${folder.emoji} ${folder.name}</span>
               </div>
             </div>
-            <button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-red-400 p-1" title="Eliminar"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
+            <button onclick="deleteTask('${t.id}')" class="text-slate-400 hover:text-red-500 p-1" title="Eliminar"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
           </div>
         `;
       }).join('');
@@ -1737,9 +1933,9 @@
       ['beginner', 'intermediate', 'pro'].forEach(k => {
         const btn = document.getElementById(`pomoPreset-${k}`);
         if (k === presetKey) {
-          btn.className = 'p-2.5 rounded-2xl border border-emerald-500/40 bg-emerald-500/20 text-emerald-300 text-xs font-black transition';
+          btn.className = 'p-2.5 rounded-2xl border border-emerald-500/40 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 text-xs font-black transition';
         } else {
-          btn.className = 'p-2.5 rounded-2xl border border-slate-800 bg-slate-800/70 text-slate-300 hover:text-white text-xs font-black transition';
+          btn.className = 'p-2.5 rounded-2xl border border-slate-300 dark:border-slate-800 bg-slate-100 dark:bg-slate-800/70 text-slate-700 dark:text-slate-300 hover:text-emerald-500 text-xs font-black transition';
         }
       });
 
@@ -1829,7 +2025,6 @@
           }
         }
 
-        // Check for 4 cycles -> Long Break (Triple time)
         if (AppState.pomodoro.cycle >= AppState.pomodoro.totalCycles) {
           AppState.pomodoro.mode = 'longRest';
           const preset = POMODORO_PRESETS[AppState.pomodoro.preset];
@@ -1861,13 +2056,13 @@
       const modeBadge = document.getElementById('pomoModeBadge');
       if (AppState.pomodoro.mode === 'focus') {
         modeBadge.innerText = '🧠 Tiempo de Enfoque';
-        modeBadge.className = 'px-3.5 py-1 bg-emerald-500/20 text-emerald-300 border border-emerald-500/40 rounded-full text-xs font-black uppercase';
+        modeBadge.className = 'px-3.5 py-1 bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/40 rounded-full text-xs font-black uppercase';
       } else if (AppState.pomodoro.mode === 'longRest') {
         modeBadge.innerText = '☕ Descanso Largo (Triple)';
-        modeBadge.className = 'px-3.5 py-1 bg-teal-500/20 text-teal-300 border border-teal-500/40 rounded-full text-xs font-black uppercase';
+        modeBadge.className = 'px-3.5 py-1 bg-teal-500/20 text-teal-700 dark:text-teal-300 border border-teal-500/40 rounded-full text-xs font-black uppercase';
       } else {
         modeBadge.innerText = '🌿 Descanso Breve';
-        modeBadge.className = 'px-3.5 py-1 bg-purple-500/20 text-purple-300 border border-purple-500/40 rounded-full text-xs font-black uppercase';
+        modeBadge.className = 'px-3.5 py-1 bg-purple-500/20 text-purple-700 dark:text-purple-300 border border-purple-500/40 rounded-full text-xs font-black uppercase';
       }
 
       document.getElementById('pomoCycleBadge').innerText = `Ciclo ${AppState.pomodoro.cycle} / ${AppState.pomodoro.totalCycles}`;
@@ -1885,9 +2080,9 @@
       AppState.selectedMood = m;
       document.querySelectorAll('.mood-opt').forEach(btn => {
         if (btn.innerText.includes(m)) {
-          btn.className = 'mood-opt px-3 py-1.5 rounded-xl bg-slate-800 border border-emerald-500 text-xs font-bold';
+          btn.className = 'mood-opt px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 border border-emerald-500 text-xs font-bold';
         } else {
-          btn.className = 'mood-opt px-3 py-1.5 rounded-xl bg-slate-800 border border-slate-700 text-xs font-bold';
+          btn.className = 'mood-opt px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 border border-slate-300 dark:border-slate-700 text-xs font-bold';
         }
       });
     }
@@ -1913,18 +2108,18 @@
       if (!container || !goalsContainer) return;
 
       container.innerHTML = AppState.journal.map(entry => `
-        <div class="glassmorphism p-3.5 rounded-2xl border border-slate-800 space-y-1.5 text-xs">
-          <div class="flex items-center justify-between text-slate-400">
-            <span class="font-bold text-white flex items-center gap-1.5"><span>${entry.mood}</span><span>${entry.date}</span></span>
+        <div class="glassmorphism p-3.5 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-1.5 text-xs">
+          <div class="flex items-center justify-between text-slate-500 dark:text-slate-400">
+            <span class="font-bold text-slate-900 dark:text-white flex items-center gap-1.5"><span>${entry.mood}</span><span>${entry.date}</span></span>
           </div>
-          <p class="text-slate-200 leading-relaxed">${entry.text}</p>
+          <p class="text-slate-700 dark:text-slate-200 leading-relaxed">${entry.text}</p>
         </div>
       `).join('');
 
       goalsContainer.innerHTML = AppState.monthlyGoals.map(g => `
-        <div class="flex items-center justify-between p-2.5 rounded-2xl bg-slate-900/60 border border-slate-800">
-          <span class="${g.done ? 'line-through text-slate-500' : 'text-slate-200'} font-medium">${g.text}</span>
-          <input type="checkbox" ${g.done ? 'checked' : ''} onchange="toggleMonthlyGoal('${g.id}')" class="w-4 h-4 accent-emerald-500 rounded cursor-pointer">
+        <div class="flex items-center justify-between p-2.5 rounded-2xl bg-white/60 dark:bg-slate-900/60 border border-slate-200 dark:border-slate-800">
+          <span class="${g.done ? 'line-through text-slate-400' : 'text-slate-800 dark:text-slate-200'} font-medium">${g.text}</span>
+          <input type="checkbox" ${g.done ? 'checked' : ''} onchange="toggleMonthlyGoal('${g.id}')" class="w-4 h-4 accent-emerald-600 rounded cursor-pointer">
         </div>
       `).join('');
     }
@@ -1954,6 +2149,10 @@
     }
 
     function renderAnalytics() {
+      const isDark = document.documentElement.classList.contains('dark');
+      const textColor = isDark ? '#cbd5e1' : '#475569';
+      const gridColor = isDark ? 'rgba(255, 255, 255, 0.05)' : 'rgba(0, 0, 0, 0.05)';
+
       const ctxWeekly = document.getElementById('xpWeeklyChart');
       if (ctxWeekly) {
         if (chartWeeklyInstance) chartWeeklyInstance.destroy();
@@ -1964,7 +2163,7 @@
             datasets: [{
               label: 'XP Ganado',
               data: AppState.weeklyXP,
-              backgroundColor: 'rgba(16, 185, 129, 0.75)',
+              backgroundColor: isDark ? 'rgba(16, 185, 129, 0.85)' : 'rgba(16, 185, 129, 0.75)',
               borderColor: '#10b981',
               borderRadius: 8,
               borderWidth: 1.5
@@ -1975,8 +2174,8 @@
             maintainAspectRatio: false,
             plugins: { legend: { display: false } },
             scales: {
-              y: { beginAtZero: true, grid: { color: 'rgba(255, 255, 255, 0.05)' }, ticks: { color: '#94a3b8', font: { size: 10 } } },
-              x: { grid: { display: false }, ticks: { color: '#94a3b8', font: { size: 10 } } }
+              y: { beginAtZero: true, grid: { color: gridColor }, ticks: { color: textColor, font: { size: 10 } } },
+              x: { grid: { display: false }, ticks: { color: textColor, font: { size: 10 } } }
             }
           }
         });
@@ -2003,7 +2202,7 @@
             maintainAspectRatio: false,
             cutout: '72%',
             plugins: {
-              legend: { position: 'bottom', labels: { color: '#cbd5e1', font: { size: 10 } } }
+              legend: { position: 'bottom', labels: { color: textColor, font: { size: 10 } } }
             }
           }
         });
@@ -2018,8 +2217,10 @@
       grid.innerHTML = '';
       for (let i = 1; i <= 30; i++) {
         const cell = document.createElement('div');
-        const intensity = (i % 4 === 0 || i > 25) ? 'bg-emerald-500' : (i % 2 === 0 ? 'bg-emerald-700/80' : 'bg-slate-800');
-        cell.className = `h-6 rounded-lg ${intensity} border border-white/5 transition hover:scale-110 cursor-pointer shadow-sm`;
+        const intensity = (i % 4 === 0 || i > 25) 
+          ? 'bg-emerald-500' 
+          : (i % 2 === 0 ? 'bg-emerald-600/70' : 'bg-slate-200 dark:bg-slate-800');
+        cell.className = `h-6 rounded-lg ${intensity} border border-black/5 dark:border-white/5 transition hover:scale-110 cursor-pointer shadow-sm`;
         cell.title = `Día ${i}: Actividad registrada`;
         grid.appendChild(cell);
       }
@@ -2041,17 +2242,33 @@
 
     function updateGreeting() {
       const greeting = AppState.userName
-        ? `¡Hola, ${AppState.userName}! 👋 Tu rutina y evolución al alcance de 1 clic.`
-        : `¡Hola! 👋 Tu rutina diaria y evolución de cuerpo completo a 1 clic.`;
+        ? `¡Hola, ${AppState.userName}! 👋 Tu rutina y productividad en un solo toque.`
+        : `¡Hola! 👋 Tu rutina diaria y productividad al alcance de un toque.`;
       document.getElementById('greetingText').innerText = greeting;
     }
 
     function toggleTheme() {
-      const isDark = document.documentElement.classList.toggle('dark');
-      AppState.theme = isDark ? 'dark' : 'light';
+      const html = document.documentElement;
+      const willBeDark = !html.classList.contains('dark');
+      
+      if (willBeDark) {
+        html.classList.add('dark');
+        html.classList.remove('light');
+        AppState.theme = 'dark';
+        document.getElementById('themeIcon').setAttribute('data-lucide', 'sun');
+      } else {
+        html.classList.remove('dark');
+        html.classList.add('light');
+        AppState.theme = 'light';
+        document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
+      }
+      
       persistState();
-      document.getElementById('themeIcon').setAttribute('data-lucide', isDark ? 'sun' : 'moon');
       lucide.createIcons();
+      if (chartWeeklyInstance || chartCategoryInstance) {
+        renderAnalytics();
+      }
+      showToast(`Modo ${willBeDark ? 'Oscuro' : 'Claro'} activado`);
     }
 
     function exportDataJSON() {
@@ -2068,7 +2285,7 @@
     function promptTotalReset() {
       showConfirmDialog({
         title: '🚨 ¿Ejecutar Borrado Total?',
-        message: 'Esta acción pondrá tu racha en 0 días, vaciará hábitos y tareas, y reseteará tu mascota a Bebé con 0 XP sin que vuelvan a cargarse datos de prueba.',
+        message: 'Esta acción pondrá tu racha en 0 días, vaciará hábitos y tareas, y reseteará tu mascota a Bebé con 0 XP sin recargar datos de demostración.',
         onConfirm: () => {
           AppState.streak = 0;
           AppState.pet.xp = 0;
@@ -2089,7 +2306,7 @@
           updateHabitsSummary();
 
           SoundFX.playTone(300, 0.4);
-          showToast('Borrado Total ejecutado. Aplicación restablecida a cero.', 'warning');
+          showToast('Borrado Total ejecutado. Aplicación en cero.', 'warning');
         }
       });
     }
@@ -2099,22 +2316,22 @@
       {
         icon: '🚀',
         title: '¡Bienvenido a HabitFlow 360 v6!',
-        body: 'Registra tus hábitos diarios en 1 clic, mantén tus rachas y gana XP para transformar tu vida.'
+        body: 'Registra tus hábitos diarios, organiza tus tareas y haz evolucionar a tu mascota virtual con diseño de cuerpo completo.'
       },
       {
         icon: '🐾',
-        title: '4 Mascotas de Cuerpo Completo',
-        body: 'Elige entre Perro, Gato, Zorro y Panda. Cada uno evoluciona de cuerpo completo con atuendos, accesorios y auras.'
+        title: 'Pantalla Dedicada para Mascota',
+        body: 'La mascota ya no estorba en la parte superior en celular: tiene su propia pestaña para interactuar y alimentarla.'
       },
       {
         icon: '📁',
         title: 'Tareas por Carpetas Madre',
-        body: 'Organiza tus proyectos (Universidad, Trabajo, Casa) agrupando tareas sin desorden.'
+        body: 'Separa tus pendientes de Universidad, Trabajo o Casa rápidamente sin perder el foco.'
       },
       {
         icon: '⏱️',
         title: 'Pomodoro Conectado & Analítica',
-        body: 'Sincroniza hábitos con tiempo en el Pomodoro con descanso triple tras 4 ciclos y revisa tu constancia en gráficos.'
+        body: 'Cumple ciclos con descanso triple tras 4 sesiones y analiza tus logros semanales en gráficos interactivos.'
       }
     ];
 
@@ -2140,50 +2357,62 @@
       } else {
         closeModal('tourModal');
         if (typeof confetti === 'function') confetti({ particleCount: 80, spread: 60 });
-        showToast('¡Todo listo! Que tengas una jornada productiva.');
+        showToast('¡Todo listo! Que tengas un día muy productivo.');
       }
     }
 
     function switchTab(tabId) {
+      // Hide all panes
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
-      const active = document.getElementById(tabId);
-      if (active) active.classList.remove('hidden');
+      
+      // Show requested pane
+      const targetPane = document.getElementById(tabId);
+      if (targetPane) {
+        targetPane.classList.remove('hidden');
+      }
 
-      // Desktop Tab buttons
+      // Update Desktop Tab Buttons
       const desktopTabs = {
         tabToday: 'tabTodayBtn',
         tabTasks: 'tabTasksBtn',
         tabPomodoro: 'tabPomodoroBtn',
+        tabPet: 'tabPetBtn',
         tabJournal: 'tabJournalBtn',
         tabStats: 'tabStatsBtn'
       };
+
       document.querySelectorAll('.tab-btn').forEach(b => {
-        b.className = 'tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-400 hover:bg-slate-800 transition';
+        b.className = 'tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition flex items-center gap-1.5';
       });
+
       const activeBtn = document.getElementById(desktopTabs[tabId]);
       if (activeBtn) {
-        activeBtn.className = 'tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold bg-emerald-500 text-white shadow-md transition';
+        activeBtn.className = 'tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold bg-emerald-600 text-white shadow-md transition flex items-center gap-1.5';
       }
 
-      // Mobile Tab buttons
+      // Update Mobile Bottom Tab Buttons
       const mobTabs = {
         tabToday: 'mobTabToday',
         tabTasks: 'mobTabTasks',
         tabPomodoro: 'mobTabPomodoro',
+        tabPet: 'mobTabPet',
         tabJournal: 'mobTabJournal',
         tabStats: 'mobTabStats'
       };
+
       document.querySelectorAll('.mob-nav-btn').forEach(b => {
-        b.className = 'mob-nav-btn flex flex-col items-center text-slate-400 font-bold text-[10px]';
+        b.className = 'mob-nav-btn flex flex-col items-center text-slate-500 dark:text-slate-400 font-bold text-[10px]';
       });
+
       const activeMob = document.getElementById(mobTabs[tabId]);
       if (activeMob) {
-        activeMob.className = 'mob-nav-btn flex flex-col items-center text-emerald-400 font-bold text-[10px]';
+        activeMob.className = 'mob-nav-btn flex flex-col items-center text-emerald-600 dark:text-emerald-400 font-bold text-[10px]';
       }
 
       if (tabId === 'tabStats') {
         setTimeout(renderAnalytics, 80);
       }
+      
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
@@ -2196,10 +2425,15 @@
       // Set random motivational quote
       document.getElementById('quoteText').innerText = `"${MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]}"`;
       
-      // Theme setup
+      // Theme initial configuration
       if (AppState.theme === 'light') {
         document.documentElement.classList.remove('dark');
+        document.documentElement.classList.add('light');
         document.getElementById('themeIcon').setAttribute('data-lucide', 'moon');
+      } else {
+        document.documentElement.classList.add('dark');
+        document.documentElement.classList.remove('light');
+        document.getElementById('themeIcon').setAttribute('data-lucide', 'sun');
       }
 
       initThreeBackground();
