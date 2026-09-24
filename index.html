@@ -3,8 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-  <title>HabitFlow 360 v6 — Hábitos, Tareas y Mascotas Realistas</title>
-  
+  <title>HabitFlow 360 — Hábitos, Tareas y Mascotas Realistas</title>
+
   <!-- Tailwind CSS CDN -->
   <script src="https://cdn.tailwindcss.com"></script>
   <script>
@@ -42,12 +42,16 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
   <style>
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    body { 
-      font-family: 'Plus Jakarta Sans', sans-serif; 
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;600;700&display=swap');
+    
+    * {
+      font-family: 'Plus Jakarta Sans', sans-serif;
       -webkit-tap-highlight-color: transparent;
     }
-    
+    .font-mono {
+      font-family: 'JetBrains Mono', monospace;
+    }
+
     ::-webkit-scrollbar {
       width: 5px;
       height: 5px;
@@ -76,9 +80,8 @@
       pointer-events: none;
     }
 
-    /* Glassmorphism containers with full light and dark mode support */
     .glassmorphism {
-      background: rgba(255, 255, 255, 0.88);
+      background: rgba(255, 255, 255, 0.90);
       backdrop-filter: blur(16px);
       -webkit-backdrop-filter: blur(16px);
       border: 1px solid rgba(226, 232, 240, 0.8);
@@ -90,29 +93,29 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
-    /* Realistic breathing & life motion */
+    /* Animaciones orgánicas para mascotas realistas */
     @keyframes realisticBreathing {
-      0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 10px 15px rgba(0,0,0,0.15)); }
-      50% { transform: translateY(-8px) scale(1.015); filter: drop-shadow(0 20px 25px rgba(16, 185, 129, 0.25)); }
+      0%, 100% { transform: translateY(0px) scale(1); filter: drop-shadow(0 12px 18px rgba(0,0,0,0.25)); }
+      50% { transform: translateY(-7px) scale(1.018); filter: drop-shadow(0 22px 28px rgba(16, 185, 129, 0.3)); }
     }
     @keyframes auraPulse {
-      0%, 100% { opacity: 0.5; transform: scale(0.98); }
-      50% { opacity: 0.9; transform: scale(1.04); }
+      0%, 100% { opacity: 0.45; transform: scale(0.96); }
+      50% { opacity: 0.95; transform: scale(1.05); }
     }
-    @keyframes tailWag {
-      0%, 100% { transform: rotate(0deg); }
-      50% { transform: rotate(7deg); }
-    }
-    .pet-life-animation { 
-      animation: realisticBreathing 4s ease-in-out infinite; 
+    .pet-life-animation {
+      animation: realisticBreathing 4s ease-in-out infinite;
       transform-origin: bottom center;
     }
-    .aura-glow-effect { 
-      animation: auraPulse 3.5s ease-in-out infinite; 
+    .aura-glow-effect {
+      animation: auraPulse 3.5s ease-in-out infinite;
     }
-    .wag-tail {
-      transform-origin: 25px 75px;
-      animation: tailWag 1.8s ease-in-out infinite;
+
+    /* Resaltado interactivo para el tour */
+    .tour-highlight {
+      position: relative;
+      z-index: 45 !important;
+      box-shadow: 0 0 0 4px #10b981, 0 0 25px rgba(16, 185, 129, 0.5) !important;
+      transition: all 0.3s ease;
     }
 
     button:active { transform: scale(0.97); }
@@ -121,40 +124,56 @@
 
 <body class="bg-slate-100 dark:bg-slate-950 text-slate-800 dark:text-slate-100 min-h-screen selection:bg-emerald-500 selection:text-white transition-colors duration-300 relative pb-28 md:pb-12 overflow-x-hidden">
 
-  <!-- Interactive 3D Background Canvas -->
+  <!-- Canvas 3D de fondo -->
   <canvas id="canvas3d"></canvas>
 
-  <!-- Main Container -->
-  <div class="max-w-4xl mx-auto px-3.5 py-4 md:py-6 relative z-10">
+  <div class="max-w-4xl mx-auto px-3.5 py-4 md:py-6 relative z-10 space-y-4">
 
-    <!-- Daily Motivational Banner -->
-    <div class="bg-gradient-to-r from-emerald-500/10 via-teal-500/10 to-blue-500/10 dark:from-emerald-600/20 dark:via-teal-600/20 dark:to-blue-600/20 border border-emerald-500/30 backdrop-blur-md p-3 rounded-2xl mb-4 text-center text-xs font-semibold text-emerald-800 dark:text-emerald-300 flex items-center justify-center gap-2 shadow-sm">
-      <span class="text-base">✨</span>
-      <span id="quoteText">"El éxito es la suma de pequeños esfuerzos repetidos día tras día."</span>
+    <!-- Banner de Advertencia de Caché y Respaldo Seguro a WhatsApp -->
+    <div id="backupSecurityNotice" class="bg-gradient-to-r from-amber-500/15 via-emerald-500/15 to-teal-500/15 border border-amber-500/40 dark:border-amber-400/30 backdrop-blur-md p-3.5 rounded-3xl shadow-sm flex flex-col sm:flex-row items-center justify-between gap-3 text-xs">
+      <div class="flex items-center gap-2.5">
+        <span class="p-2 rounded-2xl bg-amber-500/20 text-amber-600 dark:text-amber-400 text-lg">⚠️</span>
+        <div class="leading-tight">
+          <p class="font-extrabold text-slate-900 dark:text-slate-100">
+            Tus datos se guardan <span class="text-emerald-600 dark:text-emerald-400">100% en este dispositivo</span>.
+          </p>
+          <p class="text-[11px] text-slate-600 dark:text-slate-400">
+            Si limpias la caché o cambias de celular podrías perderlos. ¡Respáldalos frecuentemente en WhatsApp!
+          </p>
+        </div>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0 w-full sm:w-auto">
+        <button onclick="shareBackupWhatsApp()" class="flex-1 sm:flex-none px-3.5 py-2 rounded-2xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black flex items-center justify-center gap-1.5 shadow-sm transition active:scale-95 text-xs">
+          <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+          <span>📲 Respaldar en WhatsApp</span>
+        </button>
+        <button onclick="triggerImportBackup()" class="px-3 py-2 rounded-2xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold flex items-center justify-center gap-1 border border-slate-300 dark:border-slate-700 text-xs transition" title="Cargar copia de seguridad previa">
+          <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+          <span>Cargar</span>
+        </button>
+        <input type="file" id="backupFileInput" accept=".json" class="hidden" onchange="handleBackupFile(event)">
+      </div>
     </div>
 
-    <!-- App Header & Control Bar -->
-    <header class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glassmorphism p-4 md:p-5 rounded-3xl shadow-sm mb-4">
-      <div>
-        <div class="flex items-center gap-2.5">
-          <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-black text-lg">
-            ⚡
-          </div>
-          <div>
-            <h1 class="text-xl md:text-2xl font-black tracking-tight bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent flex items-center gap-2">
-              HabitFlow 360 <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">v6</span>
-            </h1>
-            <p id="greetingText" class="text-xs text-slate-500 dark:text-slate-400 font-medium">
-              ¡Hola! Tu rutina diaria y productividad al alcance de un toque.
-            </p>
-          </div>
+    <!-- Cabecera Principal y Barra de Control -->
+    <header id="tourHeader" class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glassmorphism p-4 md:p-5 rounded-3xl shadow-sm">
+      <div class="flex items-center gap-2.5">
+        <div class="w-10 h-10 rounded-2xl bg-gradient-to-tr from-emerald-500 via-teal-400 to-cyan-400 flex items-center justify-center shadow-lg shadow-emerald-500/20 text-white font-black text-lg">
+          ⚡
+        </div>
+        <div>
+          <h1 class="text-xl md:text-2xl font-black tracking-tight bg-gradient-to-r from-emerald-600 via-teal-500 to-cyan-500 dark:from-emerald-400 dark:via-teal-300 dark:to-cyan-300 bg-clip-text text-transparent flex items-center gap-2">
+            HabitFlow 360 <span class="text-[10px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/10 dark:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30">v6.5</span>
+          </h1>
+          <p id="greetingText" class="text-xs text-slate-500 dark:text-slate-400 font-medium">
+            ¡Hola! Tu rutina diaria y productividad al alcance de un toque.
+          </p>
         </div>
       </div>
 
-      <!-- Right Header Controls -->
       <div class="flex items-center gap-2 flex-wrap">
-        <!-- Quick compact Pet Pill: jumps to Pet Tab without cluttering the screen -->
-        <button onclick="switchTab('tabPet')" class="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold hover:scale-105 transition shadow-sm" title="Ver mi Mascota">
+        <!-- Píldora de acceso directo a Mascota -->
+        <button onclick="switchTab('tabPet')" id="tourPetPill" class="flex items-center gap-2 px-3 py-1.5 rounded-2xl bg-emerald-50 dark:bg-emerald-950/60 border border-emerald-500/30 text-emerald-800 dark:text-emerald-300 text-xs font-bold hover:scale-105 transition shadow-sm" title="Ver mi Mascota Realista">
           <span id="headerPetIcon" class="text-sm">🐾</span>
           <span id="headerPetName" class="font-extrabold max-w-[90px] truncate">Perro Fiel</span>
           <span id="headerPetStageBadge" class="text-[10px] px-1.5 py-0.5 rounded-lg bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 font-black">Fase 1</span>
@@ -165,28 +184,28 @@
           <span id="streakCounter">0 Días</span>
         </div>
 
-        <button onclick="openTourModal()" class="p-2.5 rounded-2xl bg-slate-200 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition border border-slate-300 dark:border-slate-700" title="Guía Rápida">
+        <button onclick="startStepByStepTour()" class="p-2.5 rounded-2xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 font-bold text-xs transition border border-slate-300 dark:border-slate-700" title="Guía Paso a Paso Interactiva">
           ❓
         </button>
 
-        <button onclick="toggleTheme()" class="p-2.5 rounded-2xl bg-slate-200 dark:bg-slate-800/80 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition border border-slate-300 dark:border-slate-700" title="Modo Claro/Oscuro">
+        <button onclick="toggleTheme()" class="p-2.5 rounded-2xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-700 dark:text-slate-300 transition border border-slate-300 dark:border-slate-700" title="Modo Claro/Oscuro">
           <i data-lucide="sun" id="themeIcon" class="w-4 h-4"></i>
         </button>
 
-        <button onclick="openSettingsModal()" class="p-2.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 transition shadow-sm" title="Ajustes">
+        <button onclick="openSettingsModal()" class="p-2.5 rounded-2xl bg-emerald-500/10 dark:bg-emerald-500/20 hover:bg-emerald-500/20 text-emerald-700 dark:text-emerald-300 border border-emerald-500/30 transition shadow-sm" title="Ajustes, Contraseña y Respaldos">
           <i data-lucide="settings" class="w-4 h-4"></i>
         </button>
       </div>
     </header>
 
-    <!-- Desktop Navigation Bar (Direct view switching) -->
-    <div class="hidden md:flex items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3 mb-5">
+    <!-- Barra de Navegación de Escritorio -->
+    <nav id="tourDesktopNav" class="hidden md:flex items-center justify-between gap-3 border-b border-slate-200 dark:border-slate-800 pb-3">
       <div class="flex items-center gap-1.5 flex-wrap">
         <button onclick="switchTab('tabToday')" id="tabTodayBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold bg-emerald-600 text-white shadow-md transition">📋 Hábitos</button>
         <button onclick="switchTab('tabTasks')" id="tabTasksBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">📁 Tareas</button>
         <button onclick="switchTab('tabPomodoro')" id="tabPomodoroBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">⏱️ Pomodoro</button>
         <button onclick="switchTab('tabPet')" id="tabPetBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition flex items-center gap-1.5">
-          <span>🐾 Mascota</span>
+          <span>🐾 Mascota Realista</span>
           <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
         </button>
         <button onclick="switchTab('tabJournal')" id="tabJournalBtn" class="tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-800 transition">✍️ Diario</button>
@@ -197,13 +216,13 @@
         <i data-lucide="plus-circle" class="w-4 h-4"></i>
         <span>Nuevo Hábito</span>
       </button>
-    </div>
+    </nav>
 
-    <!-- ================= TAB 1: HÁBITOS ================= -->
+    <!-- ================= PESTAÑA 1: HÁBITOS ================= -->
     <section id="tabToday" class="tab-pane space-y-4">
       
-      <!-- Daily Habit Progress Summary Bar (Clean & Lightweight) -->
-      <div class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 md:p-5 rounded-3xl shadow-lg">
+      <!-- Barra de Progreso de Hábitos de Hoy -->
+      <div id="tourHabitProgress" class="bg-gradient-to-br from-emerald-600 to-teal-700 text-white p-4 md:p-5 rounded-3xl shadow-lg">
         <div class="flex items-center justify-between mb-2">
           <div>
             <span class="text-[10px] uppercase tracking-wider font-extrabold text-emerald-100">Progreso de Hábitos Hoy</span>
@@ -229,10 +248,10 @@
         </button>
       </div>
       
-      <!-- Habits Grid -->
+      <!-- Contenedor de Hábitos -->
       <div id="habitsContainer" class="grid grid-cols-1 md:grid-cols-2 gap-3.5"></div>
       
-      <!-- Empty state -->
+      <!-- Estado Vacío -->
       <div id="emptyHabitsState" class="hidden text-center py-12 glassmorphism rounded-3xl border border-dashed border-slate-300 dark:border-slate-700 p-6">
         <span class="text-4xl block mb-2">🌱</span>
         <h3 class="text-base font-bold text-slate-800 dark:text-slate-200">No tienes hábitos registrados</h3>
@@ -243,12 +262,12 @@
       </div>
     </section>
 
-    <!-- ================= TAB 2: TAREAS ================= -->
+    <!-- ================= PESTAÑA 2: TAREAS ================= -->
     <section id="tabTasks" class="tab-pane hidden space-y-4">
       <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 glassmorphism p-4 md:p-5 rounded-3xl shadow-sm">
         <div>
           <h3 class="text-base font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">📂 Tareas por Carpetas Madre</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-400">Organiza pendientes por Universidad, Casa, Trabajo (+10 XP cada una).</p>
+          <p class="text-xs text-slate-500 dark:text-slate-400">Organiza pendientes por Universidad, Casa o Trabajo (+10 XP cada una).</p>
         </div>
         <div class="flex items-center gap-2">
           <button onclick="openAddFolderModal()" class="bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 px-3.5 py-2 rounded-2xl text-xs font-bold transition flex items-center gap-1.5 border border-slate-300 dark:border-slate-700">
@@ -262,18 +281,18 @@
         </div>
       </div>
       
-      <!-- Folders Badges -->
+      <!-- Badges de Carpetas -->
       <div id="folderBadgesContainer" class="flex items-center gap-2 overflow-x-auto pb-1.5"></div>
       
-      <!-- Tasks list -->
+      <!-- Lista de Tareas -->
       <div id="tasksListContainer" class="space-y-2.5"></div>
     </section>
 
-    <!-- ================= TAB 3: POMODORO ================= -->
+    <!-- ================= PESTAÑA 3: POMODORO ================= -->
     <section id="tabPomodoro" class="tab-pane hidden space-y-5">
       <div class="glassmorphism p-6 md:p-8 rounded-3xl shadow-lg text-center max-w-xl mx-auto border border-emerald-500/20 relative overflow-hidden">
         
-        <!-- Linked Habit Banner -->
+        <!-- Banner de Hábito Enlazado -->
         <div id="pomoLinkedBanner" class="hidden mb-4 inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-purple-500/10 dark:bg-purple-500/20 border border-purple-500/30 text-purple-700 dark:text-purple-300 text-xs font-bold animate-pulse">
           <i data-lucide="link" class="w-3.5 h-3.5"></i>
           <span id="pomoLinkedTitle">Enfoque: Estudiar Código</span>
@@ -288,17 +307,17 @@
           </span>
         </div>
 
-        <!-- Timer Display -->
+        <!-- Pantalla del Temporizador -->
         <div id="pomoTimerDisplay" class="text-6xl md:text-8xl font-black font-mono my-4 md:my-6 text-emerald-600 dark:text-emerald-400 tracking-tight select-none">
           25:00
         </div>
 
-        <!-- Progress ring bar -->
+        <!-- Barra de progreso Pomodoro -->
         <div class="w-64 max-w-full mx-auto mb-6 bg-slate-200 dark:bg-slate-800 rounded-full h-2.5 overflow-hidden p-0.5 border border-slate-300 dark:border-slate-700">
           <div id="pomoProgressBar" class="bg-gradient-to-r from-emerald-500 via-teal-400 to-cyan-400 h-full rounded-full transition-all duration-300" style="width: 0%"></div>
         </div>
 
-        <!-- Pomodoro Action Controls -->
+        <!-- Botones de Acción Pomodoro -->
         <div class="flex flex-wrap items-center justify-center gap-3 mb-6">
           <button id="pomoStartBtn" onclick="togglePomodoroTimer()" class="bg-emerald-600 hover:bg-emerald-500 text-white text-sm font-black px-6 py-3 rounded-2xl shadow-lg flex items-center gap-2 transition active:scale-95">
             <i data-lucide="play" id="pomoPlayIcon" class="w-4 h-4 fill-current"></i>
@@ -320,7 +339,7 @@
           </button>
         </div>
 
-        <!-- Recommendations by Study Level -->
+        <!-- Presets por Nivel -->
         <div class="border-t border-slate-200 dark:border-slate-800 pt-4">
           <label class="block text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-2.5">Recomendaciones por Nivel</label>
           <div class="grid grid-cols-3 gap-2">
@@ -335,31 +354,31 @@
       </div>
     </section>
 
-    <!-- ================= TAB 4: MASCOTA (DEDICATED FULL-BODY SCREEN) ================= -->
+    <!-- ================= PESTAÑA 4: MASCOTA ULTRA REALISTA ================= -->
     <section id="tabPet" class="tab-pane hidden space-y-5">
       
       <div class="bg-gradient-to-br from-slate-900 via-emerald-950 to-slate-900 text-white p-6 md:p-8 rounded-3xl shadow-2xl border border-emerald-500/40 relative overflow-hidden">
         
         <div class="flex flex-col md:flex-row items-center gap-8">
           
-          <!-- Realistic Full-Body Stage & Pedestal Habitat -->
+          <!-- Escenario y Pedestal de la Mascota -->
           <div class="flex-shrink-0 flex flex-col items-center">
             
-            <div class="w-56 h-56 md:w-64 md:h-64 rounded-3xl bg-slate-950/80 border-2 border-emerald-500/40 p-3 flex flex-col items-center justify-end relative shadow-2xl overflow-hidden">
+            <div class="w-60 h-60 md:w-72 md:h-72 rounded-3xl bg-slate-950/85 border-2 border-emerald-500/40 p-3 flex flex-col items-center justify-end relative shadow-2xl overflow-hidden">
               
-              <!-- Mystical Backdrop Aura -->
-              <div class="absolute inset-0 bg-gradient-to-t from-emerald-500/20 via-transparent to-transparent aura-glow-effect pointer-events-none"></div>
+              <!-- Aura Mística de Fondo -->
+              <div class="absolute inset-0 bg-gradient-to-t from-emerald-500/25 via-teal-500/10 to-transparent aura-glow-effect pointer-events-none"></div>
               
-              <!-- Pedestal base platform with realistic shadow -->
-              <div class="absolute bottom-3 w-44 h-8 bg-emerald-500/30 rounded-full blur-md"></div>
-              <div class="absolute bottom-4 w-36 h-4 bg-slate-900 rounded-full border border-emerald-400/40"></div>
+              <!-- Base Pedestal -->
+              <div class="absolute bottom-3 w-48 h-9 bg-emerald-500/30 rounded-full blur-md"></div>
+              <div class="absolute bottom-4 w-40 h-4 bg-slate-900 rounded-full border border-emerald-400/40"></div>
 
-              <!-- Floating stage accessory badge -->
+              <!-- Accesorio Flotante -->
               <div id="petAccessory" class="absolute top-3 right-3 text-3xl z-20 transition-all duration-300 p-2 rounded-2xl bg-slate-900/80 border border-emerald-500/40 shadow-lg">🍼</div>
 
-              <!-- Animated Realistic Vector Pet -->
-              <div id="petFullBodyContainer" class="w-48 h-48 pet-life-animation z-10 flex items-center justify-center transition-all duration-500 mb-2">
-                <!-- Dynamically loaded realistic SVG -->
+              <!-- Contenedor del Vector SVG Ultra Realista -->
+              <div id="petFullBodyContainer" class="w-52 h-52 md:w-60 md:h-60 pet-life-animation z-10 flex items-center justify-center transition-all duration-500 mb-2">
+                <!-- SVG inyectado dinámicamente -->
               </div>
             </div>
 
@@ -368,7 +387,7 @@
             </span>
           </div>
 
-          <!-- Pet Information & Autonomous Vitals -->
+          <!-- Información y Vitales Autónomos -->
           <div class="flex-1 w-full space-y-4">
             <div class="flex items-center justify-between">
               <div>
@@ -386,7 +405,7 @@
               </div>
             </div>
 
-            <!-- Evolutionary Level Bar -->
+            <!-- Barra de Evolución -->
             <div class="bg-slate-950/50 p-3 rounded-2xl border border-emerald-500/20">
               <div class="flex justify-between text-xs font-extrabold text-slate-300 mb-1.5">
                 <span>Progreso hacia la Siguiente Fase</span>
@@ -397,7 +416,7 @@
               </div>
             </div>
 
-            <!-- Autonomous Vitals: Nutrition & Evolutionary Happiness -->
+            <!-- Vitales: Nutrición y Felicidad -->
             <div class="grid grid-cols-2 gap-3 pt-1">
               <div class="bg-slate-900/90 p-3 rounded-2xl border border-slate-700/80 flex flex-col justify-between">
                 <div class="flex items-center justify-between mb-2">
@@ -430,7 +449,7 @@
 
     </section>
 
-    <!-- ================= TAB 5: DIARIO ================= -->
+    <!-- ================= PESTAÑA 5: DIARIO ================= -->
     <section id="tabJournal" class="tab-pane hidden space-y-5">
       <div class="grid grid-cols-1 md:grid-cols-3 gap-5">
         <div class="md:col-span-2 glassmorphism p-5 md:p-6 rounded-3xl shadow-sm space-y-3.5">
@@ -439,7 +458,7 @@
             <span id="journalCurrentDate" class="text-[11px] px-2.5 py-0.5 rounded-full bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border border-slate-300 dark:border-slate-700 font-mono">Hoy</span>
           </div>
 
-          <!-- Mood Selector -->
+          <!-- Selector de Estado de Ánimo -->
           <div>
             <label class="block text-[11px] font-bold uppercase text-slate-500 dark:text-slate-400 mb-1.5">Estado de Ánimo</label>
             <div class="flex items-center gap-2 flex-wrap" id="journalMoodButtons">
@@ -459,7 +478,7 @@
           </div>
         </div>
 
-        <!-- Monthly Goals -->
+        <!-- Metas del Mes -->
         <div class="glassmorphism p-5 rounded-3xl shadow-sm space-y-3">
           <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-1.5">🎯 Metas del Mes</h3>
           <div id="monthlyGoalsContainer" class="space-y-2.5 text-xs"></div>
@@ -469,17 +488,17 @@
         </div>
       </div>
 
-      <!-- Historical Journal Feed -->
+      <!-- Historial de Entradas -->
       <div class="space-y-3">
         <h4 class="text-xs font-black text-slate-500 dark:text-slate-400 uppercase tracking-wider">Historial de Entradas</h4>
         <div id="journalHistoryContainer" class="space-y-2.5"></div>
       </div>
     </section>
 
-    <!-- ================= TAB 6: ANALÍTICA ================= -->
+    <!-- ================= PESTAÑA 6: ANALÍTICA ================= -->
     <section id="tabStats" class="tab-pane hidden space-y-5">
       <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <!-- 7-Day XP Chart -->
+        <!-- Gráfico de XP Semanal -->
         <div class="glassmorphism p-5 md:p-6 rounded-3xl shadow-sm">
           <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
             <i data-lucide="bar-chart-2" class="w-4 h-4 text-emerald-500"></i>
@@ -490,7 +509,7 @@
           </div>
         </div>
 
-        <!-- Habits vs Tasks Doughnut Chart -->
+        <!-- Gráfico Hábitos vs Tareas -->
         <div class="glassmorphism p-5 md:p-6 rounded-3xl shadow-sm">
           <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 mb-3 flex items-center gap-2">
             <i data-lucide="pie-chart" class="w-4 h-4 text-teal-500"></i>
@@ -502,7 +521,7 @@
         </div>
       </div>
 
-      <!-- 30-Day Constancy Heatmap -->
+      <!-- Mapa de Calor de 30 Días -->
       <div class="glassmorphism p-5 md:p-6 rounded-3xl shadow-sm space-y-2.5">
         <div class="flex items-center justify-between">
           <h3 class="text-sm font-bold text-slate-900 dark:text-slate-100 flex items-center gap-2">
@@ -517,7 +536,7 @@
 
   </div>
 
-  <!-- Mobile Bottom Navigation Bar (< 768px) with direct Mascot tab -->
+  <!-- Barra de Navegación Inferior Móvil (< 768px) -->
   <nav class="md:hidden fixed bottom-0 left-0 right-0 glassmorphism border-t border-slate-300 dark:border-slate-800 z-40 flex justify-around py-2.5 shadow-2xl">
     <button onclick="switchTab('tabToday')" id="mobTabToday" class="mob-nav-btn flex flex-col items-center text-emerald-600 dark:text-emerald-400 font-bold text-[10px]">
       <span class="text-lg">📋</span>
@@ -545,13 +564,41 @@
     </button>
   </nav>
 
-  <!-- Modal: Select Full-Body Pets -->
+  <!-- PIE DE PÁGINA OFICIAL CON CRÉDITOS Y CONTACTO WHATSAPP -->
+  <footer class="mt-auto bg-slate-900 border-t border-slate-800 py-6 px-4 text-center text-xs text-slate-400 transition-colors">
+    <div class="max-w-4xl mx-auto flex flex-col sm:flex-row items-center justify-between gap-4">
+      <div>
+        <p class="font-black text-slate-200">
+          Diseñado por <span class="text-emerald-400">I´m_Jhordy</span>
+        </p>
+        <p class="text-[11px] mt-0.5">Sangolquí, Pichincha, Ecuador 🇪🇨</p>
+      </div>
+
+      <div class="flex items-center gap-4 text-xs font-bold">
+        <!-- TikTok -->
+        <a href="https://www.tiktok.com/@I_m_Jhordy" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-slate-300 hover:text-emerald-400 transition">
+          <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">
+            <path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-5.2 1.74 2.89 2.89 0 0 1 2.31-4.64c.298-.002.595.042.88.13V9.4a6.33 6.33 0 0 0-1-.08A6.34 6.34 0 0 0 3 15.66a6.34 6.34 0 0 0 10.81 4.48 6.3 6.3 0 0 0 1.86-4.48V8.72a8.18 8.18 0 0 0 4.92 1.63V6.9a4.85 4.85 0 0 1-1-.21z"/>
+          </svg>
+          <span>@I_m_Jhordy</span>
+        </a>
+
+        <!-- WhatsApp -->
+        <a href="https://wa.me/593963923399?text=Hola%20Jhordy,%20tengo%20una%20consulta%20sobre%20HabitFlow%20360" target="_blank" rel="noopener noreferrer" class="flex items-center gap-1.5 text-emerald-400 hover:underline">
+          <i data-lucide="message-circle" class="w-4 h-4"></i>
+          <span>+593 963923399</span>
+        </a>
+      </div>
+    </div>
+  </footer>
+
+  <!-- MODAL: SELECCIÓN DE MASCOTAS DE CUERPO COMPLETO -->
   <div id="petSelectModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-emerald-500/40 space-y-4">
       <div class="flex items-center justify-between">
         <div>
-          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Elige tu Mascota de Cuerpo Completo</h3>
-          <p class="text-xs text-slate-500 dark:text-slate-300">Cada mascota cuenta con diseño de cuerpo entero, hábitat y 4 fases evolutivas.</p>
+          <h3 class="text-lg font-bold text-slate-900 dark:text-white">Elige tu Mascota Ultra Realista</h3>
+          <p class="text-xs text-slate-500 dark:text-slate-300">Cada mascota cuenta con diseño anatómico de cuerpo entero y 4 fases evolutivas.</p>
         </div>
         <button onclick="closeModal('petSelectModal')" class="text-slate-400 hover:text-slate-700 dark:hover:text-white"><i data-lucide="x" class="w-5 h-5"></i></button>
       </div>
@@ -608,30 +655,43 @@
     </div>
   </div>
 
-  <!-- Modal: Guía Rápida / Onboarding Tour -->
-  <div id="tourModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
-    <div class="glassmorphism w-full max-w-md rounded-3xl p-6 shadow-2xl border border-emerald-500/40 text-center space-y-4">
-      <span id="tourIcon" class="text-4xl block select-none">🚀</span>
-      <h3 id="tourTitle" class="text-lg font-bold text-slate-900 dark:text-white">¡Bienvenido a HabitFlow 360 v6!</h3>
-      <p id="tourBody" class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
-        Ahora la Mascota cuenta con su propia pantalla dedicada para que no estorbe en celular, mientras registras tus hábitos y tareas en 1 solo clic.
-      </p>
-      <div class="flex justify-between items-center pt-2">
-        <span id="tourStepIndicator" class="text-[11px] font-bold text-emerald-600 dark:text-emerald-400">Paso 1 / 4</span>
-        <button id="tourNextBtn" onclick="nextTourStep()" class="bg-emerald-600 hover:bg-emerald-500 text-white px-5 py-2.5 rounded-2xl text-xs font-bold transition active:scale-95">
+  <!-- GUÍA INTERACTIVA FLOTANTE PASO A PASO (TOUR SUCESIVO) -->
+  <div id="interactiveTourOverlay" class="fixed inset-0 z-50 bg-black/60 backdrop-blur-[2px] hidden transition-all duration-300">
+    <!-- Ventana flotante explicativa -->
+    <div id="tourFloatingCard" class="absolute z-50 glassmorphism p-5 rounded-3xl shadow-2xl border border-emerald-500/50 w-80 sm:w-96 text-xs transition-all duration-300 space-y-3">
+      <div class="flex items-center justify-between">
+        <div class="flex items-center gap-2">
+          <span id="tourStepBadge" class="px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-black text-[10px] uppercase">Paso 1 de 5</span>
+          <span id="tourStepIcon" class="text-base">🚀</span>
+        </div>
+        <button onclick="endStepByStepTour()" class="text-slate-400 hover:text-white font-bold text-xs">Omitir ✕</button>
+      </div>
+
+      <div>
+        <h4 id="tourStepTitle" class="text-sm font-black text-slate-900 dark:text-white">Bienvenido a HabitFlow 360</h4>
+        <p id="tourStepDescription" class="text-slate-600 dark:text-slate-300 leading-relaxed mt-1">
+          Aprende cómo funciona el sistema para aprovechar al máximo tus hábitos y tu mascota.
+        </p>
+      </div>
+
+      <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
+        <button id="tourPrevBtn" onclick="prevTourStep()" class="px-3 py-1.5 rounded-xl bg-slate-200 dark:bg-slate-800 text-slate-700 dark:text-slate-300 font-bold hover:bg-slate-300 dark:hover:bg-slate-700 disabled:opacity-30">
+          Anterior
+        </button>
+        <button id="tourNextBtn" onclick="nextTourStep()" class="px-4 py-1.5 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-bold shadow-md">
           Siguiente
         </button>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Ajustes & Configuración -->
+  <!-- MODAL: AJUSTES, CONTRASEÑA PERSONAL & SEGURIDAD -->
   <div id="settingsModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-lg rounded-3xl p-6 shadow-2xl border border-slate-300 dark:border-slate-700 max-h-[90vh] overflow-y-auto space-y-4">
       <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
         <h3 class="text-base font-bold text-slate-900 dark:text-white flex items-center gap-2">
           <i data-lucide="settings" class="w-4 h-4 text-emerald-500"></i>
-          <span>Ajustes & Configuración</span>
+          <span>Ajustes & Contraseña de Seguridad</span>
         </h3>
         <button onclick="closeModal('settingsModal')" class="text-slate-400 hover:text-slate-700 dark:hover:text-white">
           <i data-lucide="x" class="w-5 h-5"></i>
@@ -647,44 +707,86 @@
           </div>
         </div>
 
-        <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
-          <div>
-            <span class="font-bold text-slate-800 dark:text-white block">Tema de Visualización</span>
-            <span class="text-[11px] text-slate-500 dark:text-slate-400">Alternar entre Modo Claro y Oscuro</span>
+        <div>
+          <label class="block font-bold text-slate-700 dark:text-slate-300 mb-1">Tu Contraseña Personal de Borrado</label>
+          <div class="flex gap-2">
+            <input type="password" id="userCustomPasswordInput" placeholder="Establece tu clave personal..." class="flex-1 px-3 py-2.5 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-sm text-slate-800 dark:text-white focus:outline-none focus:ring-1 focus:ring-emerald-500">
+            <button onclick="saveUserPassword()" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl transition">Guardar</button>
           </div>
-          <button onclick="toggleTheme()" class="px-4 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-white font-bold rounded-2xl transition">
-            Cambiar Modo
-          </button>
+          <p class="text-[11px] text-slate-500 dark:text-slate-400 mt-1">
+            Esta clave te permitirá borrar o resetear datos. Si la olvidas, puedes contactar a <b>Jhordy</b> al <b>0963923399</b> o usar su clave de rescate oficial.
+          </p>
         </div>
 
-        <div class="flex items-center justify-between pt-2 border-t border-slate-200 dark:border-slate-800">
-          <div>
-            <span class="font-bold text-slate-800 dark:text-white block">Copia de Respaldo JSON</span>
-            <span class="text-[11px] text-slate-500 dark:text-slate-400">Descarga tu historial completo en un archivo.</span>
+        <!-- Copia y Respaldo WhatsApp -->
+        <div class="p-4 bg-slate-100 dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+          <span class="font-bold text-slate-800 dark:text-white block">💾 Respaldos y Restauración</span>
+          <div class="flex gap-2 flex-wrap">
+            <button onclick="shareBackupWhatsApp()" class="flex-1 px-3.5 py-2.5 bg-amber-500 hover:bg-amber-400 text-slate-950 font-black rounded-2xl text-xs flex items-center justify-center gap-1.5 transition">
+              <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
+              <span>Compartir en WhatsApp</span>
+            </button>
+            <button onclick="exportDataJSON()" class="flex-1 px-3.5 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-emerald-700 dark:text-emerald-300 font-bold rounded-2xl border border-emerald-500/30 text-xs flex items-center justify-center gap-1 transition">
+              <i data-lucide="download" class="w-3.5 h-3.5"></i>
+              <span>Descargar JSON</span>
+            </button>
           </div>
-          <button onclick="exportDataJSON()" class="px-3.5 py-2 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-emerald-700 dark:text-emerald-300 font-bold rounded-2xl border border-emerald-500/30 transition">
-            Exportar
-          </button>
         </div>
 
-        <!-- Danger Zone: Total Reset -->
+        <!-- Zona de Peligro: Borrado Seguro -->
         <div class="p-4 bg-red-50 dark:bg-red-950/40 border border-red-200 dark:border-red-500/40 rounded-2xl space-y-2">
           <h4 class="font-bold text-red-600 dark:text-red-400 flex items-center gap-1.5">
             <i data-lucide="alert-triangle" class="w-4 h-4"></i>
-            <span>Zona de Peligro: Borrado Total</span>
+            <span>Zona de Peligro: Borrado Total Protegido</span>
           </h4>
           <p class="text-[11px] text-red-700/80 dark:text-red-300/80">
-            Esta acción restablecerá la racha a 0, vaciará hábitos y tareas, y colocará la mascota en Fase 1 Bebé (0 XP) sin recargar datos de demo.
+            Requiere tu contraseña personal o la clave maestra oficial de rescate.
           </p>
-          <button onclick="promptTotalReset()" class="w-full bg-red-600 hover:bg-red-500 text-white py-2.5 rounded-2xl font-black transition active:scale-95">
-            EJECUTAR BORRADO TOTAL
+          <button onclick="openModalSecurityReset()" class="w-full bg-red-600 hover:bg-red-500 text-white py-2.5 rounded-2xl font-black transition active:scale-95">
+            🚨 BORRAR TODOS LOS DATOS / RESETEAR
           </button>
         </div>
       </div>
     </div>
   </div>
 
-  <!-- Modal: Crear Nuevo Hábito -->
+  <!-- MODAL: CONFIRMACIÓN DE CONTRASEÑA PARA BORRADO SEGURO -->
+  <div id="modalSecurityReset" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glassmorphism w-full max-w-md rounded-3xl p-6 shadow-2xl border border-red-500/40 space-y-4">
+      <div class="flex items-center gap-3 text-red-500">
+        <i data-lucide="shield-alert" class="w-7 h-7"></i>
+        <h3 class="font-black text-base text-slate-900 dark:text-white">Confirmación de Seguridad</h3>
+      </div>
+
+      <p class="text-xs text-slate-600 dark:text-slate-300 leading-relaxed">
+        Esta acción eliminará todos los hábitos, tareas, notas de diario y reiniciará la mascota a Fase 1 (0 XP).
+      </p>
+
+      <div>
+        <label class="block text-xs font-bold text-slate-700 dark:text-slate-300 mb-1">Ingresa tu contraseña de borrado:</label>
+        <input type="password" id="inputResetPassword" class="w-full px-3 py-2 rounded-xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 font-bold text-slate-900 dark:text-white outline-none" placeholder="Escribe tu clave...">
+      </div>
+
+      <!-- Cuadro de rescate con enlace a Jhordy -->
+      <div class="p-3 bg-amber-50 dark:bg-amber-950/40 rounded-xl border border-amber-300 dark:border-amber-500/40 text-[11px] text-amber-900 dark:text-amber-200 space-y-1">
+        <p class="font-black">¿Olvidaste tu contraseña?</p>
+        <p>Comunícate directamente con <b>Jhordy</b> al celular <b>0963923399</b> o solicita la clave genérica de rescate.</p>
+        <a href="https://wa.me/593963923399?text=Hola%20Jhordy,%20olvide%20mi%20clave%20de%20borrado%20en%20HabitFlow%20360" target="_blank" class="inline-flex items-center gap-1 font-bold text-emerald-600 dark:text-emerald-400 hover:underline pt-1">
+          <i data-lucide="message-circle" class="w-3.5 h-3.5"></i>
+          <span>Pedir clave de rescate a Jhordy</span>
+        </a>
+      </div>
+
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modalSecurityReset')" class="px-4 py-2 font-bold text-xs text-slate-400 hover:text-slate-800 dark:hover:text-white">Cancelar</button>
+        <button onclick="executeTotalResetWithPassword()" class="bg-red-600 hover:bg-red-500 text-white font-black px-4 py-2 rounded-xl text-xs shadow-md">
+          Confirmar y Borrar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL: CREAR NUEVO HÁBITO -->
   <div id="addHabitModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-md rounded-3xl p-6 shadow-2xl border border-emerald-500/30 space-y-3.5">
       <div class="flex items-center justify-between">
@@ -739,7 +841,7 @@
     </div>
   </div>
 
-  <!-- Modal: Opción Hábito con Tiempo (Pomodoro vs Manual) -->
+  <!-- MODAL: OPCIÓN HÁBITO CON TIEMPO -->
   <div id="modalTimedChoice" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-emerald-500/40 text-center space-y-4">
       <div class="w-12 h-12 mx-auto rounded-2xl bg-emerald-500/20 text-emerald-500 flex items-center justify-center text-xl font-bold">
@@ -767,7 +869,7 @@
     </div>
   </div>
 
-  <!-- Modal: Crear Carpeta Madre -->
+  <!-- MODAL: CREAR CARPETA MADRE -->
   <div id="addFolderModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-md rounded-3xl p-6 shadow-2xl border border-emerald-500/30 space-y-3.5">
       <h3 class="text-base font-bold text-slate-900 dark:text-white">Nueva Carpeta Madre</h3>
@@ -781,7 +883,7 @@
     </div>
   </div>
 
-  <!-- Modal: Crear Tarea -->
+  <!-- MODAL: CREAR TAREA -->
   <div id="addTaskModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-md rounded-3xl p-6 shadow-2xl border border-emerald-500/30 space-y-3.5">
       <h3 class="text-base font-bold text-slate-900 dark:text-white">Nueva Tarea</h3>
@@ -802,7 +904,7 @@
     </div>
   </div>
 
-  <!-- Modal: Agregar Meta del Mes -->
+  <!-- MODAL: AGREGAR META DEL MES -->
   <div id="addGoalModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-sm rounded-3xl p-5 shadow-2xl border border-emerald-500/30 space-y-3 text-xs">
       <h3 class="text-sm font-bold text-slate-900 dark:text-white">Nueva Meta del Mes</h3>
@@ -814,7 +916,7 @@
     </div>
   </div>
 
-  <!-- Custom In-App Modal Dialog (Zero alert / confirm) -->
+  <!-- DIÁLOGO MODAL PERSONALIZADO (CERO ALERT / CONFIRM) -->
   <div id="customDialogOverlay" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
     <div class="glassmorphism w-full max-w-sm rounded-3xl p-6 shadow-2xl border border-slate-300 dark:border-slate-700 text-center space-y-4">
       <div id="dialogIcon" class="w-12 h-12 mx-auto rounded-2xl bg-amber-500/20 text-amber-500 flex items-center justify-center text-xl font-bold">
@@ -829,236 +931,236 @@
     </div>
   </div>
 
-  <!-- Toast Notification Container -->
+  <!-- Contenedor de Notificaciones Toast -->
   <div id="toastContainer" class="fixed top-4 right-4 z-50 flex flex-col gap-2 pointer-events-none"></div>
 
   <script>
-    /* ==========================================================================
-       HABITFLOW 360 v6 — REALISTIC ANIMAL ILLUSTRATIONS & DEDICATED PET ENGINE
-       ========================================================================== */
+    /* Claves de seguridad del sistema */
+    const MASTER_RESCUE_KEY = "I´M_JHORDY";
+    const STORAGE_KEY = 'HF360_STATE_V6_5';
 
-    // High-definition Realistic Vector SVGs with anatomical contours and shading
+    /* Vectores SVG de Anatomía Ultra Realista y Alta Fidelidad */
     const REALISTIC_PET_SVGS = {
       dog: [
         // Fase 1: Cachorro de Perro Fiel Realista
-        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
           <defs>
             <linearGradient id="dogFur1" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stop-color="#ea580c"/>
-              <stop offset="60%" stop-color="#9a3412"/>
+              <stop offset="50%" stop-color="#c2410c"/>
+              <stop offset="85%" stop-color="#9a3412"/>
               <stop offset="100%" stop-color="#431407"/>
             </linearGradient>
+            <radialGradient id="dogEye1" cx="35%" cy="35%" r="65%">
+              <stop offset="0%" stop-color="#78350f"/>
+              <stop offset="65%" stop-color="#451a03"/>
+              <stop offset="100%" stop-color="#0f172a"/>
+            </radialGradient>
             <linearGradient id="dogChest1" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stop-color="#ffedd5"/>
-              <stop offset="100%" stop-color="#fdba74"/>
+              <stop offset="0%" stop-color="#fff7ed"/>
+              <stop offset="60%" stop-color="#ffedd5"/>
+              <stop offset="100%" stop-color="#fed7aa"/>
             </linearGradient>
           </defs>
-          <!-- Cola -->
-          <path d="M50 140 Q30 110 40 85 Q45 80 50 95 Q48 120 65 145 Z" fill="url(#dogFur1)"/>
-          <!-- Patas traseras -->
-          <ellipse cx="60" cy="165" rx="16" ry="12" fill="#7c2d12"/>
+          <!-- Cola con movimiento -->
+          <path d="M48 140 Q25 110 38 85 Q46 80 50 95 Q48 120 65 145 Z" fill="url(#dogFur1)"/>
+          <path d="M42 90 Q40 85 45 85 Q46 95 44 105" stroke="#fff7ed" stroke-width="2.5" stroke-linecap="round"/>
+          <!-- Patas traseras musculosas -->
+          <ellipse cx="60" cy="165" rx="17" ry="13" fill="#7c2d12"/>
           <ellipse cx="65" cy="170" rx="14" ry="7" fill="#431407"/>
           <!-- Cuerpo cachorro -->
-          <path d="M60 145 C55 110, 85 95, 115 105 C135 112, 145 135, 140 165 C120 175, 75 170, 60 145 Z" fill="url(#dogFur1)"/>
-          <!-- Pecho claro -->
-          <path d="M100 110 C115 115, 130 130, 125 155 C110 162, 95 145, 100 110 Z" fill="url(#dogChest1)"/>
-          <!-- Patas delanteras -->
-          <path d="M105 135 L108 175 Q115 178 122 175 L120 135 Z" fill="#9a3412"/>
-          <path d="M125 138 L130 174 Q138 177 144 174 L140 138 Z" fill="#7c2d12"/>
-          <!-- Cabeza realista con hocico -->
-          <ellipse cx="120" cy="80" rx="28" ry="26" fill="url(#dogFur1)"/>
-          <!-- Orejas caídas suaves -->
-          <path d="M100 65 C90 60, 85 85, 95 100 C98 90, 102 75, 105 68 Z" fill="#431407"/>
-          <path d="M138 65 C150 60, 155 85, 145 100 C142 90, 138 75, 135 68 Z" fill="#431407"/>
+          <path d="M58 145 C52 110, 85 92, 115 102 C138 110, 146 135, 140 165 C120 176, 75 170, 58 145 Z" fill="url(#dogFur1)"/>
+          <!-- Pecho claro suave -->
+          <path d="M98 108 C115 114, 130 130, 125 155 C108 163, 94 144, 98 108 Z" fill="url(#dogChest1)"/>
+          <!-- Patas delanteras con garras suaves -->
+          <path d="M104 135 L106 175 Q115 179 122 175 L118 135 Z" fill="#9a3412"/>
+          <path d="M124 138 L128 174 Q137 178 144 174 L140 138 Z" fill="#7c2d12"/>
+          <!-- Cabeza anatómica -->
+          <ellipse cx="120" cy="78" rx="29" ry="27" fill="url(#dogFur1)"/>
+          <!-- Orejas suaves caídas -->
+          <path d="M98 62 C86 58, 82 86, 94 102 C98 90, 102 75, 104 66 Z" fill="#431407"/>
+          <path d="M138 62 C152 58, 156 86, 144 102 C140 90, 136 75, 134 66 Z" fill="#431407"/>
           <!-- Hocico realista -->
-          <ellipse cx="130" cy="90" rx="14" ry="11" fill="#fed7aa"/>
-          <path d="M132 84 C128 84, 126 88, 130 92 C134 94, 138 92, 138 87 Z" fill="#1e293b"/>
-          <circle cx="130" cy="87" r="1.5" fill="#fff"/>
-          <path d="M130 92 Q130 98 126 99 M130 92 Q132 98 136 99" stroke="#1e293b" stroke-width="1.8" fill="none"/>
-          <!-- Ojos almendrados expresivos -->
-          <ellipse cx="112" cy="74" rx="4.5" ry="5.5" fill="#1e293b"/>
-          <ellipse cx="132" cy="74" rx="4" ry="5" fill="#1e293b"/>
-          <circle cx="111" cy="72" r="1.5" fill="#fff"/>
-          <circle cx="131" cy="72" r="1.5" fill="#fff"/>
+          <ellipse cx="130" cy="88" rx="15" ry="11" fill="#fed7aa"/>
+          <path d="M131 82 C126 82, 124 87, 129 91 C133 93, 138 91, 137 86 Z" fill="#0f172a"/>
+          <circle cx="129" cy="85" r="1.5" fill="#fff"/>
+          <path d="M129 91 Q129 97 125 98 M129 91 Q131 97 135 98" stroke="#1e293b" stroke-width="1.8" fill="none"/>
+          <!-- Ojos expresivos con destello -->
+          <ellipse cx="112" cy="72" rx="5" ry="6" fill="url(#dogEye1)"/>
+          <ellipse cx="132" cy="72" rx="4.5" ry="5.5" fill="url(#dogEye1)"/>
+          <circle cx="111" cy="70" r="1.8" fill="#fff"/>
+          <circle cx="131" cy="70" r="1.8" fill="#fff"/>
+          <circle cx="113" cy="74" r="0.8" fill="#fdba74"/>
+          <circle cx="133" cy="74" r="0.8" fill="#fdba74"/>
         </svg>`,
 
         // Fase 2: Perro Joven Guardián con Arnés
-        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
           <defs>
             <linearGradient id="dogFur2" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stop-color="#b45309"/>
-              <stop offset="50%" stop-color="#78350f"/>
-              <stop offset="100%" stop-color="#292524"/>
+              <stop offset="45%" stop-color="#78350f"/>
+              <stop offset="85%" stop-color="#451a03"/>
+              <stop offset="100%" stop-color="#1c1917"/>
             </linearGradient>
           </defs>
-          <path d="M40 145 Q20 115 28 85 Q35 80 40 100 Q38 125 55 150 Z" fill="#451a03"/>
-          <path d="M50 140 C45 100, 80 85, 125 95 C150 105, 155 145, 145 170 C120 180, 65 175, 50 140 Z" fill="url(#dogFur2)"/>
-          <!-- Arnés verde esmeralda táctico -->
-          <path d="M85 105 L135 120 L130 136 L80 120 Z" fill="#059669"/>
-          <circle cx="110" cy="122" r="5" fill="#fbbf24"/>
-          <!-- Patas atléticas -->
-          <path d="M100 135 L102 178 Q112 182 120 178 L116 135 Z" fill="#78350f"/>
-          <path d="M130 135 L135 177 Q144 180 150 176 L144 135 Z" fill="#451a03"/>
-          <path d="M48 160 Q55 178 72 178 Q78 165 72 150 Z" fill="#292524"/>
+          <path d="M38 145 Q18 115 26 85 Q34 80 38 100 Q36 125 54 150 Z" fill="#451a03"/>
+          <path d="M48 138 C42 98, 78 82, 125 94 C152 104, 158 145, 146 172 C120 182, 62 176, 48 138 Z" fill="url(#dogFur2)"/>
+          <!-- Arnés verde esmeralda de protección táctico -->
+          <path d="M82 102 L136 118 L130 136 L78 118 Z" fill="#059669" stroke="#10b981" stroke-width="1.2"/>
+          <circle cx="108" cy="120" r="5.5" fill="#fbbf24"/>
+          <!-- Patas musculosas -->
+          <path d="M98 132 L100 178 Q110 182 118 178 L114 132 Z" fill="#78350f"/>
+          <path d="M128 132 L134 177 Q144 180 150 176 L144 132 Z" fill="#451a03"/>
+          <path d="M46 158 Q54 178 70 178 Q76 165 70 148 Z" fill="#292524"/>
           <!-- Cabeza alerta de pastor -->
-          <ellipse cx="132" cy="70" rx="26" ry="24" fill="url(#dogFur2)"/>
-          <!-- Orejas erguidas -->
-          <polygon points="112,58 116,25 130,52" fill="#451a03"/>
-          <polygon points="135,52 148,26 152,58" fill="#451a03"/>
-          <ellipse cx="146" cy="76" rx="14" ry="10" fill="#d97706"/>
-          <path d="M150 72 C146 72, 144 76, 148 79 C152 80, 156 78, 155 74 Z" fill="#0f172a"/>
-          <circle cx="126" cy="66" rx="4.5" ry="4.5" fill="#0f172a"/>
-          <circle cx="140" cy="66" rx="4.5" ry="4.5" fill="#0f172a"/>
-          <circle cx="125" cy="64" r="1.5" fill="#fff"/>
-          <circle cx="139" cy="64" r="1.5" fill="#fff"/>
+          <ellipse cx="132" cy="68" rx="27" ry="25" fill="url(#dogFur2)"/>
+          <polygon points="110,56 114,22 128,50" fill="#451a03"/>
+          <polygon points="134,50 148,24 152,56" fill="#451a03"/>
+          <ellipse cx="146" cy="74" rx="14" ry="10" fill="#d97706"/>
+          <path d="M150 70 C146 70, 144 74, 148 77 C152 78, 156 76, 155 72 Z" fill="#0f172a"/>
+          <circle cx="126" cy="64" rx="5" ry="5" fill="#0f172a"/>
+          <circle cx="140" cy="64" rx="5" ry="5" fill="#0f172a"/>
+          <circle cx="125" cy="62" r="1.8" fill="#fff"/>
+          <circle cx="139" cy="62" r="1.8" fill="#fff"/>
         </svg>`,
 
-        // Fase 3: Guardián Alfa con Armadura
+        // Fase 3: Guardián Alfa con Armadura Rúnica
         `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
           <defs>
             <linearGradient id="armorGrad" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stop-color="#06b6d4"/>
+              <stop offset="50%" stop-color="#0891b2"/>
               <stop offset="100%" stop-color="#0e7490"/>
             </linearGradient>
           </defs>
-          <path d="M35 140 Q10 100 20 65 Q30 65 35 90 Q30 120 50 148 Z" fill="#1c1917"/>
-          <path d="M48 135 C40 90, 80 75, 130 85 C160 95, 165 140, 150 172 C120 182, 60 178, 48 135 Z" fill="#292524"/>
-          <!-- Peto de armadura rúnica -->
-          <path d="M75 95 L145 105 L135 145 L70 125 Z" fill="url(#armorGrad)" stroke="#38bdf8" stroke-width="1.5"/>
-          <circle cx="108" cy="120" r="7" fill="#fbbf24"/>
+          <path d="M35 140 Q8 98 18 62 Q28 62 33 88 Q28 118 48 148 Z" fill="#1c1917"/>
+          <path d="M46 132 C38 88, 78 72, 130 82 C162 94, 166 140, 152 174 C120 184, 58 178, 46 132 Z" fill="#292524"/>
+          <!-- Peto de armadura rúnica pulida -->
+          <path d="M72 92 L146 104 L136 146 L68 124 Z" fill="url(#armorGrad)" stroke="#38bdf8" stroke-width="1.8"/>
+          <circle cx="106" cy="118" r="8" fill="#fbbf24"/>
+          <path d="M106 112 L106 124 M100 118 L112 118" stroke="#78350f" stroke-width="2"/>
           <!-- Cabeza imponente de lobo/perro alfa -->
-          <ellipse cx="138" cy="62" rx="27" ry="25" fill="#1c1917"/>
-          <polygon points="115,50 120,15 136,44" fill="#0f172a"/>
-          <polygon points="142,44 158,16 162,50" fill="#0f172a"/>
-          <ellipse cx="154" cy="68" rx="15" ry="10" fill="#44403c"/>
-          <path d="M158 64 C154 64, 153 68, 157 71 C161 72, 164 70, 163 66 Z" fill="#0f172a"/>
-          <!-- Ojos cyan brillantes -->
-          <ellipse cx="132" cy="58" rx="5" ry="4" fill="#38bdf8"/>
-          <ellipse cx="147" cy="58" rx="5" ry="4" fill="#38bdf8"/>
-          <circle cx="132" cy="58" r="1.5" fill="#fff"/>
-          <circle cx="147" cy="58" r="1.5" fill="#fff"/>
+          <ellipse cx="138" cy="60" rx="28" ry="26" fill="#1c1917"/>
+          <polygon points="114,48 118,12 134,42" fill="#0f172a"/>
+          <polygon points="142,42 158,14 162,48" fill="#0f172a"/>
+          <ellipse cx="154" cy="66" rx="15" ry="10" fill="#44403c"/>
+          <path d="M158 62 C154 62, 153 66, 157 69 C161 70, 164 68, 163 64 Z" fill="#0f172a"/>
+          <!-- Ojos cyan brillantes con reflejo mágico -->
+          <ellipse cx="132" cy="56" rx="5.5" ry="4.5" fill="#38bdf8"/>
+          <ellipse cx="148" cy="56" rx="5.5" ry="4.5" fill="#38bdf8"/>
+          <circle cx="132" cy="56" r="1.8" fill="#fff"/>
+          <circle cx="148" cy="56" r="1.8" fill="#fff"/>
           <!-- Patas firmes -->
-          <path d="M98 130 L102 180 Q114 184 122 180 L118 130 Z" fill="#1c1917"/>
-          <path d="M134 130 L140 179 Q150 183 158 179 L150 130 Z" fill="#0f172a"/>
+          <path d="M96 128 L100 180 Q112 184 120 180 L116 128 Z" fill="#1c1917"/>
+          <path d="M132 128 L138 180 Q148 184 156 180 L148 128 Z" fill="#0f172a"/>
         </svg>`,
 
-        // Fase 4: Lobo Místico Celestial
+        // Fase 4: Lobo Místico Celestial con Alas Astrales
         `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
-          <!-- Aura exterior cósmica -->
-          <circle cx="100" cy="100" r="85" fill="none" stroke="#38bdf8" stroke-width="2" stroke-dasharray="6,4" opacity="0.7"/>
+          <circle cx="100" cy="100" r="88" fill="none" stroke="#38bdf8" stroke-width="2.5" stroke-dasharray="6,4" opacity="0.75"/>
           <!-- Alas celestiales espectrales -->
-          <path d="M40 100 Q10 40 50 20 Q70 60 75 95 Z" fill="#38bdf8" opacity="0.65"/>
-          <path d="M150 95 Q185 35 150 15 Q130 55 125 90 Z" fill="#38bdf8" opacity="0.65"/>
-          <!-- Cola llameante -->
-          <path d="M30 145 Q0 100 15 50 Q35 60 35 95 Q30 120 50 152 Z" fill="#6366f1"/>
-          <!-- Cuerpo místico de lobo -->
-          <path d="M46 130 C40 85, 80 70, 135 80 C165 90, 170 135, 155 170 C125 180, 60 175, 46 130 Z" fill="#0f172a"/>
-          <!-- Patas -->
-          <path d="M96 128 L100 178 Q112 182 120 178 L114 128 Z" fill="#1e1b4b"/>
-          <path d="M134 128 L140 178 Q150 182 158 178 L150 128 Z" fill="#1e1b4b"/>
-          <!-- Cabeza con marcas cósmicas -->
-          <ellipse cx="140" cy="58" rx="27" ry="24" fill="#0f172a"/>
-          <polygon points="118,46 124,10 140,40" fill="#38bdf8"/>
-          <polygon points="144,40 160,12 165,48" fill="#38bdf8"/>
-          <circle cx="140" cy="45" r="3" fill="#facc15"/>
-          <ellipse cx="134" cy="56" rx="5" ry="4" fill="#facc15"/>
-          <ellipse cx="149" cy="56" rx="5" ry="4" fill="#facc15"/>
+          <path d="M38 98 Q8 35 50 15 Q72 55 76 92 Z" fill="#38bdf8" opacity="0.7"/>
+          <path d="M152 92 Q190 30 152 12 Q130 52 124 88 Z" fill="#38bdf8" opacity="0.7"/>
+          <!-- Cola llameante astral -->
+          <path d="M28 145 Q-2 95 12 45 Q34 55 34 92 Q28 118 48 152 Z" fill="#6366f1"/>
+          <!-- Cuerpo cósmico de lobo -->
+          <path d="M44 128 C38 82, 78 68, 136 78 C166 88, 172 135, 156 172 C124 182, 58 176, 44 128 Z" fill="#0f172a"/>
+          <!-- Patas con destellos -->
+          <path d="M94 126 L98 178 Q110 182 118 178 L112 126 Z" fill="#1e1b4b"/>
+          <path d="M132 126 L138 178 Q148 182 156 178 L148 126 Z" fill="#1e1b4b"/>
+          <!-- Cabeza coronada -->
+          <ellipse cx="140" cy="56" rx="28" ry="25" fill="#0f172a"/>
+          <polygon points="116,44 122,8 138,38" fill="#38bdf8"/>
+          <polygon points="144,38 160,10 166,46" fill="#38bdf8"/>
+          <circle cx="140" cy="42" r="3.5" fill="#facc15"/>
+          <ellipse cx="134" cy="54" rx="5.5" ry="4.5" fill="#facc15"/>
+          <ellipse cx="150" cy="54" rx="5.5" ry="4.5" fill="#facc15"/>
+          <circle cx="134" cy="54" r="1.8" fill="#fff"/>
+          <circle cx="150" cy="54" r="1.8" fill="#fff"/>
         </svg>`
       ],
 
       cat: [
         // Fase 1: Gatito Realista
-        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
           <defs>
             <linearGradient id="catFur1" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stop-color="#fb923c"/>
-              <stop offset="60%" stop-color="#c2410c"/>
+              <stop offset="55%" stop-color="#c2410c"/>
               <stop offset="100%" stop-color="#7c2d12"/>
             </linearGradient>
           </defs>
-          <path d="M45 130 Q15 90 35 60 Q45 65 40 85 Q35 110 55 140 Z" fill="#c2410c"/>
-          <path d="M55 140 C50 110, 75 95, 110 105 C130 112, 138 135, 132 165 C115 174, 70 170, 55 140 Z" fill="url(#catFur1)"/>
-          <ellipse cx="118" cy="80" rx="25" ry="23" fill="url(#catFur1)"/>
-          <polygon points="98,68 100,40 114,62" fill="#7c2d12"/>
-          <polygon points="126,62 140,40 142,68" fill="#7c2d12"/>
-          <!-- Ojos felinos verdes profundos -->
-          <ellipse cx="110" cy="76" rx="5" ry="6" fill="#10b981"/>
-          <ellipse cx="128" cy="76" rx="5" ry="6" fill="#10b981"/>
-          <ellipse cx="110" cy="76" rx="1.5" ry="5.5" fill="#0f172a"/>
-          <ellipse cx="128" cy="76" rx="1.5" ry="5.5" fill="#0f172a"/>
-          <!-- Bigotes y hocico -->
-          <ellipse cx="119" cy="86" rx="8" ry="6" fill="#ffedd5"/>
-          <polygon points="117,84 121,84 119,87" fill="#f43f5e"/>
-          <line x1="102" y1="86" x2="88" y2="84" stroke="#431407" stroke-width="1.2"/>
-          <line x1="102" y1="89" x2="88" y2="92" stroke="#431407" stroke-width="1.2"/>
-          <line x1="134" y1="86" x2="148" y2="84" stroke="#431407" stroke-width="1.2"/>
-          <line x1="134" y1="89" x2="148" y2="92" stroke="#431407" stroke-width="1.2"/>
-          <!-- Patas -->
-          <path d="M102 135 L104 175 Q112 178 118 175 L114 135 Z" fill="#9a3412"/>
-          <path d="M122 135 L126 175 Q134 178 140 175 L135 135 Z" fill="#7c2d12"/>
+          <path d="M42 128 Q12 85 34 55 Q44 60 38 82 Q34 108 54 138 Z" fill="#c2410c"/>
+          <path d="M54 138 C48 108, 74 92, 110 102 C130 110, 138 134, 132 165 C115 174, 68 170, 54 138 Z" fill="url(#catFur1)"/>
+          <ellipse cx="118" cy="78" rx="26" ry="24" fill="url(#catFur1)"/>
+          <polygon points="96,66 98,36 112,60" fill="#7c2d12"/>
+          <polygon points="126,60 140,36 142,66" fill="#7c2d12"/>
+          <ellipse cx="110" cy="74" rx="5.5" ry="6.5" fill="#10b981"/>
+          <ellipse cx="128" cy="74" rx="5.5" ry="6.5" fill="#10b981"/>
+          <ellipse cx="110" cy="74" rx="1.8" ry="6" fill="#0f172a"/>
+          <ellipse cx="128" cy="74" rx="1.8" ry="6" fill="#0f172a"/>
+          <circle cx="108" cy="72" r="1.6" fill="#fff"/>
+          <circle cx="126" cy="72" r="1.6" fill="#fff"/>
+          <!-- Hocico y bigotes -->
+          <ellipse cx="119" cy="85" rx="8" ry="6" fill="#ffedd5"/>
+          <polygon points="117,83 121,83 119,86" fill="#f43f5e"/>
+          <line x1="102" y1="85" x2="86" y2="83" stroke="#431407" stroke-width="1.4"/>
+          <line x1="102" y1="88" x2="86" y2="92" stroke="#431407" stroke-width="1.4"/>
+          <line x1="134" y1="85" x2="150" y2="83" stroke="#431407" stroke-width="1.4"/>
+          <line x1="134" y1="88" x2="150" y2="92" stroke="#431407" stroke-width="1.4"/>
+          <path d="M100 135 L102 175 Q110 178 116 175 L112 135 Z" fill="#9a3412"/>
+          <path d="M120 135 L124 175 Q132 178 138 175 L133 135 Z" fill="#7c2d12"/>
         </svg>`,
 
         // Fase 2: Gato Cazador con Cascabel
-        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
-          <path d="M35 135 Q10 90 25 50 Q35 55 32 80 Q25 110 48 145 Z" fill="#9a3412"/>
-          <path d="M48 135 C42 98, 75 85, 120 95 C145 105, 150 140, 140 168 C115 178, 62 174, 48 135 Z" fill="#c2410c"/>
-          <!-- Collar con cascabel -->
-          <path d="M108 92 L140 102 L136 112 L104 102 Z" fill="#e11d48"/>
-          <circle cx="122" cy="106" r="4.5" fill="#facc15"/>
-          <ellipse cx="126" cy="68" rx="24" ry="22" fill="#c2410c"/>
-          <polygon points="106,56 108,28 122,50" fill="#7c2d12"/>
-          <polygon points="134,50 148,28 150,56" fill="#7c2d12"/>
-          <ellipse cx="118" cy="65" rx="5" ry="6" fill="#22c55e"/>
-          <ellipse cx="136" cy="65" rx="5" ry="6" fill="#22c55e"/>
-          <ellipse cx="118" cy="65" rx="1.5" ry="5.5" fill="#0f172a"/>
-          <ellipse cx="136" cy="65" rx="1.5" ry="5.5" fill="#0f172a"/>
-          <!-- Patas ágiles -->
-          <path d="M96 130 L98 178 Q108 182 116 178 L110 130 Z" fill="#9a3412"/>
-          <path d="M125 130 L130 178 Q140 182 146 178 L140 130 Z" fill="#7c2d12"/>
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <path d="M34 135 Q8 88 24 48 Q34 54 30 78 Q24 108 46 145 Z" fill="#9a3412"/>
+          <path d="M46 135 C40 96, 74 82, 120 92 C146 104, 150 140, 140 168 C115 178, 60 174, 46 135 Z" fill="#c2410c"/>
+          <path d="M106 90 L140 100 L136 112 L102 102 Z" fill="#e11d48"/>
+          <circle cx="121" cy="106" r="5" fill="#facc15"/>
+          <ellipse cx="126" cy="66" rx="25" ry="23" fill="#c2410c"/>
+          <polygon points="104,54 106,24 120,48" fill="#7c2d12"/>
+          <polygon points="134,48 148,24 150,54" fill="#7c2d12"/>
+          <ellipse cx="118" cy="64" rx="5.5" ry="6.5" fill="#22c55e"/>
+          <ellipse cx="136" cy="64" rx="5.5" ry="6.5" fill="#22c55e"/>
+          <ellipse cx="118" cy="64" rx="1.8" ry="6" fill="#0f172a"/>
+          <ellipse cx="136" cy="64" rx="1.8" ry="6" fill="#0f172a"/>
         </svg>`,
 
-        // Fase 3: Pantera Veloz
+        // Fase 3: Pantera Veloz de Medianoche
         `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
-          <path d="M30 130 Q5 75 22 40 Q32 45 30 75 Q20 105 45 145 Z" fill="#09090b"/>
-          <path d="M45 130 C38 88, 75 75, 128 85 C158 95, 162 140, 148 172 C118 182, 58 178, 45 130 Z" fill="#18181b"/>
-          <ellipse cx="135" cy="62" rx="25" ry="23" fill="#18181b"/>
-          <polygon points="112,50 116,22 130,44" fill="#09090b"/>
-          <polygon points="142,44 156,22 160,50" fill="#09090b"/>
-          <!-- Ojos dorados penetrantes -->
-          <ellipse cx="126" cy="58" rx="5" ry="6" fill="#eab308"/>
-          <ellipse cx="144" cy="58" rx="5" ry="6" fill="#eab308"/>
-          <ellipse cx="126" cy="58" rx="1.2" ry="5.5" fill="#000"/>
-          <ellipse cx="144" cy="58" rx="1.2" ry="5.5" fill="#000"/>
-          <!-- Patas musculosas -->
-          <path d="M94 126 L98 180 Q110 184 118 180 L112 126 Z" fill="#09090b"/>
-          <path d="M130 126 L136 179 Q148 183 154 179 L146 126 Z" fill="#09090b"/>
+          <path d="M28 130 Q4 72 20 38 Q30 42 28 74 Q18 104 44 145 Z" fill="#09090b"/>
+          <path d="M44 130 C36 86, 74 72, 128 82 C158 92, 162 138, 148 172 C118 182, 56 178, 44 130 Z" fill="#18181b"/>
+          <ellipse cx="135" cy="60" rx="26" ry="24" fill="#18181b"/>
+          <polygon points="110,48 114,18 128,42" fill="#09090b"/>
+          <polygon points="142,42 156,18 160,48" fill="#09090b"/>
+          <ellipse cx="126" cy="56" rx="5.5" ry="6.5" fill="#eab308"/>
+          <ellipse cx="144" cy="56" rx="5.5" ry="6.5" fill="#eab308"/>
+          <ellipse cx="126" cy="56" rx="1.4" ry="6" fill="#000"/>
+          <ellipse cx="144" cy="56" rx="1.4" ry="6" fill="#000"/>
         </svg>`,
 
         // Fase 4: Tigre Legendario Dorado
         `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
-          <circle cx="100" cy="100" r="85" fill="none" stroke="#f59e0b" stroke-width="2" stroke-dasharray="5,4" opacity="0.8"/>
-          <path d="M30 130 Q0 80 20 40 Q30 45 28 75 Q20 105 45 145 Z" fill="#b45309"/>
-          <!-- Cuerpo con rayas -->
-          <path d="M45 130 C38 88, 75 75, 128 85 C158 95, 162 140, 148 172 C118 182, 58 178, 45 130 Z" fill="#f59e0b"/>
-          <path d="M70 100 L76 115 L68 120 Z" fill="#18181b"/>
-          <path d="M90 98 L98 116 L88 122 Z" fill="#18181b"/>
-          <path d="M115 105 L122 122 L112 126 Z" fill="#18181b"/>
-          <!-- Cabeza de tigre -->
-          <ellipse cx="136" cy="60" rx="26" ry="24" fill="#f59e0b"/>
-          <polygon points="114,48 118,20 132,42" fill="#b45309"/>
-          <polygon points="144,42 158,20 162,48" fill="#b45309"/>
-          <polygon points="132,38 136,26 140,38" fill="#ef4444"/>
-          <!-- Ojos celestiales -->
-          <ellipse cx="127" cy="56" rx="5" ry="6" fill="#38bdf8"/>
-          <ellipse cx="145" cy="56" rx="5" ry="6" fill="#38bdf8"/>
-          <ellipse cx="127" cy="56" rx="1.5" ry="5.5" fill="#000"/>
-          <ellipse cx="145" cy="56" rx="1.5" ry="5.5" fill="#000"/>
+          <circle cx="100" cy="100" r="88" fill="none" stroke="#f59e0b" stroke-width="2.5" stroke-dasharray="5,4" opacity="0.8"/>
+          <path d="M28 130 Q0 78 18 38 Q28 42 26 74 Q18 104 44 145 Z" fill="#b45309"/>
+          <path d="M44 130 C36 86, 74 72, 128 82 C158 92, 162 138, 148 172 C118 182, 56 178, 44 130 Z" fill="#f59e0b"/>
+          <path d="M68 98 L76 114 L66 120 Z" fill="#18181b"/>
+          <path d="M88 96 L98 116 L86 122 Z" fill="#18181b"/>
+          <path d="M114 104 L122 122 L110 126 Z" fill="#18181b"/>
+          <ellipse cx="136" cy="58" rx="27" ry="25" fill="#f59e0b"/>
+          <polygon points="112,46 116,18 130,40" fill="#b45309"/>
+          <polygon points="144,40 158,18 162,46" fill="#b45309"/>
+          <polygon points="130,36 135,22 140,36" fill="#ef4444"/>
+          <ellipse cx="127" cy="54" rx="5.5" ry="6.5" fill="#38bdf8"/>
+          <ellipse cx="145" cy="54" rx="5.5" ry="6.5" fill="#38bdf8"/>
         </svg>`
       ],
 
       fox: [
-        // Fase 1: Zorrito Bebé Realista
-        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
+        // Fase 1: Zorrito Bebé
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
           <defs>
             <linearGradient id="foxFur1" x1="0" y1="0" x2="1" y2="1">
               <stop offset="0%" stop-color="#ea580c"/>
@@ -1066,133 +1168,112 @@
               <stop offset="100%" stop-color="#431407"/>
             </linearGradient>
           </defs>
-          <!-- Gran cola esponjosa con punta blanca -->
-          <path d="M40 145 C10 110, 15 65, 45 45 C65 65, 55 110, 60 145 Z" fill="url(#foxFur1)"/>
-          <path d="M35 55 C42 48, 50 52, 45 45 C35 50, 30 65, 35 55 Z" fill="#fff"/>
-          <path d="M55 140 C50 110, 75 95, 110 105 C130 112, 138 135, 132 165 C115 174, 70 170, 55 140 Z" fill="url(#foxFur1)"/>
-          <!-- Cabeza de zorro con mejillas blancas -->
-          <ellipse cx="118" cy="78" rx="25" ry="23" fill="url(#foxFur1)"/>
-          <polygon points="96,62 94,30 112,55" fill="#431407"/>
-          <polygon points="128,55 144,30 144,62" fill="#431407"/>
-          <polygon points="105,75 130,75 124,96" fill="#fff"/>
-          <circle cx="124" cy="94" r="2.5" fill="#0f172a"/>
-          <!-- Ojos astutos -->
-          <ellipse cx="110" cy="72" rx="4.5" ry="4" fill="#0f172a"/>
-          <ellipse cx="128" cy="72" rx="4.5" ry="4" fill="#0f172a"/>
-          <circle cx="109" cy="70" r="1.5" fill="#fff"/>
-          <circle cx="127" cy="70" r="1.5" fill="#fff"/>
+          <path d="M38 145 C8 110, 12 62, 44 42 C64 62, 54 110, 58 145 Z" fill="url(#foxFur1)"/>
+          <path d="M34 52 C40 46, 48 50, 44 42 C34 48, 28 62, 34 52 Z" fill="#fff"/>
+          <path d="M54 138 C48 108, 74 92, 110 102 C130 110, 138 134, 132 165 C115 174, 68 170, 54 138 Z" fill="url(#foxFur1)"/>
+          <ellipse cx="118" cy="76" rx="26" ry="24" fill="url(#foxFur1)"/>
+          <polygon points="94,60 92,26 110,52" fill="#431407"/>
+          <polygon points="128,52 146,26 146,60" fill="#431407"/>
+          <polygon points="104,74 130,74 124,96" fill="#fff"/>
+          <circle cx="124" cy="94" r="2.8" fill="#0f172a"/>
+          <ellipse cx="110" cy="70" rx="4.8" ry="4.2" fill="#0f172a"/>
+          <ellipse cx="128" cy="70" rx="4.8" ry="4.2" fill="#0f172a"/>
+          <circle cx="109" cy="68" r="1.6" fill="#fff"/>
+          <circle cx="127" cy="68" r="1.6" fill="#fff"/>
         </svg>`,
 
-        // Fase 2: Zorro Explorador con Mochila
-        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
-          <path d="M35 140 C5 100, 10 50, 45 35 C65 55, 55 105, 58 145 Z" fill="#c2410c"/>
-          <path d="M35 48 C42 40, 50 45, 45 35 C35 40, 30 55, 35 48 Z" fill="#fff"/>
-          <path d="M48 135 C42 98, 75 85, 120 95 C145 105, 150 140, 140 168 C115 178, 62 174, 48 135 Z" fill="#c2410c"/>
-          <!-- Mochila de explorador -->
-          <rect x="75" y="100" width="30" height="24" rx="6" fill="#15803d"/>
-          <ellipse cx="126" cy="68" rx="25" ry="22" fill="#c2410c"/>
-          <polygon points="102,52 100,20 120,45" fill="#7c2d12"/>
-          <polygon points="135,45 152,20 152,52" fill="#7c2d12"/>
-          <polygon points="112,68 138,68 132,88" fill="#fff"/>
-          <circle cx="132" cy="86" r="2.5" fill="#0f172a"/>
-          <ellipse cx="118" cy="62" rx="4.5" ry="4" fill="#0f172a"/>
-          <ellipse cx="136" cy="62" rx="4.5" ry="4" fill="#0f172a"/>
+        // Fase 2: Zorro Explorador
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <path d="M34 140 C4 98, 8 48, 44 32 C64 54, 54 104, 56 145 Z" fill="#c2410c"/>
+          <path d="M46 135 C40 96, 74 82, 120 92 C146 104, 150 140, 140 168 C115 178, 60 174, 46 135 Z" fill="#c2410c"/>
+          <rect x="74" y="98" width="32" height="26" rx="6" fill="#15803d"/>
+          <ellipse cx="126" cy="66" rx="26" ry="23" fill="#c2410c"/>
+          <polygon points="100,50 98,18 118,44" fill="#7c2d12"/>
+          <polygon points="135,44 154,18 154,50" fill="#7c2d12"/>
+          <polygon points="110,66 138,66 132,88" fill="#fff"/>
+          <circle cx="132" cy="86" r="2.8" fill="#0f172a"/>
         </svg>`,
 
         // Fase 3: Zorro Alfa
         `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
-          <path d="M30 140 C-5 90, 5 35, 45 20 C65 45, 50 100, 55 145 Z" fill="#9a3412"/>
-          <path d="M45 130 C38 88, 75 75, 128 85 C158 95, 162 140, 148 172 C118 182, 58 178, 45 130 Z" fill="#9a3412"/>
-          <ellipse cx="132" cy="62" rx="26" ry="23" fill="#9a3412"/>
-          <polygon points="108,46 106,14 126,40" fill="#431407"/>
-          <polygon points="140,40 158,14 160,46" fill="#431407"/>
-          <ellipse cx="124" cy="56" rx="5" ry="4" fill="#facc15"/>
-          <ellipse cx="142" cy="56" rx="5" ry="4" fill="#facc15"/>
+          <path d="M28 140 C-8 88, 2 32, 44 18 C64 44, 48 98, 54 145 Z" fill="#9a3412"/>
+          <path d="M44 130 C36 86, 74 72, 128 82 C158 92, 162 138, 148 172 C118 182, 56 178, 44 130 Z" fill="#9a3412"/>
+          <ellipse cx="132" cy="60" rx="27" ry="24" fill="#9a3412"/>
+          <polygon points="106,44 104,12 124,38" fill="#431407"/>
+          <polygon points="140,38 160,12 162,44" fill="#431407"/>
+          <ellipse cx="124" cy="54" rx="5.2" ry="4.2" fill="#facc15"/>
+          <ellipse cx="142" cy="54" rx="5.2" ry="4.2" fill="#facc15"/>
         </svg>`,
 
         // Fase 4: Kitsune Místico de Nueve Colas
         `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
-          <circle cx="100" cy="100" r="85" fill="none" stroke="#ec4899" stroke-width="2" stroke-dasharray="4,4" opacity="0.8"/>
-          <!-- Múltiples colas celestiales -->
-          <path d="M50 130 Q10 70 30 30" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <path d="M45 135 Q5 90 15 50" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <path d="M40 140 Q0 115 10 75" stroke="#f43f5e" stroke-width="8" stroke-linecap="round" fill="none"/>
-          <path d="M45 130 C38 88, 75 75, 128 85 C158 95, 162 140, 148 172 C118 182, 58 178, 45 130 Z" fill="#fff"/>
-          <ellipse cx="134" cy="60" rx="25" ry="23" fill="#fff"/>
-          <polygon points="110,44 108,12 128,38" fill="#f43f5e"/>
-          <polygon points="142,38 160,12 162,44" fill="#f43f5e"/>
-          <!-- Ojos cyan místicos -->
-          <ellipse cx="126" cy="55" rx="5" ry="4" fill="#06b6d4"/>
-          <ellipse cx="144" cy="55" rx="5" ry="4" fill="#06b6d4"/>
+          <circle cx="100" cy="100" r="88" fill="none" stroke="#ec4899" stroke-width="2.5" stroke-dasharray="4,4" opacity="0.8"/>
+          <path d="M50 130 Q8 65 30 25" stroke="#f43f5e" stroke-width="9" stroke-linecap="round" fill="none"/>
+          <path d="M44 135 Q2 85 14 45" stroke="#f43f5e" stroke-width="9" stroke-linecap="round" fill="none"/>
+          <path d="M38 140 Q-2 110 8 70" stroke="#f43f5e" stroke-width="9" stroke-linecap="round" fill="none"/>
+          <path d="M44 130 C36 86, 74 72, 128 82 C158 92, 162 138, 148 172 C118 182, 56 178, 44 130 Z" fill="#fff"/>
+          <ellipse cx="134" cy="58" rx="26" ry="24" fill="#fff"/>
+          <polygon points="108,42 106,10 126,36" fill="#f43f5e"/>
+          <polygon points="142,36 162,10 164,42" fill="#f43f5e"/>
+          <ellipse cx="126" cy="54" rx="5.2" ry="4.2" fill="#06b6d4"/>
+          <ellipse cx="144" cy="54" rx="5.2" ry="4.2" fill="#06b6d4"/>
         </svg>`
       ],
 
       panda: [
-        // Fase 1: Pandita Realista Bebé
-        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
-          <path d="M50 145 C45 110, 75 95, 115 105 C135 112, 145 135, 140 165 C120 175, 70 170, 50 145 Z" fill="#f8fafc"/>
-          <!-- Patas negras traseras -->
-          <ellipse cx="60" cy="165" rx="16" ry="12" fill="#0f172a"/>
-          <!-- Hombros y patas delanteras negras -->
-          <path d="M90 115 C100 105, 125 105, 135 118 L130 175 Q122 178 115 175 L110 135 L100 175 Q92 178 86 175 Z" fill="#0f172a"/>
-          <!-- Cabeza redonda -->
-          <ellipse cx="118" cy="75" rx="28" ry="26" fill="#f8fafc"/>
-          <!-- Orejas negras redondeadas -->
-          <circle cx="95" cy="54" r="10" fill="#0f172a"/>
-          <circle cx="140" cy="54" r="10" fill="#0f172a"/>
-          <!-- Manchas en los ojos características del panda -->
-          <ellipse cx="108" cy="74" rx="7" ry="9" fill="#0f172a" transform="rotate(-15 108 74)"/>
-          <ellipse cx="128" cy="74" rx="7" ry="9" fill="#0f172a" transform="rotate(15 128 74)"/>
-          <circle cx="108" cy="74" r="2.5" fill="#fff"/>
-          <circle cx="128" cy="74" r="2.5" fill="#fff"/>
-          <!-- Nariz panda -->
-          <ellipse cx="118" cy="85" rx="5" ry="3.5" fill="#0f172a"/>
+        // Fase 1: Pandita Realista
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <path d="M48 145 C42 108, 74 92, 114 102 C134 110, 144 134, 138 165 C118 175, 68 170, 48 145 Z" fill="#f8fafc"/>
+          <ellipse cx="58" cy="165" rx="17" ry="13" fill="#0f172a"/>
+          <path d="M88 114 C98 104, 124 104, 134 116 L128 175 Q120 178 114 175 L108 135 L98 175 Q90 178 84 175 Z" fill="#0f172a"/>
+          <ellipse cx="118" cy="74" rx="29" ry="27" fill="#f8fafc"/>
+          <circle cx="94" cy="52" r="11" fill="#0f172a"/>
+          <circle cx="142" cy="52" r="11" fill="#0f172a"/>
+          <ellipse cx="107" cy="72" rx="7.5" ry="9.5" fill="#0f172a" transform="rotate(-15 107 72)"/>
+          <ellipse cx="129" cy="72" rx="7.5" ry="9.5" fill="#0f172a" transform="rotate(15 129 72)"/>
+          <circle cx="107" cy="72" r="2.8" fill="#fff"/>
+          <circle cx="129" cy="72" r="2.8" fill="#fff"/>
+          <ellipse cx="118" cy="84" rx="5.5" ry="4" fill="#0f172a"/>
         </svg>`,
 
         // Fase 2: Panda Bambú Ninja
-        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-xl">
-          <path d="M48 140 C42 100, 75 90, 125 100 C145 110, 150 140, 142 168 C120 178, 65 175, 48 140 Z" fill="#f8fafc"/>
-          <!-- Cinturón cinta verde -->
-          <rect x="75" y="115" width="45" height="10" rx="3" fill="#15803d"/>
-          <!-- Vara de bambú -->
-          <line x1="145" y1="35" x2="135" y2="180" stroke="#22c55e" stroke-width="5" stroke-linecap="round"/>
-          <circle cx="92" cy="50" r="10" fill="#0f172a"/>
-          <circle cx="138" cy="50" r="10" fill="#0f172a"/>
-          <ellipse cx="115" cy="72" rx="27" ry="25" fill="#f8fafc"/>
-          <ellipse cx="105" cy="70" rx="7" ry="9" fill="#0f172a" transform="rotate(-15 105 70)"/>
-          <ellipse cx="125" cy="70" rx="7" ry="9" fill="#0f172a" transform="rotate(15 125 70)"/>
-          <circle cx="105" cy="70" r="2.5" fill="#fff"/>
-          <circle cx="125" cy="70" r="2.5" fill="#fff"/>
+        `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
+          <path d="M46 138 C40 98, 74 88, 124 98 C144 108, 148 138, 140 168 C118 178, 62 175, 46 138 Z" fill="#f8fafc"/>
+          <rect x="74" y="114" width="46" height="11" rx="3.5" fill="#15803d"/>
+          <line x1="146" y1="32" x2="134" y2="182" stroke="#22c55e" stroke-width="5.5" stroke-linecap="round"/>
+          <circle cx="90" cy="48" r="11" fill="#0f172a"/>
+          <circle cx="140" cy="48" r="11" fill="#0f172a"/>
+          <ellipse cx="115" cy="70" rx="28" ry="26" fill="#f8fafc"/>
+          <ellipse cx="104" cy="68" rx="7.5" ry="9.5" fill="#0f172a" transform="rotate(-15 104 68)"/>
+          <ellipse cx="126" cy="68" rx="7.5" ry="9.5" fill="#0f172a" transform="rotate(15 126 68)"/>
+          <circle cx="104" cy="68" r="2.8" fill="#fff"/>
+          <circle cx="126" cy="68" r="2.8" fill="#fff"/>
         </svg>`,
 
         // Fase 3: Maestro Kung-Fu Yin-Yang
         `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
-          <path d="M48 140 C42 100, 75 90, 125 100 C145 110, 150 140, 142 168 C120 178, 65 175, 48 140 Z" fill="#f8fafc"/>
-          <!-- Medallón Yin-Yang en el pecho -->
-          <circle cx="105" cy="120" r="12" fill="#0f172a"/>
-          <path d="M105 108 A6 6 0 0 1 105 120 A6 6 0 0 0 105 132" stroke="#fff" stroke-width="2.5" fill="none"/>
-          <circle cx="92" cy="48" r="10" fill="#0f172a"/>
-          <circle cx="138" cy="48" r="10" fill="#0f172a"/>
-          <ellipse cx="115" cy="70" rx="27" ry="25" fill="#f8fafc"/>
-          <ellipse cx="105" cy="68" rx="7" ry="9" fill="#0f172a"/>
-          <ellipse cx="125" cy="68" rx="7" ry="9" fill="#0f172a"/>
-          <circle cx="105" cy="68" r="2.5" fill="#38bdf8"/>
-          <circle cx="125" cy="68" r="2.5" fill="#38bdf8"/>
+          <path d="M46 138 C40 98, 74 88, 124 98 C144 108, 148 138, 140 168 C118 178, 62 175, 46 138 Z" fill="#f8fafc"/>
+          <circle cx="104" cy="118" r="13" fill="#0f172a"/>
+          <path d="M104 105 A6.5 6.5 0 0 1 104 118 A6.5 6.5 0 0 0 104 131" stroke="#fff" stroke-width="2.8" fill="none"/>
+          <circle cx="90" cy="46" r="11" fill="#0f172a"/>
+          <circle cx="140" cy="46" r="11" fill="#0f172a"/>
+          <ellipse cx="115" cy="68" rx="28" ry="26" fill="#f8fafc"/>
+          <circle cx="104" cy="66" r="2.8" fill="#38bdf8"/>
+          <circle cx="126" cy="66" r="2.8" fill="#38bdf8"/>
         </svg>`,
 
         // Fase 4: Panda Celestial con Alas
         `<svg viewBox="0 0 200 200" class="w-full h-full drop-shadow-2xl">
-          <circle cx="100" cy="100" r="85" fill="none" stroke="#a855f7" stroke-width="2" stroke-dasharray="5,4" opacity="0.8"/>
-          <!-- Alas místicas púrpuras -->
-          <path d="M35 90 Q10 40 45 20 Q65 60 70 90 Z" fill="#c084fc" opacity="0.75"/>
-          <path d="M145 90 Q180 40 145 20 Q125 60 120 90 Z" fill="#c084fc" opacity="0.75"/>
-          <path d="M48 140 C42 100, 75 90, 125 100 C145 110, 150 140, 142 168 C120 178, 65 175, 48 140 Z" fill="#f8fafc"/>
-          <circle cx="92" cy="46" r="10" fill="#0f172a"/>
-          <circle cx="138" cy="46" r="10" fill="#0f172a"/>
-          <ellipse cx="115" cy="68" rx="27" ry="25" fill="#f8fafc"/>
-          <polygon points="107,35 115,22 123,35" fill="#fbbf24"/>
-          <ellipse cx="105" cy="66" rx="7" ry="9" fill="#a855f7"/>
-          <ellipse cx="125" cy="66" rx="7" ry="9" fill="#a855f7"/>
+          <circle cx="100" cy="100" r="88" fill="none" stroke="#a855f7" stroke-width="2.5" stroke-dasharray="5,4" opacity="0.8"/>
+          <path d="M34 88 Q8 35 44 15 Q64 55 70 88 Z" fill="#c084fc" opacity="0.8"/>
+          <path d="M146 88 Q182 35 146 15 Q126 55 120 88 Z" fill="#c084fc" opacity="0.8"/>
+          <path d="M46 138 C40 98, 74 88, 124 98 C144 108, 148 138, 140 168 C118 178, 62 175, 46 138 Z" fill="#f8fafc"/>
+          <circle cx="90" cy="44" r="11" fill="#0f172a"/>
+          <circle cx="140" cy="44" r="11" fill="#0f172a"/>
+          <ellipse cx="115" cy="66" rx="28" ry="26" fill="#f8fafc"/>
+          <polygon points="106,32 115,18 124,32" fill="#fbbf24"/>
+          <ellipse cx="104" cy="64" rx="7.5" ry="9.5" fill="#a855f7"/>
+          <ellipse cx="126" cy="64" rx="7.5" ry="9.5" fill="#a855f7"/>
         </svg>`
       ]
     };
@@ -1248,23 +1329,15 @@
       bienestar: { label: 'Bienestar', bg: 'bg-rose-500/10 dark:bg-rose-500/20', text: 'text-rose-700 dark:text-rose-300 border border-rose-500/30' }
     };
 
-    const MOTIVATIONAL_QUOTES = [
-      "El éxito es la suma de pequeños esfuerzos repetidos día tras día.",
-      "Cada hábito completado alimenta a tu mascota y expande tu futuro.",
-      "La constancia vence a la motivación en cualquier partida.",
-      "Enfócate en el proceso de hoy y el progreso llegará por sí solo."
-    ];
-
     const POMODORO_PRESETS = {
       beginner: { focus: 25, rest: 5 },
       intermediate: { focus: 40, rest: 8 },
       pro: { focus: 50, rest: 10 }
     };
 
-    const STORAGE_KEY = 'HF360_STATE_V6';
-
     const defaultState = {
       userName: '',
+      userPassword: '123',
       streak: 3,
       pet: {
         key: 'dog',
@@ -1300,7 +1373,7 @@
         linkedHabitId: null
       },
       journal: [
-        { id: 'j1', date: '23 Sep 2026', mood: '🔥', text: 'Gran avance en los proyectos clave; mantuve el enfoque continuo y alimenté a mi compañero.' }
+        { id: 'j1', date: '24 Sep 2026', mood: '🔥', text: 'Gran avance en los proyectos clave; mantuve el enfoque continuo y alimenté a mi compañero.' }
       ],
       monthlyGoals: [
         { id: 'g1', text: 'Completar 100 horas de foco profundo', done: false },
@@ -1355,23 +1428,6 @@
           osc.start(now);
           osc.stop(now + 0.45);
         } catch (e) {}
-      },
-      playTone(freq = 440, duration = 0.2) {
-        try {
-          this.init();
-          if (!this.ctx) return;
-          const now = this.ctx.currentTime;
-          const osc = this.ctx.createOscillator();
-          const gain = this.ctx.createGain();
-          osc.type = 'sine';
-          osc.frequency.setValueAtTime(freq, now);
-          gain.gain.setValueAtTime(0.08, now);
-          gain.gain.exponentialRampToValueAtTime(0.001, now + duration);
-          osc.connect(gain);
-          gain.connect(this.ctx.destination);
-          osc.start(now);
-          osc.stop(now + duration);
-        } catch (e) {}
       }
     };
 
@@ -1392,28 +1448,6 @@
         toast.classList.add('opacity-0', 'translate-y-2');
         setTimeout(() => toast.remove(), 350);
       }, 3200);
-    }
-
-    function showConfirmDialog({ title, message, onConfirm }) {
-      const overlay = document.getElementById('customDialogOverlay');
-      document.getElementById('dialogTitle').innerText = title;
-      document.getElementById('dialogMessage').innerText = message;
-      overlay.classList.remove('hidden');
-
-      const btnConfirm = document.getElementById('dialogBtnConfirm');
-      const btnCancel = document.getElementById('dialogBtnCancel');
-
-      const cleanup = () => {
-        overlay.classList.add('hidden');
-        btnConfirm.onclick = null;
-        btnCancel.onclick = null;
-      };
-
-      btnConfirm.onclick = () => {
-        cleanup();
-        onConfirm();
-      };
-      btnCancel.onclick = cleanup;
     }
 
     function initThreeBackground() {
@@ -1486,7 +1520,7 @@
         if (typeof confetti === 'function') {
           confetti({ particleCount: 130, spread: 85, origin: { y: 0.55 } });
         }
-        showToast(`🎉 ¡EVOLUCIÓN! ${AppState.pet.name} alcanzó una nueva fase de cuerpo completo!`, 'success');
+        showToast(`🎉 ¡EVOLUCIÓN! ${AppState.pet.name} alcanzó una nueva fase ultra realista!`, 'success');
       } else {
         showToast(`+${amount} XP ganados: ${reason}`, 'success');
       }
@@ -1506,19 +1540,16 @@
       const targets = [100, 300, 700, 1200];
       const maxNext = targets[stageIdx] || 1200;
 
-      // Update compact header badge
       document.getElementById('headerPetIcon').innerText = animalData.icon;
       document.getElementById('headerPetName').innerText = pet.name;
       document.getElementById('headerPetStageBadge').innerText = `Fase ${stageIdx + 1}`;
 
-      // Update full pet tab values
       document.getElementById('petNameText').innerText = pet.name;
       document.getElementById('petXpTotal').innerText = `${pet.xp} XP`;
       document.getElementById('petStageTitle').innerText = stage.title;
       document.getElementById('petPhaseBadge').innerText = stage.phase;
       document.getElementById('petAccessory').innerText = stage.accessory;
       
-      // Inject realistic full-body vector
       const svgs = REALISTIC_PET_SVGS[pet.key] || REALISTIC_PET_SVGS.dog;
       document.getElementById('petFullBodyContainer').innerHTML = svgs[stageIdx];
 
@@ -1624,7 +1655,6 @@
           <div class="glassmorphism p-4 rounded-3xl border ${h.completed ? 'border-emerald-500/60 bg-emerald-50/50 dark:bg-emerald-950/20' : 'border-slate-200 dark:border-slate-800'} shadow-sm flex flex-col justify-between transition-all">
             <div class="flex justify-between items-start mb-3">
               <div class="flex items-start gap-2.5">
-                <!-- Reorder Arrows -->
                 <div class="flex flex-col gap-0.5 mt-0.5">
                   <button onclick="moveHabitOrder('${h.id}', -1)" ${isFirst ? 'disabled class="opacity-20 cursor-not-allowed"' : 'class="text-slate-400 hover:text-emerald-500 p-0.5"'} title="Subir">
                     <i data-lucide="arrow-up" class="w-3.5 h-3.5"></i>
@@ -1729,16 +1759,19 @@
     }
 
     function deleteHabit(id) {
-      showConfirmDialog({
-        title: 'Eliminar Hábito',
-        message: '¿Estás seguro de quitar este hábito de tu rutina diaria?',
-        onConfirm: () => {
-          AppState.habits = AppState.habits.filter(h => h.id !== id);
-          persistState();
-          renderHabits();
-          showToast('Hábito eliminado');
-        }
-      });
+      const overlay = document.getElementById('customDialogOverlay');
+      document.getElementById('dialogTitle').innerText = 'Eliminar Hábito';
+      document.getElementById('dialogMessage').innerText = '¿Deseas quitar este hábito de tu rutina diaria?';
+      overlay.classList.remove('hidden');
+
+      document.getElementById('dialogBtnConfirm').onclick = () => {
+        overlay.classList.add('hidden');
+        AppState.habits = AppState.habits.filter(h => h.id !== id);
+        persistState();
+        renderHabits();
+        showToast('Hábito eliminado');
+      };
+      document.getElementById('dialogBtnCancel').onclick = () => overlay.classList.add('hidden');
     }
 
     function updateHabitsSummary() {
@@ -1872,16 +1905,19 @@
     }
 
     function deleteTask(id) {
-      showConfirmDialog({
-        title: 'Eliminar Tarea',
-        message: '¿Deseas descartar esta tarea?',
-        onConfirm: () => {
-          AppState.tasks = AppState.tasks.filter(t => t.id !== id);
-          persistState();
-          renderTasks();
-          showToast('Tarea eliminada');
-        }
-      });
+      const overlay = document.getElementById('customDialogOverlay');
+      document.getElementById('dialogTitle').innerText = 'Eliminar Tarea';
+      document.getElementById('dialogMessage').innerText = '¿Deseas descartar esta tarea?';
+      overlay.classList.remove('hidden');
+
+      document.getElementById('dialogBtnConfirm').onclick = () => {
+        overlay.classList.add('hidden');
+        AppState.tasks = AppState.tasks.filter(t => t.id !== id);
+        persistState();
+        renderTasks();
+        showToast('Tarea eliminada');
+      };
+      document.getElementById('dialogBtnCancel').onclick = () => overlay.classList.add('hidden');
     }
 
     function openAddFolderModal() {
@@ -1987,14 +2023,17 @@
     }
 
     function cancelPomodoroSession() {
-      showConfirmDialog({
-        title: 'Cancelar Sesión',
-        message: '¿Deseas cancelar la sesión actual de Pomodoro sin marcar el hábito?',
-        onConfirm: () => {
-          resetPomodoroTimer();
-          showToast('Sesión cancelada');
-        }
-      });
+      const overlay = document.getElementById('customDialogOverlay');
+      document.getElementById('dialogTitle').innerText = 'Cancelar Sesión';
+      document.getElementById('dialogMessage').innerText = '¿Deseas cancelar la sesión actual de Pomodoro sin marcar el hábito?';
+      overlay.classList.remove('hidden');
+
+      document.getElementById('dialogBtnConfirm').onclick = () => {
+        overlay.classList.add('hidden');
+        resetPomodoroTimer();
+        showToast('Sesión cancelada');
+      };
+      document.getElementById('dialogBtnCancel').onclick = () => overlay.classList.add('hidden');
     }
 
     function finishPomodoroEarly() {
@@ -2226,8 +2265,98 @@
       }
     }
 
+    function shareBackupWhatsApp() {
+      const totalHabits = AppState.habits.length;
+      const doneHabits = AppState.habits.filter(h => h.completed).length;
+      const pet = AppState.pet;
+
+      const summary = `*RESPALDO HABITFLOW 360*\n` +
+        `📅 Fecha: ${new Date().toLocaleDateString('es-ES')}\n` +
+        `👤 Usuario: ${AppState.userName || 'Usuario'}\n` +
+        `🔥 Racha: ${AppState.streak} Días\n` +
+        `🐾 Mascota: ${pet.name} (${pet.xp} XP - Fase ${getPetStageIndex(pet.xp) + 1})\n` +
+        `📋 Hábitos hoy: ${doneHabits}/${totalHabits}\n\n` +
+        `_Copia generada de forma 100% segura._`;
+
+      const jsonBlob = new Blob([JSON.stringify(AppState, null, 2)], { type: 'application/json' });
+      const filename = `Respaldo_HabitFlow360_${Date.now()}.json`;
+
+      // Intentar Web Share API con archivo
+      if (navigator.canShare && navigator.canShare({ files: [new File([jsonBlob], filename, { type: 'application/json' })] })) {
+        try {
+          const file = new File([jsonBlob], filename, { type: 'application/json' });
+          navigator.share({
+            title: 'Respaldo HabitFlow 360',
+            text: summary,
+            files: [file]
+          }).then(() => {
+            showToast('Respaldo compartido con éxito');
+          }).catch(() => {
+            openWhatsAppFallback(summary);
+          });
+          return;
+        } catch (e) {
+          openWhatsAppFallback(summary);
+        }
+      } else {
+        openWhatsAppFallback(summary);
+      }
+    }
+
+    function openWhatsAppFallback(summary) {
+      exportDataJSON();
+      const encoded = encodeURIComponent(summary);
+      const url = `https://wa.me/?text=${encoded}`;
+      window.open(url, '_blank');
+      showToast('Descargando archivo JSON y abriendo WhatsApp...');
+    }
+
+    function triggerImportBackup() {
+      document.getElementById('backupFileInput').click();
+    }
+
+    function handleBackupFile(event) {
+      const file = event.target.files[0];
+      if (!file) return;
+
+      const reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          const imported = JSON.parse(e.target.result);
+          if (imported.pet && imported.habits) {
+            AppState = imported;
+            persistState();
+            renderPet();
+            renderHabits();
+            renderTasks();
+            renderJournal();
+            updatePomodoroDisplay();
+            updateGreeting();
+            if (typeof confetti === 'function') confetti({ particleCount: 90, spread: 70 });
+            showToast('¡Copia de seguridad restaurada con éxito!');
+          } else {
+            showToast('El archivo no contiene un formato de respaldo válido', 'warning');
+          }
+        } catch (err) {
+          showToast('Error al leer el archivo de respaldo', 'warning');
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function exportDataJSON() {
+      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppState, null, 2));
+      const a = document.createElement('a');
+      a.setAttribute("href", dataStr);
+      a.setAttribute("download", `HabitFlow360_Respaldo_${Date.now()}.json`);
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    }
+
     function openSettingsModal() {
       document.getElementById('usernameInput').value = AppState.userName;
+      document.getElementById('userCustomPasswordInput').value = AppState.userPassword || '';
       document.getElementById('settingsModal').classList.remove('hidden');
     }
 
@@ -2236,8 +2365,18 @@
       AppState.userName = name;
       persistState();
       updateGreeting();
-      closeModal('settingsModal');
       showToast('Nombre de usuario guardado');
+    }
+
+    function saveUserPassword() {
+      const pwd = document.getElementById('userCustomPasswordInput').value.trim();
+      if (!pwd) {
+        showToast('Escribe una contraseña válida', 'warning');
+        return;
+      }
+      AppState.userPassword = pwd;
+      persistState();
+      showToast('Contraseña de borrado actualizada con éxito');
     }
 
     function updateGreeting() {
@@ -2245,6 +2384,145 @@
         ? `¡Hola, ${AppState.userName}! 👋 Tu rutina y productividad en un solo toque.`
         : `¡Hola! 👋 Tu rutina diaria y productividad al alcance de un toque.`;
       document.getElementById('greetingText').innerText = greeting;
+    }
+
+    function openModalSecurityReset() {
+      document.getElementById('inputResetPassword').value = '';
+      document.getElementById('modalSecurityReset').classList.remove('hidden');
+    }
+
+    function executeTotalResetWithPassword() {
+      const enteredPass = document.getElementById('inputResetPassword').value.trim();
+      const userPass = AppState.userPassword || '123';
+
+      // Valida si coincide con la clave personal del usuario O con la clave maestra de Jhordy
+      if (enteredPass !== userPass && enteredPass !== MASTER_RESCUE_KEY) {
+        showToast('Contraseña incorrecta. Contacta a Jhordy al 0963923399 para la clave de rescate.', 'warning');
+        return;
+      }
+
+      AppState.streak = 0;
+      AppState.pet.xp = 0;
+      AppState.pet.hunger = 50;
+      AppState.pet.happiness = 50;
+      AppState.habits = [];
+      AppState.tasks = [];
+      AppState.journal = [];
+      AppState.weeklyXP = [0, 0, 0, 0, 0, 0, 0];
+
+      persistState();
+      closeModal('modalSecurityReset');
+      closeModal('settingsModal');
+
+      renderPet();
+      renderHabits();
+      renderTasks();
+      renderJournal();
+      renderAnalytics();
+      updateHabitsSummary();
+
+      showToast('Borrado Total ejecutado. Aplicación restablecida en cero.', 'warning');
+    }
+
+    let currentTourStep = 0;
+    const INTERACTIVE_TOUR_STEPS = [
+      {
+        targetId: 'backupSecurityNotice',
+        icon: '💾',
+        title: '1. Respaldo Seguro en WhatsApp',
+        desc: 'Tus datos se guardan de forma privada en este teléfono. Puedes compartirlos o descargarlos en 1 toque con este botón.'
+      },
+      {
+        targetId: 'tourHabitProgress',
+        icon: '📋',
+        title: '2. Hábitos y Reordenamiento',
+        desc: 'Completa tus hábitos diarios (simples, contadores o con tiempo) y reordénalos con las flechas ⬆️ y ⬇️.'
+      },
+      {
+        targetId: 'tourPetPill',
+        icon: '🐾',
+        title: '3. Mascota de Cuerpo Completo',
+        desc: 'Cada hábito suma +20 XP para evolucionar a tu compañero a través de 4 fases anatómicas realistas con hábitat y accesorios.'
+      },
+      {
+        targetId: 'tabPomodoroBtn',
+        icon: '⏱️',
+        title: '4. Pomodoro con Descanso Largo',
+        desc: 'Trabaja en bloques con descanso automático. Al completar 4 ciclos continuos, obtienes un descanso triple prolongado.'
+      },
+      {
+        targetId: 'tourHeader',
+        icon: '⚙️',
+        title: '5. Seguridad y Contraseñas',
+        desc: 'Configura tu contraseña de borrado. Si alguna vez la olvidas, puedes contactar a Jhordy (0963923399) o usar su clave de rescate.'
+      }
+    ];
+
+    function startStepByStepTour() {
+      currentTourStep = 0;
+      document.getElementById('interactiveTourOverlay').classList.remove('hidden');
+      renderTourStep();
+    }
+
+    function renderTourStep() {
+      // Limpiar resaltados previos
+      document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+
+      const step = INTERACTIVE_TOUR_STEPS[currentTourStep];
+      document.getElementById('tourStepBadge').innerText = `Paso ${currentTourStep + 1} de ${INTERACTIVE_TOUR_STEPS.length}`;
+      document.getElementById('tourStepIcon').innerText = step.icon;
+      document.getElementById('tourStepTitle').innerText = step.title;
+      document.getElementById('tourStepDescription').innerText = step.desc;
+
+      document.getElementById('tourPrevBtn').disabled = (currentTourStep === 0);
+      document.getElementById('tourNextBtn').innerText = (currentTourStep === INTERACTIVE_TOUR_STEPS.length - 1) ? 'Finalizar 🎉' : 'Siguiente';
+
+      const targetEl = document.getElementById(step.targetId);
+      const card = document.getElementById('tourFloatingCard');
+
+      if (targetEl) {
+        targetEl.classList.add('tour-highlight');
+        targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
+
+        const rect = targetEl.getBoundingClientRect();
+        const cardHeight = card.offsetHeight || 180;
+        
+        let top = rect.bottom + window.scrollY + 12;
+        if (top + cardHeight > document.body.scrollHeight) {
+          top = Math.max(10, rect.top + window.scrollY - cardHeight - 12);
+        }
+
+        let left = Math.max(12, Math.min(window.innerWidth - 380, rect.left + (rect.width / 2) - 180));
+        card.style.top = `${top}px`;
+        card.style.left = `${left}px`;
+      } else {
+        card.style.top = '25%';
+        card.style.left = '50%';
+        card.style.transform = 'translate(-50%, -50%)';
+      }
+    }
+
+    function nextTourStep() {
+      if (currentTourStep < INTERACTIVE_TOUR_STEPS.length - 1) {
+        currentTourStep++;
+        renderTourStep();
+      } else {
+        endStepByStepTour();
+        if (typeof confetti === 'function') confetti({ particleCount: 70, spread: 60 });
+        showToast('¡Guía completada! Ya conoces todo el sistema.');
+      }
+    }
+
+    function prevTourStep() {
+      if (currentTourStep > 0) {
+        currentTourStep--;
+        renderTourStep();
+      }
+    }
+
+    function endStepByStepTour() {
+      document.querySelectorAll('.tour-highlight').forEach(el => el.classList.remove('tour-highlight'));
+      document.getElementById('interactiveTourOverlay').classList.add('hidden');
     }
 
     function toggleTheme() {
@@ -2271,107 +2549,11 @@
       showToast(`Modo ${willBeDark ? 'Oscuro' : 'Claro'} activado`);
     }
 
-    function exportDataJSON() {
-      const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(AppState, null, 2));
-      const a = document.createElement('a');
-      a.setAttribute("href", dataStr);
-      a.setAttribute("download", `HabitFlow360_v6_${Date.now()}.json`);
-      document.body.appendChild(a);
-      a.click();
-      a.remove();
-      showToast('Respaldo exportado exitosamente');
-    }
-
-    function promptTotalReset() {
-      showConfirmDialog({
-        title: '🚨 ¿Ejecutar Borrado Total?',
-        message: 'Esta acción pondrá tu racha en 0 días, vaciará hábitos y tareas, y reseteará tu mascota a Bebé con 0 XP sin recargar datos de demostración.',
-        onConfirm: () => {
-          AppState.streak = 0;
-          AppState.pet.xp = 0;
-          AppState.pet.hunger = 50;
-          AppState.pet.happiness = 50;
-          AppState.habits = [];
-          AppState.tasks = [];
-          AppState.journal = [];
-          AppState.weeklyXP = [0, 0, 0, 0, 0, 0, 0];
-
-          persistState();
-          closeModal('settingsModal');
-          renderPet();
-          renderHabits();
-          renderTasks();
-          renderJournal();
-          renderAnalytics();
-          updateHabitsSummary();
-
-          SoundFX.playTone(300, 0.4);
-          showToast('Borrado Total ejecutado. Aplicación en cero.', 'warning');
-        }
-      });
-    }
-
-    let tourStepIndex = 0;
-    const TOUR_STEPS = [
-      {
-        icon: '🚀',
-        title: '¡Bienvenido a HabitFlow 360 v6!',
-        body: 'Registra tus hábitos diarios, organiza tus tareas y haz evolucionar a tu mascota virtual con diseño de cuerpo completo.'
-      },
-      {
-        icon: '🐾',
-        title: 'Pantalla Dedicada para Mascota',
-        body: 'La mascota ya no estorba en la parte superior en celular: tiene su propia pestaña para interactuar y alimentarla.'
-      },
-      {
-        icon: '📁',
-        title: 'Tareas por Carpetas Madre',
-        body: 'Separa tus pendientes de Universidad, Trabajo o Casa rápidamente sin perder el foco.'
-      },
-      {
-        icon: '⏱️',
-        title: 'Pomodoro Conectado & Analítica',
-        body: 'Cumple ciclos con descanso triple tras 4 sesiones y analiza tus logros semanales en gráficos interactivos.'
-      }
-    ];
-
-    function openTourModal() {
-      tourStepIndex = 0;
-      updateTourStepUI();
-      document.getElementById('tourModal').classList.remove('hidden');
-    }
-
-    function updateTourStepUI() {
-      const step = TOUR_STEPS[tourStepIndex];
-      document.getElementById('tourIcon').innerText = step.icon;
-      document.getElementById('tourTitle').innerText = step.title;
-      document.getElementById('tourBody').innerText = step.body;
-      document.getElementById('tourStepIndicator').innerText = `Paso ${tourStepIndex + 1} / 4`;
-      document.getElementById('tourNextBtn').innerText = tourStepIndex === 3 ? '¡Comenzar! 🎉' : 'Siguiente';
-    }
-
-    function nextTourStep() {
-      if (tourStepIndex < 3) {
-        tourStepIndex++;
-        updateTourStepUI();
-      } else {
-        closeModal('tourModal');
-        if (typeof confetti === 'function') confetti({ particleCount: 80, spread: 60 });
-        showToast('¡Todo listo! Que tengas un día muy productivo.');
-      }
-    }
-
     function switchTab(tabId) {
-      // Hide all panes
       document.querySelectorAll('.tab-pane').forEach(p => p.classList.add('hidden'));
-      
-      // Show requested pane
       const targetPane = document.getElementById(tabId);
-      if (targetPane) {
-        targetPane.classList.remove('hidden');
-      }
+      if (targetPane) targetPane.classList.remove('hidden');
 
-      // Update Desktop Tab Buttons
       const desktopTabs = {
         tabToday: 'tabTodayBtn',
         tabTasks: 'tabTasksBtn',
@@ -2390,7 +2572,6 @@
         activeBtn.className = 'tab-btn px-4 py-2 rounded-2xl text-xs md:text-sm font-bold bg-emerald-600 text-white shadow-md transition flex items-center gap-1.5';
       }
 
-      // Update Mobile Bottom Tab Buttons
       const mobTabs = {
         tabToday: 'mobTabToday',
         tabTasks: 'mobTabTasks',
@@ -2422,10 +2603,6 @@
     }
 
     window.onload = function() {
-      // Set random motivational quote
-      document.getElementById('quoteText').innerText = `"${MOTIVATIONAL_QUOTES[Math.floor(Math.random() * MOTIVATIONAL_QUOTES.length)]}"`;
-      
-      // Theme initial configuration
       if (AppState.theme === 'light') {
         document.documentElement.classList.remove('dark');
         document.documentElement.classList.add('light');
@@ -2444,6 +2621,14 @@
       updatePomodoroDisplay();
       updateGreeting();
       lucide.createIcons();
+
+      // Iniciar el tour automáticamente la primera vez que se abre la aplicación
+      if (!localStorage.getItem('HF360_TOUR_SEEN')) {
+        setTimeout(() => {
+          startStepByStepTour();
+          localStorage.setItem('HF360_TOUR_SEEN', 'true');
+        }, 600);
+      }
     };
   </script>
 </body>
