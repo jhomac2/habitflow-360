@@ -147,11 +147,11 @@
           <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
           <span>📲 Respaldar en WhatsApp</span>
         </button>
-        <button onclick="triggerImportBackup()" class="px-3 py-2 rounded-2xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold flex items-center justify-center gap-1 border border-slate-300 dark:border-slate-700 text-xs transition" title="Cargar copia de seguridad previa">
+        <button onclick="openRestoreBackupModal()" class="px-3 py-2 rounded-2xl bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold flex items-center justify-center gap-1 border border-slate-300 dark:border-slate-700 text-xs transition" title="Cargar copia de seguridad previa">
           <i data-lucide="upload" class="w-3.5 h-3.5"></i>
           <span>Cargar</span>
         </button>
-        <input type="file" id="backupFileInput" accept=".json" class="hidden" onchange="handleBackupFile(event)">
+        <input type="file" id="backupFileInput" accept=".json,application/json,text/plain,*/*" class="hidden" onchange="handleBackupFile(event)">
       </div>
     </div>
 
@@ -726,9 +726,13 @@
               <i data-lucide="share-2" class="w-3.5 h-3.5"></i>
               <span>Compartir en WhatsApp</span>
             </button>
-            <button onclick="exportDataJSON()" class="flex-1 px-3.5 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-emerald-700 dark:text-emerald-300 font-bold rounded-2xl border border-emerald-500/30 text-xs flex items-center justify-center gap-1 transition">
-              <i data-lucide="download" class="w-3.5 h-3.5"></i>
-              <span>Descargar JSON</span>
+            <button onclick="copyBackupCodeToClipboard()" class="flex-1 px-3.5 py-2.5 bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-800 dark:text-slate-200 font-bold rounded-2xl border border-slate-300 dark:border-slate-700 text-xs flex items-center justify-center gap-1 transition">
+              <i data-lucide="copy" class="w-3.5 h-3.5"></i>
+              <span>Copiar Código</span>
+            </button>
+            <button onclick="openRestoreBackupModal()" class="flex-1 px-3.5 py-2.5 bg-emerald-600 hover:bg-emerald-500 text-white font-bold rounded-2xl text-xs flex items-center justify-center gap-1 transition">
+              <i data-lucide="upload" class="w-3.5 h-3.5"></i>
+              <span>Restaurar Datos</span>
             </button>
           </div>
         </div>
@@ -912,6 +916,47 @@
       <div class="flex justify-end gap-2 pt-1">
         <button onclick="closeModal('addGoalModal')" class="px-3 py-1.5 font-bold text-slate-400">Cancelar</button>
         <button onclick="confirmCreateGoal()" class="px-4 py-2 bg-emerald-600 text-white font-bold rounded-2xl">Guardar</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODAL INTELIGENTE: RESTAURAR COPIA DE SEGURIDAD (ARCHIVO O PEGAR TEXTO) -->
+  <div id="restoreBackupModal" class="fixed inset-0 bg-black/80 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+    <div class="glassmorphism w-full max-w-md rounded-3xl p-6 shadow-2xl border border-emerald-500/40 space-y-4">
+      <div class="flex items-center justify-between border-b border-slate-200 dark:border-slate-800 pb-3">
+        <div class="flex items-center gap-2">
+          <span class="p-2 rounded-xl bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 text-base">📥</span>
+          <div>
+            <h3 class="font-black text-sm text-slate-900 dark:text-white">Restaurar Copia de Seguridad</h3>
+            <p class="text-[10px] text-slate-500 dark:text-slate-400">Elige subir tu archivo descargado o pegar el código directamente.</p>
+          </div>
+        </div>
+        <button onclick="closeModal('restoreBackupModal')" class="text-slate-400 hover:text-white">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Opción A: Archivo -->
+      <div class="p-3.5 bg-slate-100 dark:bg-slate-900/80 rounded-2xl border border-slate-200 dark:border-slate-800 space-y-2">
+        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Opción 1: Subir archivo .json desde tu celular</span>
+        <button onclick="triggerImportBackup()" class="w-full py-2.5 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-500 text-white font-black text-xs flex items-center justify-center gap-2 shadow-sm transition active:scale-95">
+          <i data-lucide="folder-open" class="w-4 h-4"></i>
+          <span>Seleccionar archivo descargado</span>
+        </button>
+      </div>
+
+      <!-- Opción B: Pegar código JSON directo -->
+      <div class="space-y-2">
+        <span class="text-xs font-bold text-slate-800 dark:text-slate-200 block">Opción 2: Pegar código de respaldo copiado</span>
+        <textarea id="rawBackupTextInput" rows="4" placeholder="Pega aquí el código copiado de tu WhatsApp o respaldo..." class="w-full p-3 rounded-2xl border border-slate-300 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 text-xs font-mono text-slate-800 dark:text-slate-200 outline-none resize-none"></textarea>
+        <button onclick="restoreFromRawText()" class="w-full py-2.5 px-4 rounded-xl bg-amber-500 hover:bg-amber-400 text-slate-950 font-black text-xs flex items-center justify-center gap-2 shadow-sm transition active:scale-95">
+          <i data-lucide="check" class="w-4 h-4"></i>
+          <span>Restaurar desde texto pegado</span>
+        </button>
+      </div>
+
+      <div class="flex justify-end pt-1">
+        <button onclick="closeModal('restoreBackupModal')" class="text-xs font-bold text-slate-400 hover:text-white">Cancelar</button>
       </div>
     </div>
   </div>
@@ -2270,18 +2315,21 @@
       const doneHabits = AppState.habits.filter(h => h.completed).length;
       const pet = AppState.pet;
 
+      // Descargamos siempre el archivo JSON real al dispositivo
+      exportDataJSON();
+
       const summary = `*RESPALDO HABITFLOW 360*\n` +
         `📅 Fecha: ${new Date().toLocaleDateString('es-ES')}\n` +
         `👤 Usuario: ${AppState.userName || 'Usuario'}\n` +
         `🔥 Racha: ${AppState.streak} Días\n` +
         `🐾 Mascota: ${pet.name} (${pet.xp} XP - Fase ${getPetStageIndex(pet.xp) + 1})\n` +
         `📋 Hábitos hoy: ${doneHabits}/${totalHabits}\n\n` +
-        `_Copia generada de forma 100% segura._`;
+        `📥 *NOTA:* El archivo de restauración (.json) se descargó a tu carpeta 'Descargas'. Para restaurar tus datos en cualquier momento, abre la app y tócalo en 'Cargar'.`;
 
       const jsonBlob = new Blob([JSON.stringify(AppState, null, 2)], { type: 'application/json' });
       const filename = `Respaldo_HabitFlow360_${Date.now()}.json`;
 
-      // Intentar Web Share API con archivo
+      // Intentar Web Share API con archivo nativo si el celular lo soporta
       if (navigator.canShare && navigator.canShare({ files: [new File([jsonBlob], filename, { type: 'application/json' })] })) {
         try {
           const file = new File([jsonBlob], filename, { type: 'application/json' });
@@ -2303,16 +2351,37 @@
       }
     }
 
+    function copyBackupCodeToClipboard() {
+      try {
+        const text = JSON.stringify(AppState);
+        const temp = document.createElement('textarea');
+        temp.value = text;
+        document.body.appendChild(temp);
+        temp.select();
+        document.execCommand('copy');
+        document.body.removeChild(temp);
+        showToast('¡Código copiado! Pégalo en tu WhatsApp o guárdalo.');
+      } catch (e) {
+        showToast('No se pudo copiar automáticamente', 'warning');
+      }
+    }
+
     function openWhatsAppFallback(summary) {
-      exportDataJSON();
       const encoded = encodeURIComponent(summary);
       const url = `https://wa.me/?text=${encoded}`;
       window.open(url, '_blank');
-      showToast('Descargando archivo JSON y abriendo WhatsApp...');
+      showToast('Descargado archivo .json y abriendo WhatsApp...');
+    }
+
+    function openRestoreBackupModal() {
+      document.getElementById('rawBackupTextInput').value = '';
+      document.getElementById('restoreBackupModal').classList.remove('hidden');
     }
 
     function triggerImportBackup() {
-      document.getElementById('backupFileInput').click();
+      const fileInput = document.getElementById('backupFileInput');
+      fileInput.value = ''; // Resetea para permitir volver a elegir el mismo archivo
+      fileInput.click();
     }
 
     function handleBackupFile(event) {
@@ -2321,27 +2390,47 @@
 
       const reader = new FileReader();
       reader.onload = function(e) {
-        try {
-          const imported = JSON.parse(e.target.result);
-          if (imported.pet && imported.habits) {
-            AppState = imported;
-            persistState();
-            renderPet();
-            renderHabits();
-            renderTasks();
-            renderJournal();
-            updatePomodoroDisplay();
-            updateGreeting();
-            if (typeof confetti === 'function') confetti({ particleCount: 90, spread: 70 });
-            showToast('¡Copia de seguridad restaurada con éxito!');
-          } else {
-            showToast('El archivo no contiene un formato de respaldo válido', 'warning');
-          }
-        } catch (err) {
-          showToast('Error al leer el archivo de respaldo', 'warning');
-        }
+        processAndApplyBackup(e.target.result);
       };
       reader.readAsText(file);
+    }
+
+    function restoreFromRawText() {
+      const text = document.getElementById('rawBackupTextInput').value.trim();
+      if (!text) {
+        showToast('Pega el código de respaldo en el recuadro', 'warning');
+        return;
+      }
+      processAndApplyBackup(text);
+    }
+
+    function processAndApplyBackup(contentString) {
+      try {
+        const imported = JSON.parse(contentString);
+        if (imported && (imported.pet || imported.habits)) {
+          // Fusionar con el estado por defecto para evitar campos undefined
+          AppState = Object.assign({}, defaultState, imported);
+          persistState();
+          closeModal('restoreBackupModal');
+          closeModal('settingsModal');
+
+          renderPet();
+          renderHabits();
+          renderTasks();
+          renderJournal();
+          updatePomodoroDisplay();
+          updateGreeting();
+          if (chartWeeklyInstance || chartCategoryInstance) {
+            renderAnalytics();
+          }
+          if (typeof confetti === 'function') confetti({ particleCount: 110, spread: 80 });
+          showToast('¡Copia de seguridad restaurada con éxito!');
+        } else {
+          showToast('El contenido no corresponde a un respaldo válido', 'warning');
+        }
+      } catch (err) {
+        showToast('Error al procesar el código. Verifica que sea el JSON completo', 'warning');
+      }
     }
 
     function exportDataJSON() {
