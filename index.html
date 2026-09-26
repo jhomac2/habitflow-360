@@ -260,7 +260,7 @@
             <span>📋 Hábitos Activos Pendientes Hoy</span>
           </h3>
           <span class="text-[11px] text-slate-500 dark:text-slate-400">
-            Al completar un hábito se oculta de la pantalla y <b>vuelve a aparecer automáticamente mañana a su hora fija</b>.
+            Reorganiza el orden de tus hábitos con <b>▲ y ▼</b>. Al completar un hábito se oculta y <b>vuelve mañana a su hora</b>.
           </span>
         </div>
 
@@ -1503,7 +1503,12 @@
               </div>
             </div>
             
+            <!-- Acciones: Reordenar ▲ / ▼, Editar y Borrar -->
             <div class="flex items-center gap-1">
+              ${!isCompleted ? `
+                <button onclick="moveHabitUp('${h.id}')" class="p-1 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-emerald-500 font-black text-xs transition active:scale-95" title="Mover arriba" ${idx === 0 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>▲</button>
+                <button onclick="moveHabitDown('${h.id}')" class="p-1 rounded-lg bg-slate-200 dark:bg-slate-800 hover:bg-slate-300 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300 hover:text-emerald-500 font-black text-xs transition active:scale-95" title="Mover abajo" ${idx === totalCount - 1 ? 'disabled style="opacity:0.3;cursor:not-allowed;"' : ''}>▼</button>
+              ` : ''}
               <button onclick="editHabit('${h.id}')" class="text-slate-400 hover:text-emerald-500 p-1" title="Editar"><i data-lucide="edit-2" class="w-3.5 h-3.5"></i></button>
               <button onclick="deleteHabit('${h.id}')" class="text-slate-400 hover:text-rose-500 p-1" title="Eliminar"><i data-lucide="trash-2" class="w-3.5 h-3.5"></i></button>
             </div>
@@ -1515,6 +1520,43 @@
           </div>
         </div>
       `;
+    }
+
+    // Funciones para Reorganizar el Orden de Hábitos (Subir / Bajar)
+    function moveHabitUp(id) {
+      const activeHabits = (AppState.habits || []).filter(h => !h.completed);
+      const idx = activeHabits.findIndex(h => h.id === id);
+      if (idx <= 0) return;
+      const prevId = activeHabits[idx - 1].id;
+
+      const realIdx = AppState.habits.findIndex(h => h.id === id);
+      const prevRealIdx = AppState.habits.findIndex(h => h.id === prevId);
+
+      const temp = AppState.habits[realIdx];
+      AppState.habits[realIdx] = AppState.habits[prevRealIdx];
+      AppState.habits[prevRealIdx] = temp;
+
+      persistState();
+      renderHabits();
+      showToast("Hábito movido hacia arriba ▲");
+    }
+
+    function moveHabitDown(id) {
+      const activeHabits = (AppState.habits || []).filter(h => !h.completed);
+      const idx = activeHabits.findIndex(h => h.id === id);
+      if (idx === -1 || idx >= activeHabits.length - 1) return;
+      const nextId = activeHabits[idx + 1].id;
+
+      const realIdx = AppState.habits.findIndex(h => h.id === id);
+      const nextRealIdx = AppState.habits.findIndex(h => h.id === nextId);
+
+      const temp = AppState.habits[realIdx];
+      AppState.habits[realIdx] = AppState.habits[nextRealIdx];
+      AppState.habits[nextRealIdx] = temp;
+
+      persistState();
+      renderHabits();
+      showToast("Hábito movido hacia abajo ▼");
     }
 
     function toggleShowCompletedHabits() {
