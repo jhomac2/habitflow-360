@@ -23,7 +23,7 @@
 ---
 
 ## 👨‍💻 Creador &amp; Contacto Directo
-Desarrollado por **Jhordy** desde la Provincia de Pichincha, Ecuador 🇪🇨.
+Desarrollado por **Mr_Jhordy** desde la Provincia de Pichincha, Ecuador 🇪🇨.
 * 📱 **WhatsApp:** [+593 963923399](https://wa.me/593963923399)
 * 🐙 **GitHub:** [github.com/By_Jhordy](https://github.com/By_Jhordy)
 
